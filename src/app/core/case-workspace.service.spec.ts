@@ -114,6 +114,15 @@ describe('CaseWorkspaceService', () => {
     expect(from).toHaveBeenCalledTimes(1);
     expect(post).not.toHaveBeenCalled();
   });
+  it('records a sent date without starting or advancing investigation', async () => {
+    const result = { plan: { id: 'plan', sent_on: '2026-10-01' }, fact: { status: 'user' } };
+    post.mockResolvedValue(result);
+    expect(await service.markSent('plan', '2026-10-01')).toEqual(result);
+    expect(post).toHaveBeenCalledExactlyOnceWith('agent/sent', {
+      planId: 'plan', sentOn: '2026-10-01',
+    });
+    expect(rpc).not.toHaveBeenCalled();
+  });
   it('requests a short-lived private URL without making a model call', async () => {
     const document = { storage_path: 'owner/case/source.png' } as Parameters<
       CaseWorkspaceService['sourceUrl']

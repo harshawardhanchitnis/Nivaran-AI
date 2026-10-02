@@ -12,15 +12,17 @@ import {
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-workspace.service';
-import { indiaCalendarDate, workspacePlan } from '../../core/workspace-plan';
+import { indiaCalendarDate, workspacePlan, sentPlanView } from '../../core/workspace-plan';
 import { workspaceDraftContext } from '../../core/workspace-draft';
 import { DraftEditor } from '../../shared/ui/draft-editor';
 import { DeadlineTimeline } from '../../shared/ui/deadline-timeline';
 import { EvidenceTag } from '../../shared/ui/evidence-tag';
+import { SentPanel } from '../../shared/ui/sent-panel';
+import { downloadPlanDates } from '../../core/calendar-download';
 
 @Component({
   selector: 'app-case-pack',
-  imports: [RouterLink, MatButtonModule, DraftEditor, DeadlineTimeline, EvidenceTag],
+  imports: [RouterLink, MatButtonModule, DraftEditor, DeadlineTimeline, EvidenceTag, SentPanel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <p class="no-print"><a [routerLink]="['/cases', caseId()]">Back to your case</a></p>
@@ -30,7 +32,7 @@ import { EvidenceTag } from '../../shared/ui/evidence-tag';
         <p>{{ data.case.title }}</p>
         <p>
           Nivaran is not legal advice. The ladder order is recommended practice. Review this pack
-          and send it yourself; nothing has been sent.
+          and send it yourself. Nivaran never sends or files it.
         </p>
         <div class="no-print" aria-live="polite">
           @if (message(); as message) {
@@ -46,6 +48,15 @@ import { EvidenceTag } from '../../shared/ui/evidence-tag';
           (copyRequested)="copy($event)"
           (printRequested)="print()"
         />
+        @if (data.plan?.ladder_step === 1) {
+          <app-sent-panel
+            [plan]="sentPlan()!"
+            [today]="today()"
+            [busy]="busy()"
+            (recordRequested)="markSent($event)"
+            (calendarRequested)="calendar()"
+          />
+        }
         <section class="surface pack-section" aria-labelledby="pack-timeline">
           <h2 id="pack-timeline">Timeline</h2>
           <app-deadline-timeline [items]="current.timeline" />
@@ -154,6 +165,7 @@ export class CasePack {
   protected readonly message = signal<string | null>(null);
   protected readonly busy = signal(false);
   protected readonly today = signal(indiaCalendarDate());
+  protected readonly sentPlan = computed(() => sentPlanView(this.rows()?.plan ?? null));
   protected readonly plan = computed(() => {
     const data = this.rows();
     return data?.plan?.approved_at
@@ -252,5 +264,39 @@ export class CasePack {
   }
   protected print(): void {
     window.print();
+  }
+  protected async markSent(sentOn: string): Promise<void> {
+    const data = this.rows();
+    const generation = this.generation;
+    if (!data?.plan || this.busy()) return;
+    this.busy.set(true);
+    this.message.set(null);
+    try {
+      await this.service.markSent(data.plan.id, sentOn);
+      const latest = await this.service.load(data.case.id);
+      if (generation === this.generation) {
+        this.rows.set(latest);
+        this.message.set('Sent date saved as Your statement. The timeline has been updated.');
+      }
+    } catch (error) {
+      if (generation === this.generation)
+        this.message.set(
+          error instanceof Error ? error.message : 'Could not record the date. Try again.',
+        );
+    } finally {
+      if (generation === this.generation) this.busy.set(false);
+    }
+  }
+  protected calendar(): void {
+    const data = this.rows();
+    if (!data?.plan) return;
+    try {
+      downloadPlanDates(data.plan, data.case.title);
+      this.message.set(
+        'Calendar file downloaded. Import it in your calendar; adjust dates if receipt was later.',
+      );
+    } catch {
+      this.message.set('Could not create the calendar file. Check the dates and try again.');
+    }
   }
 }

@@ -258,6 +258,16 @@ describe('real case screen', () => {
     await fixture.whenStable();
     expect(prepareDraft).not.toHaveBeenCalled();
   });
+  it('offers the wait date as a local calendar file without investigation or drafting', async () => {
+    const waitingPlan = { ...proposal, ladder_step: 0, dates: { refund_due: '2026-10-10' } };
+    load.mockResolvedValue({ ...saved, plan: waitingPlan, guidance: [rule] });
+    const { page } = await setup();
+    expect(Array.from(page.querySelectorAll<HTMLButtonElement>('button'))
+      .find((button) => button.textContent?.includes('Add refund date to calendar'))).toBeDefined();
+    expect(start).not.toHaveBeenCalled();
+    expect(advance).not.toHaveBeenCalled();
+    expect(prepareDraft).not.toHaveBeenCalled();
+  });
   it('keeps step three information only without an approval button', async () => {
     load.mockResolvedValue({ ...saved, plan: { ...proposal, ladder_step: 3 }, guidance: [rule] });
     const { page } = await setup();

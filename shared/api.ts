@@ -77,3 +77,7 @@ export const agentDraftEditRequestSchema = z.object({
   userStatements: z.array(z.string().trim().min(1).max(200)).max(50).default([]),
 });
 export type AgentDraftEditRequest = z.infer<typeof agentDraftEditRequestSchema>;
+export const markSentRequestSchema = z.object({
+  planId: z.uuid(),
+  sentOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});

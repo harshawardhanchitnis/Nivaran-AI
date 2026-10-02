@@ -13,6 +13,7 @@ import type {
   CaseRow,
   DocumentRow,
   DraftRow,
+  SentPlanResult,
   EvidenceItemRow,
   GuidanceRow,
   PlanRow,
@@ -135,6 +136,9 @@ export class CaseWorkspaceService {
   }
   prepareDraft(planId: string): Promise<AgentDraftResponse> {
     return this.api.post('agent/draft', { planId });
+  }
+  markSent(planId: string, sentOn: string): Promise<SentPlanResult> {
+    return this.api.post('agent/sent', { planId, sentOn });
   }
   saveDraftEdit(input: AgentDraftEditRequest): Promise<{ draft: DraftRow }> {
     return this.api.post('agent/draft-edit', input);

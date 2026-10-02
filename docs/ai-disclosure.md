@@ -322,13 +322,32 @@ prose claims are known scanner limits; the editor tells the user to review the p
 The full check passed both server type-checks, 318 server/database tests (including 42 policy/seed
 tests), 79 Angular tests and the production build. See `docs/t9-checks.md` for the scope and evidence.
 
+On 2 October 2026, Codex implemented T10 sent-date recording and a browser-generated calendar
+download, using the existing complaint screen and design tokens. The owner confirmed applying
+migration 0009. A caller-scoped transaction records the sent date as a user statement and updates
+the case, plan deadlines and activity event together. Replays do not duplicate evidence; explicit
+corrections are allowed. Only an approved step-one complaint with a saved draft can be recorded.
+The interface says the user sends it themselves and retains the sent-versus-received date caveat.
+
+The hosted scripted fixture recorded 1 October, with deadlines of 3 October and 1 November.
+At 360 px there was no horizontal scroll, no console warnings/errors, and no axe violations or
+incomplete checks. Although the browser download-event waiter timed out, the actual local `.ics`
+file was found in Downloads and its three all-day dates matched the stored plan. Unit tests check
+calendar escaping, UTF-8 folding, year-end rollover and month-end arithmetic, alongside caller
+ownership, approval, replay and date-validation checks. The owner's calendar-app preview remains
+pending; the owner explicitly authorised continuing with T11 and later tasks while deferring
+that check. These checks used zero provider calls and the counter
+remained at fifteen. The full check passed both server type-checks, 334 server/database tests
+(including 46 policy/seed tests), 83 Angular tests and the production build.
+See `docs/t10-checks.md` for evidence and the remaining check.
+
 ## AI tools used
 
 | Tool | Used for |
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T9 implementation and checks, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2 October 2026. |
+| Codex (OpenAI) | Pre-event handover review, T1–T10 implementation and checks, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2 October 2026. |
 | Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; new routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October 2026. These are manual fixture checks. |
 | Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing checks on 2 October 2026. The selected ladder tool remained unavailable. These are manual fixture checks, not product evaluation results. |
 

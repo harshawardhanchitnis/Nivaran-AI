@@ -54,7 +54,16 @@ export interface FactView {
   note?: string;
 }
 
-export type ActivityKind = 'read' | 'check' | 'found' | 'ask' | 'answer' | 'search' | 'decide' | 'plan' | 'error';
+export type ActivityKind =
+  | 'read'
+  | 'check'
+  | 'found'
+  | 'ask'
+  | 'answer'
+  | 'search'
+  | 'decide'
+  | 'plan'
+  | 'error';
 
 export interface ActivityView {
   id: string;
@@ -105,6 +114,11 @@ export interface PlanView {
   summary: string;
   reasons: readonly ReasonView[];
   timeline: readonly TimelineItemView[];
+}
+export interface SentPlanView {
+  sentOn: string | null;
+  acknowledgeBy: string | null;
+  resolveBy: string | null;
 }
 
 /** A complaint is rendered from segments so inserted values, flags and personal details can be styled. */

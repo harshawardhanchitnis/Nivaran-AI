@@ -20,6 +20,7 @@ const modelMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'mig
 const logicalCapsMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0006_logical_call_caps.sql'), 'utf8');
 const planReviewMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0007_plan_review.sql'), 'utf8');
 const draftMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0008_draft_claims.sql'), 'utf8');
+const sentMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0009_mark_sent.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -72,6 +73,7 @@ beforeAll(async () => {
   await db.exec(logicalCapsMigration);
   await db.exec(planReviewMigration);
   await db.exec(draftMigration);
+  await db.exec(sentMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -490,6 +492,29 @@ describe('draft generation and versioned edits as the caller',()=> {
   expect((await claim(ALICE,id)).rows[0]?.result).toBeNull();
   await asUser(ALICE,()=>db.query('select public.release_plan_draft($1,$2)',[id,otherToken]));
   expect((await claim(ALICE,id)).rows[0]?.result).toMatchObject({draft_claim_token:token});
+ });
+});
+
+describe('caller records sending their complaint',()=>{
+ let plan:string;let caseId:string;let run:string;
+ beforeAll(async()=>{
+  const row=await db.query<{id:string;case_id:string;run_id:string}>('select p.id,p.case_id,p.run_id from public.plans p join public.drafts d on d.plan_id=p.id where p.ladder_step=1 and p.approved_at is not null limit 1');plan=row.rows[0]!.id;caseId=row.rows[0]!.case_id;
+  const r=await asUser(ALICE,()=>db.query<{id:string}>("insert into public.agent_runs(case_id,status,phase) values($1,'completed','done') returning id",[caseId]));run=r.rows[0]!.id;await asUser(ALICE,()=>db.query('update public.plans set run_id=$1 where id=$2',[run,plan]));
+ });
+ const mark=(user:string,id=plan,date='2026-01-31')=>asUser(user,()=>db.query<{result:unknown}>('select public.mark_plan_sent($1,$2,$3) as result',[id,date,'2026-10-02']));
+ it('denies visitors and another owner',async()=>{await expect(asVisitor(()=>db.query('select public.mark_plan_sent($1,$2,$3)',[plan,'2026-01-31','2026-10-02']))).rejects.toThrow(/permission denied/);expect((await mark(BOB)).rows[0]?.result).toBeNull();});
+ it('requires an approved step-one draft and refuses a future date',async()=>{
+  const p=await asUser(ALICE,()=>db.query<{id:string}>('insert into public.plans(case_id,ladder_step) values($1,1) returning id',[caseId]));expect((await mark(ALICE,p.rows[0]!.id)).rows[0]?.result).toBeNull();
+  await asUser(ALICE,()=>db.query('update public.plans set approved_at=now() where id=$1',[p.rows[0]!.id]));expect((await mark(ALICE,p.rows[0]!.id)).rows[0]?.result).toBeNull();await expect(mark(ALICE,plan,'2026-10-03')).rejects.toThrow(/sent date/);
+ });
+ it('stores one user fact, sent state, clamped dates and an honest event atomically',async()=>{
+  expect((await mark(ALICE)).rows[0]?.result).toMatchObject({plan:{sent_on:'2026-01-31',dates:{acknowledge_by:'2026-02-02',resolve_by:'2026-02-28'}},fact:{status:'user',confirmed_by_user:true,value_norm:{kind:'date',value:'2026-01-31'}}});
+  expect((await db.query('select status from public.cases where id=$1',[caseId])).rows[0]).toEqual({status:'sent'});
+  expect((await db.query<{payload:unknown}>('select payload from public.agent_events where run_id=$1',[run])).rows[0]?.payload).toMatchObject({action:'mark_as_sent',message:expect.stringContaining('Your statement')});
+ });
+ it('replays the same date without duplicate evidence or events, and permits an explicit correction',async()=>{
+  await mark(ALICE);expect((await db.query("select id from public.evidence_items where case_id=$1 and field='complaint_sent_date'",[caseId])).rows).toHaveLength(1);expect((await db.query('select id from public.agent_events where run_id=$1',[run])).rows).toHaveLength(1);
+  expect((await mark(ALICE,plan,'2026-10-01')).rows[0]?.result).toMatchObject({plan:{sent_on:'2026-10-01',dates:{acknowledge_by:'2026-10-03',resolve_by:'2026-11-01'}}});
  });
 });
 

@@ -23,8 +23,10 @@ import {
   type DocumentPreview,
 } from '../../core/workspace-mapper';
 import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
-import { indiaCalendarDate, workspacePlan } from '../../core/workspace-plan';
+import { indiaCalendarDate, workspacePlan, sentPlanView } from '../../core/workspace-plan';
 import { DraftEditor } from '../../shared/ui/draft-editor';
+import { SentPanel } from '../../shared/ui/sent-panel';
+import { downloadPlanDates } from '../../core/calendar-download';
 import {
   draftPresentation,
   draftStatements,
@@ -33,7 +35,7 @@ import {
 
 @Component({
   selector: 'app-case-workspace',
-  imports: [CaseWorkspaceView, DraftEditor, RouterLink, MatButtonModule],
+  imports: [CaseWorkspaceView, DraftEditor, SentPanel, RouterLink, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (rows(); as data) {
@@ -88,11 +90,17 @@ import {
             <p>You rejected this plan. Nothing has been drafted or sent.</p>
           } @else if (approved()) {
             <p>
-              You approved this plan.
+              {{
+                data.plan?.sent_on
+                  ? 'You recorded sending this complaint on ' + data.plan?.sent_on + '.'
+                  : 'You approved this plan.'
+              }}
               {{
                 plan()?.step === 0
                   ? 'Wait until the promised date; there is nothing to send yet.'
-                  : 'Nothing has been sent.'
+                  : data.plan?.sent_on
+                    ? 'The dates are based on your recorded sent date.'
+                    : 'Nothing has been sent.'
               }}
             </p>
           } @else if (data.run?.status === 'plan_ready') {
@@ -118,6 +126,14 @@ import {
               <a routerLink="/cases/new">Start a case with your documents.</a>
             </p>
           }
+          @if (plan()?.step === 0) {
+            <button mat-stroked-button type="button" (click)="calendar()">
+              Add refund date to calendar
+            </button>
+            @if (draftMessage(); as message) {
+              <p role="status">{{ message }}</p>
+            }
+          }
         </div>
         @if (data.draft; as draft) {
           <app-draft-editor
@@ -141,6 +157,15 @@ import {
           }
           @if (data.draft) {
             <a [routerLink]="['/cases', caseId(), 'pack']">Open printable pack</a>
+          }
+          @if (data.draft && data.plan?.ladder_step === 1) {
+            <app-sent-panel
+              [plan]="sentPlan()!"
+              [today]="today()"
+              [busy]="sentBusy()"
+              (recordRequested)="markSent($event)"
+              (calendarRequested)="calendar()"
+            />
           }
         </div>
       </app-case-workspace-view>
@@ -177,6 +202,7 @@ export class CaseWorkspace {
   protected readonly answerBusy = signal(false);
   protected readonly reviewBusy = signal(false);
   protected readonly draftBusy = signal(false);
+  protected readonly sentBusy = signal(false);
   protected readonly draftMessage = signal<string | null>(null);
   protected readonly today = signal(indiaCalendarDate());
   protected readonly waiting = signal(false);
@@ -196,6 +222,7 @@ export class CaseWorkspace {
       : null;
   });
   protected readonly approved = computed(() => !!this.rows()?.plan?.approved_at);
+  protected readonly sentPlan = computed(() => sentPlanView(this.rows()?.plan ?? null));
   protected readonly canPrepareDraft = computed(() => {
     const data = this.rows();
     return (
@@ -228,15 +255,17 @@ export class CaseWorkspace {
   protected readonly stage = computed(() =>
     this.rows()?.run?.status === 'waiting_for_user'
       ? 'Needs your answer'
-      : this.approved()
-        ? 'Plan approved'
-        : this.rows()?.plan?.rejected_at
-          ? 'Plan rejected'
-          : this.terminalOutcome() === 'resolved'
-            ? 'Refund arrived'
-            : this.terminalOutcome() === 'bank_delay'
-              ? 'Trace with your bank'
-              : workspaceStage(this.rows()?.run ?? null),
+      : this.rows()?.case.status === 'sent'
+        ? 'Complaint sent'
+        : this.approved()
+          ? 'Plan approved'
+          : this.rows()?.plan?.rejected_at
+            ? 'Plan rejected'
+            : this.terminalOutcome() === 'resolved'
+              ? 'Refund arrived'
+              : this.terminalOutcome() === 'bank_delay'
+                ? 'Trace with your bank'
+                : workspaceStage(this.rows()?.run ?? null),
   );
 
   constructor() {
@@ -267,6 +296,7 @@ export class CaseWorkspace {
     this.today.set(indiaCalendarDate());
     this.draftMessage.set(null);
     this.draftBusy.set(false);
+    this.sentBusy.set(false);
     this.rows.set(null);
     this.clearPreviews();
     const refresh = async () => {
@@ -412,7 +442,7 @@ export class CaseWorkspace {
       const result = await this.service.saveDraftEdit({ draftId: draft.id, ...edit });
       if (generation === this.generation) {
         this.rows.update((rows) => (rows ? { ...rows, draft: result.draft } : rows));
-        this.draftMessage.set('Edits saved. Nothing has been sent.');
+        this.draftMessage.set('Edits saved. Nivaran does not send your complaint.');
       }
     } catch (error) {
       if (generation === this.generation)
@@ -437,6 +467,46 @@ export class CaseWorkspace {
   }
   protected printDraft(): void {
     window.print();
+  }
+  protected async markSent(sentOn: string): Promise<void> {
+    const data = this.rows();
+    const generation = this.generation;
+    if (!data?.plan || this.sentBusy()) return;
+    this.sentBusy.set(true);
+    this.draftMessage.set(null);
+    try {
+      await this.service.markSent(data.plan.id, sentOn);
+      const latest = await this.service.load(data.case.id);
+      if (generation === this.generation) {
+        this.rows.set(latest);
+        this.draftMessage.set(
+          'Sent date saved as Your statement. Review the updated dates on the Plan tab.',
+        );
+      }
+    } catch (error) {
+      if (generation === this.generation)
+        this.draftMessage.set(
+          error instanceof Error
+            ? error.message
+            : 'Could not record the date. Your complaint is safe.',
+        );
+    } finally {
+      if (generation === this.generation) this.sentBusy.set(false);
+    }
+  }
+  protected calendar(): void {
+    const data = this.rows();
+    if (!data?.plan) return;
+    try {
+      downloadPlanDates(data.plan, data.case.title);
+      this.draftMessage.set(
+        'Calendar file downloaded. Import it in your calendar; adjust dates if receipt was later.',
+      );
+    } catch {
+      this.draftMessage.set(
+        'Could not create the calendar file. Review the saved dates and try again.',
+      );
+    }
   }
 
   protected openSources(field: FactField): void {

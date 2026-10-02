@@ -199,6 +199,14 @@ a known limit). Typing a fake ID into the draft flags it on screen.
 "Mark as sent" stores `plans.sent_on` and `complaint_sent_date` as a user statement. Show
 acknowledge-by and resolve-by. "Add to calendar" downloads an `.ics` file built in the browser.
 
+Implementation uses `0009_mark_sent.sql` and a caller-scoped transaction on an approved
+step-one complaint with a saved draft. Repeating the same date adds no duplicate evidence or
+events; an explicit correction updates the deadlines. Dates are computed in code with calendar
+month-end clamping, and the receipt caveat is shown. Recording and downloading make no model call.
+The browser export uses stable all-day event IDs and UTF-8 line folding. See `docs/t10-checks.md`;
+the owner's calendar-app preview is still pending. On 2 October the owner explicitly deferred
+that check and authorised continuing with T11 and later tasks.
+
 Checks: unit test for the `.ics` text; the file opens in a calendar app.
 
 ### T11 What happened?

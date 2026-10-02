@@ -190,6 +190,12 @@ export interface DraftRow {
   created_at: string;
 }
 
+/** Caller-owned mark_plan_sent transaction in migration 0009. */
+export interface SentPlanResult {
+  plan: PlanRow;
+  fact: CaseFactRow;
+}
+
 export interface GuidanceRow {
   id: string;
   title: string;
