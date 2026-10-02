@@ -3,16 +3,13 @@ import { verifyFacts } from '../facts/verify-facts.js';
 import { createImageQuoteChecker } from '../verify/quote.js';
 import { downloadDocument } from '../reader/download-document.js';
 import { createDocumentReader } from '../reader/read-document.js';
-import { chargeModelCall } from '../usage.js';
-import { getModel } from '../llm/provider.js';
 import { HttpError } from '../http.js';
-import { chooseAgentTool } from './model.js';
+import { createAgentToolChooser } from './model.js';
 import type { InvestigationDependencies } from './loop.js';
 
 export function createInvestigationDependencies(client: SupabaseClient): InvestigationDependencies {
   return {
-    charge: async () => { getModel('primary'); await chargeModelCall(client); },
-    choose: chooseAgentTool,
+    choose: createAgentToolChooser(client),
     check: (snapshot, role) => verifyFacts(snapshot.documents, snapshot.evidence, snapshot.facts, {
       download: document => downloadDocument(client, document), images: createImageQuoteChecker(client, role),
     }),

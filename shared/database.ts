@@ -195,6 +195,15 @@ export interface ModelChargeResult {
 
 /** Dashboard-managed app_settings limits; callers cannot read or change them through the API. */
 export interface AppModelLimits {
+  /** Charged once per logical call; fallback attempts share the charge. */
   per_user_daily_model_calls: number;
   global_daily_model_calls: number;
+}
+
+/** Public read-only retry metadata. Only the signed server receipt function can write it. */
+export interface ModelAvailabilityRow {
+  model_key: string;
+  usable_after: string;
+  reason: 'quota' | 'rate_limit' | 'high_demand' | 'timeout';
+  updated_at: string;
 }

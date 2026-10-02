@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-02",
+  "physicalAttempts": 6,
+  "logicalCharges": 3,
+  "attempts": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "milliseconds": 888,
+      "status": 200
+    },
+    {
+      "model": "gemini-3.6-flash",
+      "milliseconds": 8008
+    },
+    {
+      "model": "gemini-3.8-flash",
+      "milliseconds": 8010
+    },
+    {
+      "model": "gemini-3.5-flash",
+      "milliseconds": 8007
+    },
+    {
+      "model": "gemini-3.5-flash-lite",
+      "milliseconds": 2069,
+      "status": 200
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "milliseconds": 720,
+      "status": 200
+    }
+  ],
+  "results": [
+    {
+      "task": "Text-layer PDF",
+      "ok": true,
+      "model": "qwen/qwen3.8-27b",
+      "milliseconds": 2128,
+      "fields": [
+        "merchant_name",
+        "order_id",
+        "order_date",
+        "item_description",
+        "amount_paid"
+      ],
+      "facts": 9,
+      "reference": []
+    },
+    {
+      "task": "Vision image",
+      "ok": true,
+      "model": "gemini-3.5-flash-lite",
+      "milliseconds": 28259,
+      "fields": [
+        "merchant_name",
+        "order_id",
+        "cancellation_or_return_date",
+        "refund_amount",
+        "refund_promise_date",
+        "refund_due_date"
+      ],
+      "facts": 6,
+      "reference": []
+    },
+    {
+      "task": "Text tool choice and atomic event",
+      "ok": true,
+      "model": "qwen/qwen3.8-27b",
+      "turn": 10,
+      "status": "running",
+      "events": [
+        {
+          "type": "tool_call",
+          "tool": "get_next_step",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        {
+          "type": "error",
+          "tool": "get_next_step"
+        }
+      ],
+      "milliseconds": 1106
+    }
+  ],
+  "cooldowns": [
+    {
+      "model_key": "google:gemini-3.6-flash",
+      "usable_after": "2026-10-02T11:01:44.737+00:00",
+      "reason": "timeout"
+    },
+    {
+      "model_key": "google:gemini-3.8-flash",
+      "usable_after": "2026-10-02T11:01:53.428+00:00",
+      "reason": "timeout"
+    },
+    {
+      "model_key": "google:gemini-3.5-flash",
+      "usable_after": "2026-10-02T11:02:02.027+00:00",
+      "reason": "timeout"
+    }
+  ]
+}

@@ -4,8 +4,9 @@ import { z } from 'zod';
 import type { DocumentRow } from '../../shared/database.js';
 import { FACT_FIELDS } from '../../shared/facts.js';
 import { HttpError } from '../http.js';
-import { getModel, type ModelRole } from '../llm/provider.js';
-import { chargeModelCall } from '../usage.js';
+import type { ModelRole } from '../llm/provider.js';
+import { createRoutedModelCall } from '../llm/routed-call.js';
+import { pdfTextPages } from './pdf-text.js';
 import { downloadDocument } from './download-document.js';
 
 export const documentExtractionSchema = z.object({
@@ -61,16 +62,15 @@ export async function readDocument(document: DocumentRow, deps: ReaderDependenci
 }
 
 export function createDocumentReader(supabase: SupabaseClient) {
-  return async (document: DocumentRow, role: ModelRole, question?: string): Promise<ReadDocumentResult> => {
-    if (role === 'fallback' && document.mime_type === 'application/pdf') {
-      throw new HttpError(400, 'pdf_fallback_unavailable', 'The fallback model cannot read PDFs.');
-    }
-    const selected = getModel(role);
-    const result = await readDocument(document, {
-      download: row => downloadDocument(supabase, row),
-      charge: () => chargeModelCall(supabase),
-      callModel: async ({ bytes, mediaType, fileName }) => {
-        const content = { type: 'file' as const, data: { type: 'data' as const, data: bytes }, mediaType, filename: fileName };
+  const route=createRoutedModelCall(supabase);
+  return async (document: DocumentRow, _legacyRole?: ModelRole, question?: string): Promise<ReadDocumentResult> => {
+    const bytes=await downloadDocument(supabase,document);
+    const pages=document.mime_type==='application/pdf' ? await pdfTextPages(bytes) : null;
+    if(pages && pages.join('').length>200000) throw new HttpError(413,'document_text_too_large','This PDF has too much text. Please upload the relevant pages.');
+    const task=pages?'text':document.mime_type==='application/pdf'?'vision_pdf':'vision_image';
+    const result=await route(task,async (selected,signal)=>{
+        const content = pages ? { type:'text' as const, text:JSON.stringify({document:document.file_name,pages:pages.map((text,index)=>({page:index+1,text}))}) }
+          : { type: 'file' as const, data: { type: 'data' as const, data: bytes }, mediaType:document.mime_type, filename:document.file_name };
         const response = await generateText({
           model: selected.model,
           system: READER_PROMPT,
@@ -79,11 +79,10 @@ export function createDocumentReader(supabase: SupabaseClient) {
           output: Output.object({ schema: readerOutputSchema, name: 'document_facts' }),
           maxRetries: 0,
           maxOutputTokens: 8000,
-          abortSignal: AbortSignal.timeout(40_000),
+          abortSignal: signal,
         });
-        return response.output;
-      },
+        return documentExtractionSchema.parse(response.output);
     });
-    return { ...result, modelId: selected.modelId };
+    return { docType:result.value.doc_type,readable:result.value.readable,facts:result.value.readable?result.value.facts:[],modelId:result.modelId };
   };
 }

@@ -31,12 +31,12 @@ export interface WhoAmIResponse {
 }
 
 export const llmCheckRequestSchema = z.object({
-  role: z.enum(['primary', 'fallback']).default('primary'),
+  task: z.enum(['vision', 'text']).default('text'),
 });
 export type LlmCheckRequest = z.input<typeof llmCheckRequestSchema>;
 
 export interface LlmCheckResponse {
-  role: 'primary' | 'fallback';
+  task: 'vision' | 'text';
   provider: string;
   modelId: string;
   milliseconds: number;

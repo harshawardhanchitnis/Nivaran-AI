@@ -21,7 +21,8 @@ export interface InvestigationStore {
   searchGuidance(query: string): Promise<GuidanceRow[]>;
 }
 export interface InvestigationDependencies {
-  charge(): Promise<void>;
+  /** Injected fake calls may charge here; the production chooser charges within its router. */
+  charge?(): Promise<void>;
   choose(snapshot: AgentSnapshot, run: AgentRunRow): Promise<{ name: string; input: unknown; modelId?: string }>;
   check(snapshot: AgentSnapshot, role: ModelRole): Promise<CheckedFactSheet>;
   reread(document: DocumentRow, role: ModelRole, question: string): Promise<ReadDocumentResult>;
@@ -65,13 +66,12 @@ export async function advanceInvestigation(store: InvestigationStore, deps: Inve
       } catch (error) {
         if (error instanceof HttpError) throw error;
         const delay = rateLimitDelay(error); if (delay !== null) return { run: current, events: [], retryAfterMs: delay };
-        const fallback = pending.role === 'primary' && document.mime_type !== 'application/pdf';
-        return await commit({ state: { ...run.agent_state, pending_reread: fallback ? { ...pending, role: 'fallback' } : undefined },
-          events: [{ type: 'error', payload: { tool: 'reread_document', message: fallback ? `Trying the image fallback for ${document.label} next.` : `Could not reread ${document.label}. Your earlier facts are saved.` } }] });
+        return await commit({ state: { ...run.agent_state, pending_reread: undefined },
+          events: [{ type: 'error', payload: { tool: 'reread_document', message: `Could not reread ${document.label}. Your earlier facts are saved.` } }] });
       }
       return await commit({ state: { ...run.agent_state, pending_reread: undefined, quotes_checked: false, next_step: undefined }, model: result.modelId,
         reread: { document_id: document.id, read_status: result.readable ? 'read' : 'unreadable', doc_type: result.docType, facts: result.facts },
-        events: [{ type: 'tool_result', payload: { tool: 'reread_document', label: document.label, message: `Took another look at ${document.label}.` } }] });
+        events: [{ type: 'tool_result', payload: { tool: 'reread_document', label: document.label, modelId:result.modelId, message: `Took another look at ${document.label}.` } }] });
     }
     if (!run.agent_state.quotes_checked) {
       let checked: CheckedFactSheet;
@@ -80,33 +80,32 @@ export async function advanceInvestigation(store: InvestigationStore, deps: Inve
       } catch (error) {
         if (error instanceof HttpError) throw error;
         const delay = rateLimitDelay(error); if (delay !== null) return { run: current, events: [], retryAfterMs: delay };
-        if (run.agent_state.image_quote_role !== 'fallback') return await commit({ state: { ...run.agent_state, image_quote_role: 'fallback' },
-          events: [{ type: 'error', payload: { tool: 'check_quotes', message: 'Could not check the image quotes. Trying the fallback next.' } }] });
         const evidence = snapshot.evidence.map(item => ({ ...item, quote_verified: item.quote_verified ?? false }));
         return await commit({ state: { ...run.agent_state, quotes_checked: true, image_quote_role: undefined }, evidence,
           facts: buildFactSheet(evidence, undefined, snapshot.facts),
           events: [{ type: 'error', payload: { tool: 'check_quotes', message: 'Some source quotes need your check. Your case is still available.' } }] });
       }
-      return await commit({ state: { ...run.agent_state, quotes_checked: true, image_quote_role: undefined }, evidence: checked.evidence,
-        facts: checked.facts, events: [{ type: 'tool_result', payload: { tool: 'check_quotes', message: 'Checked source quotes and built the fact sheet.' } }] });
+      return await commit({ state: { ...run.agent_state, quotes_checked: true, image_quote_role: undefined }, evidence: checked.evidence, model:checked.modelId,
+        facts: checked.facts, events: [{ type: 'tool_result', payload: { tool: 'check_quotes', modelId:checked.modelId, message: 'Checked source quotes and built the fact sheet.' } }] });
     }
     if (run.agent_steps >= run.max_agent_steps) return await commit({ status: 'failed', phase: 'done', error: 'Nivaran could not finish within its step limit. Your facts are saved.',
       events: [{ type: 'error', payload: { message: 'Nivaran could not finish within its step limit. Your facts are saved.' } }] });
-    await deps.charge();
+    await deps.charge?.();
     let selection: Awaited<ReturnType<InvestigationDependencies['choose']>>;
     try { selection = await deps.choose(snapshot, run); }
     catch (error) {
+      if (error instanceof HttpError) throw error;
       const delay = rateLimitDelay(error); if (delay !== null) return { run: current, events: [], retryAfterMs: delay };
       return await commit({ count_step: true, events: [{ type: 'error', payload: { message: 'The model could not choose a usable step. Your facts are saved.' } }] });
     }
-    const call = { type: 'tool_call' as const, payload: { tool: selection.name, input: selection.input, message: `Chose ${selection.name.replaceAll('_', ' ')}.` } };
+    const call = { type: 'tool_call' as const, payload: { tool: selection.name, input: selection.input, modelId:selection.modelId, message: `Chose ${selection.name.replaceAll('_', ' ')}.` } };
     let tool: Awaited<ReturnType<typeof executeTool>>;
     try { tool = await executeTool(selection.name, selection.input, context); }
     catch {
       return await commit({ count_step: true, model: selection.modelId,
-        events: [call, { type: 'error', payload: { tool: selection.name, message: 'Nivaran could not use that step. Your facts are saved.' } }] });
+        events: [call, { type: 'error', payload: { tool: selection.name, modelId:selection.modelId, message: 'Nivaran could not use that step. Your facts are saved.' } }] });
     }
     return await commit({ ...tool.changes, count_step: true, model: selection.modelId,
-      events: [call, { type: tool.changes?.question ? 'question' : 'tool_result', payload: { tool: selection.name, result: tool.result, message: tool.message } }] });
+      events: [call, { type: tool.changes?.question ? 'question' : 'tool_result', payload: { tool: selection.name, modelId:selection.modelId, result: tool.result, message: tool.message } }] });
   } finally { if (!finished) await store.release(run); }
 }

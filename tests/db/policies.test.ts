@@ -6,6 +6,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { PGlite } from '@electric-sql/pglite';
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
+import { createHmac } from 'node:crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -14,6 +16,8 @@ const migration = readFileSync(path.join(here, '..', '..', 'supabase', 'migratio
 const readingMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0002_agent_reading.sql'), 'utf8');
 const quotaMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0003_development_quota.sql'), 'utf8');
 const investigationMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0004_agent_investigation.sql'), 'utf8');
+const modelMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0005_model_availability.sql'), 'utf8');
+const logicalCapsMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0006_logical_call_caps.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -56,12 +60,14 @@ async function addDocument(caseId: string, label: string, userIdForPath: string)
 }
 
 beforeAll(async () => {
-  db = await PGlite.create();
+  db = await PGlite.create({extensions:{pgcrypto}});
   await db.exec(stubs);
   await db.exec(migration);
   await db.exec(readingMigration);
   await db.exec(quotaMigration);
   await db.exec(investigationMigration);
+  await db.exec(modelMigration);
+  await db.exec(logicalCapsMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -73,7 +79,7 @@ beforeAll(async () => {
 describe('cases', () => {
   it('installs daily app caps below the owner-reported primary quota', async () => {
     const limits = await db.query<{ value: unknown }>("select value from public.app_settings where key = 'limits'");
-    expect(limits.rows[0]?.value).toMatchObject({ per_user_daily_model_calls: 12, global_daily_model_calls: 15 });
+    expect(limits.rows[0]?.value).toMatchObject({ per_user_daily_model_calls: 15, global_daily_model_calls: 15 });
   });
 
   it('lets a user create and read their own case, with user_id filled in', async () => {
@@ -107,6 +113,29 @@ describe('cases', () => {
 
   it('gives a visitor who has not signed in nothing at all', async () => {
     await expect(asVisitor(() => db.query('select id from public.cases'))).rejects.toThrow(/permission denied/);
+  });
+});
+
+describe('signed model availability', () => {
+  const secret='test-signing-secret-at-least-thirty-two-characters';
+  it('denies direct client mutation, secret reads and visitor access', async () => {
+    await db.query("insert into public.app_settings(key,value) values ('model_cooldown_signing',$1)",[JSON.stringify({secret})]);
+    await expect(asUser(ALICE,()=>db.exec("insert into public.model_availability values('google:test',now()+interval '1 hour','quota',now())"))).rejects.toThrow();
+    await expect(asUser(ALICE,()=>db.exec('select * from public.app_settings'))).rejects.toThrow();
+    await expect(asVisitor(()=>db.exec('select * from public.model_availability'))).rejects.toThrow();
+  });
+  it('accepts a signed server receipt and rejects tampering and stale signatures', async () => {
+    const issued=Date.now(),until=issued+60000,key='google:gemini-3.6-flash',reason='rate_limit';
+    const signature=createHmac('sha256',secret).update(`v1\n${key}\n${until}\n${reason}\n${issued}`).digest('hex');
+    const call=(end:number,stamp:number,sig:string)=>asUser(ALICE,()=>db.query('select public.record_model_cooldown($1,$2,$3,$4,$5)',[key,end,reason,stamp,sig]));
+    await call(until,issued,signature);
+    await expect(call(until+1000,issued,signature)).rejects.toThrow('signature');
+    await expect(call(until,issued-120000,signature)).rejects.toThrow('receipt');
+    await expect(asVisitor(()=>db.query('select public.record_model_cooldown($1,$2,$3,$4,$5)',[key,until,reason,issued,signature]))).rejects.toThrow();
+    const rows=await asUser(BOB,()=>db.query<{usable_after:string}>('select usable_after from public.model_availability where model_key=$1',[key]));
+    expect(new Date(rows.rows[0]!.usable_after).getTime()).toBe(until);
+    await expect(asUser(ALICE,()=>db.exec('update public.model_availability set usable_after=now()'))).rejects.toThrow();
+    await expect(asUser(ALICE,()=>db.exec('delete from public.model_availability'))).rejects.toThrow();
   });
 });
 

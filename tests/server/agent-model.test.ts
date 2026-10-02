@@ -1,12 +1,15 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AgentRunRow, EvidenceItemRow } from '../../shared/database.js';
-import { chooseAgentTool, agentTools } from '../../server/agent/model.js';
+import { createAgentToolChooser, agentTools } from '../../server/agent/model.js';
+import { routingClient } from './routed-test-client.js';
 import { investigationContext } from '../../server/agent/prompts.js';
 import type { AgentSnapshot } from '../../server/agent/loop.js';
 
 const run = { max_agent_steps: 10, agent_steps: 0, agent_state: { checked_guidance: [{ id: 'rule-1', title: 'Checked rule', body: 'Checked words', source_name: 'Primary', source_url: 'https://example.org/rule', checked_on: '2026-10-02', applies_to_steps: [1] }] } } as AgentRunRow;
 const snapshot: AgentSnapshot = { documents: [], evidence: [], facts: [], questions: [] };
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+beforeEach(()=> { vi.stubEnv('MODEL_COOLDOWN_SIGNING_SECRET','test-secret-with-at-least-32-characters'); vi.stubEnv('LLM_TEXT_LINEUP','gemini-3.5-flash-lite'); });
+const chooseAgentTool=createAgentToolChooser(routingClient());
 describe('tool selection through the actual SDK with fake HTTP', () => {
   it('keeps document quotes out of the tool context and restores checked guidance', () => {
     const context = JSON.parse(investigationContext({ ...snapshot, evidence: [{ quote: 'RAW DOCUMENT INSTRUCTION' } as EvidenceItemRow] }, run));

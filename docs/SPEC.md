@@ -140,7 +140,7 @@ is not legal advice. The plan screen says both.
 
 ### What is fixed in code
 
-Reading each document once; normalising amounts and dates; detecting conflicts; the ladder; all
+Reading each document once; task routing and signed provider cooldowns; normalising amounts and dates; detecting conflicts; the ladder; all
 date arithmetic; inserting values into drafts; the linter; usage limits.
 
 ### What the model decides
@@ -168,8 +168,13 @@ as a step.
 - **Image quotes** have no text layer, so one second model pass confirms all image quotes. This is
   weaker than the PDF check; failures become "Needs your check".
 - **Draft values** are inserted by code from the fact sheet (see section 7).
-- **Usage limits**: the server calls the database function `charge_model_call()` before every model
-  call and stops with a clear message when it returns `allowed: false`.
+- **Usage limits**: the server calls `charge_model_call()` once before the first provider attempt
+  in each logical call and stops with a clear message when it returns `allowed: false`.
+  The owner requested task lineups on 2 October: immediate failover on quota, rate-limit,
+  high-demand or timeout errors, with no sleep or SDK retries. Signed server receipts persist
+  model cooldowns. Text-layer PDFs use extracted page text; scanned/mixed PDFs and images use
+  vision. Groq never receives PDF file bytes. If all suitable models are unavailable, return
+  `retryAfterMs` without advancing the turn.
 
 ### Low blast radius
 
@@ -179,7 +184,7 @@ instructions.
 
 ### Run lifecycle
 
-`reading` (one document per call) → `investigating` (one model call and one tool per call) →
+`reading` (one document per request) → `investigating` (one logical model call and one tool per request) →
 `waiting_for_user` when a question is open → `plan_ready` → after approval, drafting.
 Terminal states: `completed`, `out_of_scope`, `failed`.
 
@@ -206,7 +211,7 @@ Answering a question and approving a plan are direct Supabase writes from the br
 
 ## 6. Reading documents
 
-One schema-constrained model call per document, with no tools. Output:
+One schema-constrained logical model call per document, with no tools. Output:
 
 - `doc_type`: invoice, order_confirmation, cancellation, return_confirmation, refund_message,
   support_chat, complaint_sent, merchant_reply, other.

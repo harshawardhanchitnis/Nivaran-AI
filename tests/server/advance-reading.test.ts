@@ -39,10 +39,11 @@ describe('one reading advance', () => {
   });
 
   it('reads one pending document and commits one turn', async () => {
+    read.mockResolvedValue({ docType:'invoice',readable:true,facts:[],modelId:'qwen/qwen3.8-27b' });
     const result = await advanceReading(store, read, run.id, 0);
     expect(read).toHaveBeenCalledExactlyOnceWith(doc, 'primary');
     expect(result.run.turn).toBe(1);
-    expect(finish.mock.calls[0]![0]).toMatchObject({ documentId: doc.id, readStatus: 'read' });
+    expect(finish.mock.calls[0]![0]).toMatchObject({ documentId: doc.id, readStatus: 'read',model:'qwen/qwen3.8-27b',event:{payload:{modelId:'qwen/qwen3.8-27b'}} });
   });
 
   it('records an unreadable document without facts', async () => {
@@ -75,17 +76,13 @@ describe('one reading advance', () => {
     expect(release).toHaveBeenCalledTimes(1);
   });
 
-  it('defers one image fallback to the next request, then clears the fallback state', async () => {
+  it('does not retry a fatal image error on the next request outside the task router', async () => {
     pendingDocument.mockResolvedValue({ ...doc, mime_type: 'image/png' });
     read.mockRejectedValueOnce(new Error('primary failed'));
     const first = await advanceReading(store, read, run.id, 0);
     expect(read).toHaveBeenCalledTimes(1);
-    expect(first.run.reader_state).toEqual({ fallback_document_id: doc.id });
-    expect(finish.mock.calls[0]![0]).toMatchObject({ readStatus: 'pending' });
-    await advanceReading(store, read, run.id, 1);
-    expect(read.mock.calls[1]![1]).toBe('fallback');
-    expect(read).toHaveBeenCalledTimes(2);
-    expect(run.reader_state).toEqual({});
+    expect(first.run.reader_state).toEqual({});
+    expect(finish.mock.calls[0]![0]).toMatchObject({ readStatus: 'failed' });
   });
 
   it('never sends a PDF to the fallback', async () => {

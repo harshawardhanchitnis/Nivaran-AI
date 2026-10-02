@@ -1,6 +1,7 @@
 import { generateText, jsonSchema, tool, type JSONSchema7 } from 'ai';
 import { z } from 'zod';
-import { getModel } from '../llm/provider.js';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createRoutedModelCall } from '../llm/routed-call.js';
 import { INVESTIGATION_PROMPT, investigationContext } from './prompts.js';
 import { toolSchemas } from './tools/index.js';
 import type { InvestigationDependencies } from './loop.js';
@@ -25,14 +26,19 @@ export function agentTools() {
   return Object.fromEntries(Object.entries(toolSchemas).map(([name, schema]) =>
     [name, tool({ description: descriptions[name as keyof typeof toolSchemas], inputSchema: jsonSchema<unknown>(portable(z.toJSONSchema(schema)) as JSONSchema7) })]));
 }
-export const chooseAgentTool: InvestigationDependencies['choose'] = async (snapshot, run) => {
-  const selected = getModel('primary');
+export function createAgentToolChooser(client:SupabaseClient):InvestigationDependencies['choose'] {
+  const route=createRoutedModelCall(client);
+  return async (snapshot,run)=> {
   const tools = agentTools();
+  const result=await route('text',async (selected,signal)=> {
   const response = await generateText({ model: selected.model, system: INVESTIGATION_PROMPT,
     prompt: investigationContext(snapshot, run), tools, toolChoice: 'required',
-    maxRetries: 0, maxOutputTokens: 2500, abortSignal: AbortSignal.timeout(40_000),
+    maxRetries: 0, maxOutputTokens: 2500, abortSignal: signal,
   });
   if (response.toolCalls.length !== 1) throw new Error('The model must choose exactly one tool.');
   const call = response.toolCalls[0]!;
-  return { name: call.toolName, input: call.input, modelId: selected.modelId };
-};
+  return { name: call.toolName, input: call.input };
+  });
+  return {...result.value,modelId:result.modelId};
+  };
+}

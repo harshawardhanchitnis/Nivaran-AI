@@ -21,7 +21,7 @@ If you are behind at hour 16, skip Phase 4 and go to Phase 5.
 4. Copy `.env.example` to `.env.local` and fill in every value.
 
 Check: `npm run dev`, open `http://localhost:4200/status`, press "Run checks". All six pass.
-Then press "Test primary model" and "Test fallback model". Both answer.
+Then press "Test vision lineup" and "Test text lineup". Both answer (owner's routing update).
 
 ### T0.2 Deploy (a human does this)
 
@@ -73,9 +73,10 @@ phase only for now) and `server/usage.ts`.
 - `advance` in phase `reading`: read ONE pending document, insert `evidence_items`, set
   `documents.read_status`, append `agent_events`, bump `turn` with the compare-and-set update.
   When none are pending, set phase `investigating`.
-- Provider errors: on a rate limit, return `retryAfterMs` without bumping `turn`; on other
-  failures, try the fallback model once for images only (it cannot read PDFs), then mark the
-  document `failed`.
+- Provider errors (owner's 2 October routing update): immediately try the next task-lineup model
+  on quota, rate-limit, demand or timeout errors. Use signed persistent cooldowns and charge once
+  per logical call. If every candidate is unavailable, return `retryAfterMs` without bumping
+  `turn`. Groq receives images or extracted text, never PDF file bytes. Fatal errors mark the file failed.
 
 Checks: unit tests with a fake model for the happy path, an unreadable document, a stale
 `expectedTurn` (409), and a refused charge (429). Manually: a real invoice PDF and a real
@@ -118,7 +119,7 @@ mixed-format amounts and two-dates cases from the evaluation list.
 
 Build `server/agent/loop.ts`, `prompts.ts` and one file per tool in `server/agent/tools/`.
 
-- One model call per `advance`, tools as in SPEC section 5, each input validated with Zod.
+- One logical model call per `advance`, tools as in SPEC section 5, each input validated with Zod.
 - `ask_user` and `request_document` insert a `questions` row and set the run to
   `waiting_for_user`. `advance` on a waiting run with an answered question resumes it.
 - Stop at `max_agent_steps` with a plain "could not finish" message and whatever facts exist.

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { routingClient } from '../server/routed-test-client.js';
 
 const fake = vi.hoisted(() => ({
   rpc: vi.fn(),
@@ -8,28 +9,29 @@ const fake = vi.hoisted(() => ({
 }));
 
 vi.mock('../../server/auth.js', () => ({ requireUser: fake.requireUser }));
-vi.mock('../../server/llm/provider.js', () => ({ getModel: fake.getModel }));
+vi.mock('../../server/llm/provider.js', () => ({ getModelById: fake.getModel }));
 vi.mock('ai', () => ({ generateText: fake.generateText }));
 
 import { POST } from '../../api/llm-check.js';
 import { HttpError } from '../../server/http.js';
 
-function request(role: string = 'primary'): Request {
+function request(task: string = 'vision'): Request {
   return new Request('http://localhost/api/llm-check', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: 'Bearer fake-token' },
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({ task }),
   });
 }
 
 beforeEach(() => {
   vi.resetAllMocks();
   vi.stubEnv('ENABLE_LLM_CHECK', 'true');
-  fake.requireUser.mockResolvedValue({ supabase: { rpc: fake.rpc } });
+  vi.stubEnv('GOOGLE_GENERATIVE_AI_API_KEY','fake'); vi.stubEnv('GROQ_API_KEY','fake');
+  vi.stubEnv('MODEL_COOLDOWN_SIGNING_SECRET','test-secret-with-at-least-32-characters');
+  fake.requireUser.mockResolvedValue({ supabase: routingClient(fake.rpc) });
   fake.rpc.mockResolvedValue({ data: { allowed: true }, error: null });
-  fake.getModel.mockImplementation((role: 'primary' | 'fallback') => ({
-    role,
-    provider: role === 'primary' ? 'google' : 'groq',
+  fake.getModel.mockImplementation((provider: 'google' | 'groq') => ({
+    provider,
     modelId: 'fake-model',
     model: 'fake-model-handle',
   }));
@@ -41,11 +43,11 @@ afterEach(() => {
 });
 
 describe('POST /api/llm-check usage limits', () => {
-  it.each(['primary', 'fallback'])('charges before the %s model call', async (role) => {
-    const response = await POST(request(role));
+  it.each(['vision', 'text'])('charges before the %s model call', async (task) => {
+    const response = await POST(request(task));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ role, text: 'ok' });
+    expect(await response.json()).toMatchObject({ task, text: 'ok' });
     expect(fake.rpc).toHaveBeenCalledExactlyOnceWith('charge_model_call');
     expect(fake.generateText).toHaveBeenCalledTimes(1);
     expect(fake.rpc.mock.invocationCallOrder[0]).toBeLessThan(
@@ -106,9 +108,7 @@ describe('POST /api/llm-check usage limits', () => {
   });
 
   it('does not charge when the model is not configured', async () => {
-    fake.getModel.mockImplementation(() => {
-      throw new HttpError(503, 'model_not_configured', 'The primary model key is not set.');
-    });
+    vi.stubEnv('GOOGLE_GENERATIVE_AI_API_KEY',''); vi.stubEnv('GROQ_API_KEY','');
 
     expect((await POST(request())).status).toBe(503);
     expect(fake.rpc).not.toHaveBeenCalled();

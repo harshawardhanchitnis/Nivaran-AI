@@ -194,15 +194,50 @@ the production build. Twenty-seven database tests cover the migrations including
 caller ownership, question pause/resume and unapproved plans. Browser reload displayed the saved
 document statuses with no new model call.
 
+On 2 October 2026, at the owner's request before completing T6, Codex replaced the fixed
+primary/fallback pair with configurable vision and text lineups. PDF pages with text are extracted
+with unpdf and sent as text; scanned PDFs remain on the Google vision lineup. Groq receives
+images or extracted text, never binary PDFs. Each logical call is charged once before its first
+attempt. Quota, rate-limit, high-demand and timeout failures move immediately to the next model,
+with SDK retries disabled and an eight-second maximum attempt timeout. Signed server receipts
+record shared cooldowns through a restricted database function. Clients cannot write the table,
+read the signing secret, forge a reset time or replay a receipt to extend it. The owner confirmed
+applying migrations 0005 and 0006 and the private signing setup SQL. Caps are 15 per user and 15
+globally, retaining earlier charges.
+
+The owner's supplied reading benchmark contains eleven earlier direct attempts outside the app's
+counter. Its original table and JSON are retained in `eval/model-benchmark.*`; Codex did not rerun
+them. They measure two clean synthetic documents, not tool choice, drafting or text-extracted PDF
+reading. The script now requires an explicit live budget of at most six attempts and uses caller
+charging and signed cooldowns. Future runs write separate output files.
+
+The new router's bounded live check used six provider attempts and three logical charges. Qwen
+read the extracted two-page invoice text, returning nine candidates across five expected fields.
+Gemini 3.6, 3.8 and 3.5 each timed out at eight seconds; Flash Lite then read the screenshot and
+returned six candidates. Three signed timeout cooldowns were saved. Qwen chose `get_next_step`,
+and the run and tool-call event recorded its ID. That tool failed because T7 was still unavailable;
+this was not an end-to-end investigation success. Results and limits are in
+`eval/model-benchmark.md` and `eval/model-routing-live.json`. Fake providers cover routing and
+skipping; Qwen's literal "None" bank reference is tested as absence.
+
+A read-only audit also found one earlier charged tool-selection failure after T6 enabled browser
+investigation on the existing T2 fixture, before these routing checks. No usable tool was selected.
+Together with eleven earlier setup/reading/quote charges and the three new logical charges,
+this session has used fifteen charges on 2 October. T6's separate saved conflict/question fixture
+uses no model calls; its UI work is still to be completed and committed after routing.
+Before the routing commit, the working-tree `npm run check` passed both server type-checks,
+216 server/database tests (including the pending T6 answer tests), 59 Angular tests and the
+production build. The staged routing commit leaves the pending T6 UI and answer endpoint separate.
+
 ## AI tools used
 
 | Tool | Used for |
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, starter checks, setup preparation, diagnostic usage charging, T1 implementation and browser checks through the computer-use plugin, T2 server preparation and live checks, and PDF-skill test fixture preparation on 2 October 2026. |
-| Google Gemini API | One pre-event setup diagnostic, five failed primary reader attempts, one successful two-page invoice read and one image-quote attempt refused with HTTP 503 on 2 October 2026. Investigation is still to build. |
-| Groq API | One pre-event setup diagnostic, one successful support-image reading and one successful image-quote check on 2 October 2026. These are manual fixture checks, not evaluation results. |
+| Codex (OpenAI) | Pre-event handover review, T1–T5 implementation and checks, model routing with signed cooldowns, T6 preparation, browser checks through the computer-use plugin, and PDF-skill fixture preparation on 2 October 2026. |
+| Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; new routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October 2026. These are manual fixture checks. |
+| Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing checks on 2 October 2026. The selected ladder tool remained unavailable. These are manual fixture checks, not product evaluation results. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->

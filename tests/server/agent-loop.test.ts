@@ -88,6 +88,13 @@ describe('one model-chosen investigation step', () => {
     await expect(advanceInvestigation(store, deps, run.id, 0)).rejects.toMatchObject({ code: 'quota_exhausted' });
     expect(choose).not.toHaveBeenCalled(); expect(finishStep).not.toHaveBeenCalled(); expect(release).toHaveBeenCalled();
   });
+  it('preserves the run when the routed chooser refuses logical charging', async () => {
+    delete deps.charge;
+    choose.mockRejectedValue(new HttpError(429, 'quota_exhausted', 'Daily limit reached.'));
+    await expect(advanceInvestigation(store, deps, run.id, 0)).rejects.toMatchObject({ code: 'quota_exhausted' });
+    expect(finishStep).not.toHaveBeenCalled(); expect(release).toHaveBeenCalledTimes(1);
+    expect(run.turn).toBe(0); expect(run.agent_steps).toBe(0);
+  });
   it('waits for the latest question instead of reusing an older answer', async () => {
     snapshot.questions = [
       { id: 'old', field: 'order_id', answer: 'MM-01', answered_at: '2026-10-02' },

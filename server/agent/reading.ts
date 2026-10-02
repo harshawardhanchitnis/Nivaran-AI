@@ -33,6 +33,7 @@ export function rateLimitDelay(error: unknown): number | null {
   for (let depth = 0; depth < 5; depth += 1) {
     if (!current || typeof current !== 'object') return null;
     const entry = current as Record<string, unknown>;
+    if(typeof entry['retryAfterMs']==='number' && Number.isFinite(entry['retryAfterMs']) && entry['retryAfterMs']>0) return entry['retryAfterMs'];
     if (entry['statusCode'] === 429) {
       const headers = entry['responseHeaders'];
       const raw = headers && typeof headers === 'object' ? (headers as Record<string, unknown>)['retry-after'] : undefined;
@@ -78,7 +79,7 @@ export async function advanceReading(store: ReadingStore, read: DocumentReader, 
         result = await read(document, role);
         readStatus = result.readable ? 'read' : 'unreadable';
         event = { type: 'tool_result', payload: { tool: 'read_document', documentId: document.id,
-          label: document.label, role, readStatus, factCount: result.facts.length,
+          label: document.label, modelId:result.modelId, readStatus, factCount: result.facts.length,
           message: result.readable ? `Read ${document.label}.` : `Could not read ${document.label}. Please add a clearer copy.` } };
       } catch (error) {
         if (error instanceof HttpError) throw error;
@@ -86,13 +87,11 @@ export async function advanceReading(store: ReadingStore, read: DocumentReader, 
         if (retryAfterMs !== null) {
           return { run: { ...run, processing_token: null, processing_started_at: null }, events: [], retryAfterMs };
         }
-        const fallback = role === 'primary' && document.mime_type !== 'application/pdf';
-        readStatus = fallback ? 'pending' : 'failed';
-        readerState = fallback ? { fallback_document_id: document.id } : {};
+        readStatus = 'failed';
+        readerState = {};
         event = { type: 'error', payload: { tool: 'read_document', documentId: document.id, label: document.label,
           role, readStatus, diagnostic: failureDetails(error),
-          message: fallback ? `Could not read ${document.label} with the primary model. Trying the fallback next.`
-            : `The model could not read ${document.label}. This document needs another attempt.` } };
+          message: `The model could not read ${document.label}. This document needs another attempt.` } };
       }
     }
     const response = await store.finish({ run, documentId: document?.id ?? null, result, readStatus, readerState,

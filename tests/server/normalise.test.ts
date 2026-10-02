@@ -41,6 +41,8 @@ describe('duration normalisation', () => {
 
 describe('field-specific values', () => {
   it('does not turn an explicit missing bank reference into an ID', () => {
+    // Qwen's measured reading: value "None", source quote "No refund reference has been issued".
+    expect(normaliseFact('refund_reference', 'None')).toEqual({ kind: 'absent', value: false });
     expect(normaliseFact('refund_reference', 'No refund reference has been issued.')).toEqual({ kind: 'absent', value: false });
     expect(normaliseFact('refund_reference', 'ARN-0123456789')).toEqual({ kind: 'id', value: 'ARN-0123456789' });
   });

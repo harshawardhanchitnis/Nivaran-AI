@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { pdfQuoteChecks } from '../../server/verify/quote.js';
+import { pdfTextPages } from '../../server/reader/pdf-text.js';
 
 /** Minimal fictional, two-page text-layer PDF; no model or PDF generator dependency. */
 function fixturePdf(): Uint8Array {
@@ -21,6 +22,9 @@ function fixturePdf(): Uint8Array {
 }
 
 describe('unpdf text layer extraction', () => {
+  it('preserves real PDF pages for text routing',async()=> {
+    expect(await pdfTextPages(fixturePdf())).toEqual(['Order MM-00123','Refund INR 9999']);
+  });
   it('checks real PDF bytes against the quote page without a model call', async () => {
     expect(await pdfQuoteChecks(fixturePdf(), [
       { id: 'order', quote: 'Order MM-00123', page: 1 },

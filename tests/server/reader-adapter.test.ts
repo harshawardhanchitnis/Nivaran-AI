@@ -1,15 +1,18 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const fake = vi.hoisted(() => ({
   getModel: vi.fn(), generateText: vi.fn(), rpc: vi.fn(), download: vi.fn(), from: vi.fn(),
+  pdfText:vi.fn(),
 }));
-vi.mock('../../server/llm/provider.js', () => ({ getModel: fake.getModel }));
+vi.mock('../../server/llm/provider.js', () => ({ getModelById: fake.getModel }));
+vi.mock('../../server/reader/pdf-text.js',()=>({pdfTextPages:fake.pdfText}));
 vi.mock('ai', async (original) => ({ ...await original<object>(), generateText: fake.generateText }));
 
 import { createDocumentReader, readerOutputSchema } from '../../server/reader/read-document.js';
 import type { DocumentRow } from '../../shared/database.js';
 import { z } from 'zod';
+import { routingClient } from './routed-test-client.js';
 
 const doc: DocumentRow = {
   id: '33333333-3333-4333-8333-333333333333', case_id: '22222222-2222-4222-8222-222222222222',
@@ -17,7 +20,8 @@ const doc: DocumentRow = {
   storage_path: 'owner/case/invoice.pdf', mime_type: 'application/pdf', size_bytes: 12,
   sha256: null, doc_type: null, page_count: null, read_status: 'pending', created_at: '2026-10-02T00:00:00Z',
 };
-const client = { rpc: fake.rpc, storage: { from: fake.from } } as unknown as SupabaseClient;
+const client = { ...routingClient(fake.rpc), storage: { from: fake.from } } as unknown as SupabaseClient;
+afterEach(()=>vi.unstubAllEnvs());
 beforeEach(() => {
   vi.resetAllMocks();
   fake.getModel.mockReturnValue({ model: 'fake-model', modelId: 'fake-model-id' });
@@ -25,6 +29,9 @@ beforeEach(() => {
   fake.from.mockReturnValue({ download: fake.download });
   fake.download.mockResolvedValue({ data: new Blob(['pdf']), error: null });
   fake.generateText.mockResolvedValue({ output: { doc_type: 'invoice', readable: true, facts: [] } });
+  fake.pdfText.mockResolvedValue(['Order MM-001']);
+  vi.stubEnv('GOOGLE_GENERATIVE_AI_API_KEY','fake'); vi.stubEnv('GROQ_API_KEY','fake');
+  vi.stubEnv('MODEL_COOLDOWN_SIGNING_SECRET','test-secret-with-at-least-32-characters');
 });
 
 describe('reader SDK adapter (no real calls)', () => {
@@ -36,7 +43,7 @@ describe('reader SDK adapter (no real calls)', () => {
 
   it.each(['application/pdf', 'image/png'] as const)('sends %s bytes without tools or retries, after charging', async (mime_type) => {
     const result = await createDocumentReader(client)({ ...doc, mime_type }, 'primary');
-    expect(result.modelId).toBe('fake-model-id');
+    expect(result.modelId).toBe(mime_type==='application/pdf'?'qwen/qwen3.8-27b':'gemini-3.6-flash');
     expect(fake.from).toHaveBeenCalledWith('evidence');
     expect(fake.download).toHaveBeenCalledWith(doc.storage_path);
     expect(fake.rpc).toHaveBeenCalledExactlyOnceWith('charge_model_call');
@@ -46,15 +53,20 @@ describe('reader SDK adapter (no real calls)', () => {
     expect(options).toMatchObject({ maxRetries: 0 });
     expect(options).not.toHaveProperty('tools');
     expect(options.system).toContain('untrusted data');
-    expect(options.messages[0].content[0]).toMatchObject({ type: 'file', mediaType: mime_type });
+    expect(options.messages[0].content[0]).toMatchObject(mime_type==='application/pdf'?{type:'text'}:{ type: 'file', mediaType: mime_type });
     expect(options.output).toBeDefined();
   });
 
-  it('refuses PDF fallback before downloading, charging or calling', async () => {
-    await expect(createDocumentReader(client)(doc, 'fallback')).rejects.toMatchObject({ code: 'pdf_fallback_unavailable' });
-    expect(fake.download).not.toHaveBeenCalled();
-    expect(fake.rpc).not.toHaveBeenCalled();
-    expect(fake.generateText).not.toHaveBeenCalled();
+  it('routes text PDFs to Qwen with extracted page text and never PDF file bytes', async () => {
+    await createDocumentReader(client)(doc);
+    expect(fake.getModel.mock.calls[0]?.slice(0,2)).toEqual(['groq','qwen/qwen3.8-27b']);
+    expect(fake.generateText.mock.calls[0]![0].messages[0].content[0]).toMatchObject({type:'text'});
+  });
+  it('routes a PDF without a text layer to Gemini vision, never to Qwen PDF input', async () => {
+    fake.pdfText.mockResolvedValue(null);
+    await createDocumentReader(client)(doc);
+    expect(fake.getModel.mock.calls[0]?.slice(0,2)).toEqual(['google','gemini-3.6-flash']);
+    expect(fake.generateText.mock.calls[0]![0].messages[0].content[0]).toMatchObject({type:'file',mediaType:'application/pdf'});
   });
   it('passes a targeted second-look question as untrusted data without tools', async () => {
     await createDocumentReader(client)(doc, 'primary', 'Is a promised date stated?');

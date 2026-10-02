@@ -14,6 +14,16 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > Question UI wiring and the code ladder are next. Plans, drafting and later tasks are still to build.
 > See `docs/ai-disclosure.md` for dates and checks.
 
+Model calls use configurable vision and text lineups in `.env.example`. PDF pages with text are
+extracted locally; scanned or mixed PDFs use vision, and Groq never receives PDF file bytes.
+Each logical call is charged once, with immediate provider failover and signed database cooldowns.
+Apply migrations in order through `0006_logical_call_caps.sql`, run
+`node scripts/prepare-model-cooldowns.mjs`, then apply its ignored setup SQL in the dashboard.
+Keep `MODEL_COOLDOWN_SIGNING_SECRET` server-only; add that local setting to Vercel when deploying.
+Current owner-reported Gemini daily limits support conservative app caps of 15 per user and 15
+globally. The supplied reading benchmark and bounded live routing results are in
+[eval/model-benchmark.md](eval/model-benchmark.md); they are not the full product evaluation.
+
 ## Documents
 
 | File | What it is |
@@ -28,7 +38,7 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 
 Angular 21 and Angular Material, hosted on Vercel. Vercel Functions (Node, TypeScript) for anything
 that needs the model key. Supabase for sign-in, Postgres with row-level security, and private file
-storage. Gemini on the free tier as the primary model, Groq as the fallback, through the AI SDK.
+storage. Task-routed Gemini and Groq lineups through the AI SDK.
 
 ## Set up
 
@@ -40,14 +50,14 @@ You need Node 22 and a Supabase project.
    npm install
    ```
 
-2. In Supabase: run `supabase/migrations/0001_init.sql`, then
-   `supabase/migrations/0002_agent_reading.sql` in the SQL Editor. The second migration adds
-   reading transactions and sets daily model-call caps to 8 per user and 15 globally, based on
-   the owner's reported 20-request primary quota. Review these against your own provider limits.
-   Then run `0003_development_quota.sql`, which sets 12 per user while retaining 15 globally.
+2. In Supabase: run every file in `supabase/migrations/` in numeric order, through `0006`.
+   They add caller-owned reading/investigation transactions, signed model availability and
+   daily caps of 15 logical calls per user and 15 globally. Review caps against your provider limits.
    Turn on anonymous sign-ins (Authentication > Sign In / Providers).
 
-3. Copy `.env.example` to `.env.local` and fill it in.
+3. Copy `.env.example` to `.env.local` and fill it in. Run
+   `node scripts/prepare-model-cooldowns.mjs`, then apply the generated private setup SQL in
+   Supabase SQL Editor. Do not commit or share that file or `.env.local`.
 
 4. Start the API and the app together:
 

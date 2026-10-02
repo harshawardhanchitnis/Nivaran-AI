@@ -88,11 +88,11 @@ function messageOf(error: unknown): string {
         </mat-card-header>
         <mat-card-content>
           <div class="row">
-            <button mat-stroked-button type="button" [disabled]="modelBusy()" (click)="testModel('primary')">
-              Test primary model
+            <button mat-stroked-button type="button" [disabled]="modelBusy()" (click)="testModel('vision')">
+              Test vision lineup
             </button>
-            <button mat-stroked-button type="button" [disabled]="modelBusy()" (click)="testModel('fallback')">
-              Test fallback model
+            <button mat-stroked-button type="button" [disabled]="modelBusy()" (click)="testModel('text')">
+              Test text lineup
             </button>
           </div>
           <p class="check-detail" aria-live="polite">{{ modelResult() }}</p>
@@ -177,7 +177,7 @@ export class SystemCheck {
       await this.step('api', async () => {
         const health = await this.api.get<HealthResponse>('health');
         const flags = health.configured;
-        return `Region ${health.region}. Server settings: Supabase ${yesNo(flags.supabase)}, primary model key ${yesNo(flags.primaryModel)}, fallback model key ${yesNo(flags.fallbackModel)}.`;
+        return `Region ${health.region}. Server settings: Supabase ${yesNo(flags.supabase)}, Google model key ${yesNo(flags.primaryModel)}, Groq model key ${yesNo(flags.fallbackModel)}.`;
       });
 
       if (!configured) {
@@ -228,14 +228,14 @@ export class SystemCheck {
     }
   }
 
-  protected async testModel(role: 'primary' | 'fallback'): Promise<void> {
+  protected async testModel(task: 'vision' | 'text'): Promise<void> {
     this.modelBusy.set(true);
-    this.modelResult.set(`Calling the ${role} model…`);
+    this.modelResult.set(`Testing the ${task} lineup…`);
     try {
       if (this.supabase.configured) {
         await this.supabase.ensureSignedIn();
       }
-      const result = await this.api.post<LlmCheckResponse>('llm-check', { role });
+      const result = await this.api.post<LlmCheckResponse>('llm-check', { task });
       this.modelResult.set(
         `${result.provider} ${result.modelId} answered "${result.text}" in ${result.milliseconds} ms.`,
       );
