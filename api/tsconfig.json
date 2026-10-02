@@ -1,0 +1,37 @@
+/*
+ * TypeScript settings for everything that runs on Node: Vercel Functions (api/), server code
+ * (server/), the shared contract (shared/), scripts, eval and server-side tests.
+ *
+ * The project is native ESM ("type": "module"), so every relative import must end in ".js".
+ * Do not add "noEmit" here: Vercel compiles the functions with this file.
+ * Type-check with: npm run typecheck:server
+ */
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": [
+    "./**/*.ts",
+    "../server/**/*.ts",
+    "../shared/**/*.ts",
+    "../scripts/**/*.ts",
+    "../eval/**/*.ts",
+    "../tests/**/*.ts",
+    "../vitest.server.config.ts"
+  ]
+}

@@ -1,0 +1,20 @@
+/*
+ * Safety net, not a build config. It type-checks the Vercel Functions under the ROOT tsconfig.json
+ * as well, in case Vercel resolves that file instead of api/tsconfig.json when compiling api/*.ts.
+ * Code that passes both checks deploys either way. Run with: npm run typecheck:server
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "files": [],
+  "include": [
+    "api/**/*.ts",
+    "server/**/*.ts",
+    "shared/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.test.ts"
+  ]
+}

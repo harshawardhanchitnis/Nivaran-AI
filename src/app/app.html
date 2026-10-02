@@ -1,0 +1,21 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<mat-toolbar class="app-bar">
+  <a class="brand" routerLink="/">Nivaran AI</a>
+  <span class="spacer"></span>
+  <nav aria-label="Main">
+    <a mat-button routerLink="/cases" routerLinkActive="active" ariaCurrentWhenActive="page">My cases</a>
+    <a mat-button routerLink="/status" routerLinkActive="active" ariaCurrentWhenActive="page">Status</a>
+  </nav>
+</mat-toolbar>
+
+<main id="main" class="page" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="app-footer">
+  <p>
+    Nivaran helps you organise a refund complaint. It is not legal advice, and it never files or sends
+    anything for you.
+  </p>
+</footer>

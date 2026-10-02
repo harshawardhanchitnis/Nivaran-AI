@@ -1,0 +1,42 @@
+-- Guidance snippets: the short, hand-checked rule texts the agent may cite.
+--
+-- Write each one yourself from the PRIMARY source (the gazette text of the rules, the helpline's
+-- own pages). Keep the body to a few plain sentences that state only what the source states.
+-- Set checked_on to the day a team member last compared it with the source.
+-- Nothing here is filled in on purpose: unverified legal text must not ship.
+--
+-- Run in the Supabase SQL editor after 0001_init.sql. Safe to re-run.
+--
+-- Template (copy, fill in, uncomment):
+--
+-- insert into public.guidance (id, title, body, source_name, source_url, checked_on, applies_to_steps)
+-- values (
+--   'grievance-officer-timelines',
+--   '<short title>',
+--   '<what the source says, in plain words>',
+--   '<name of the source document>',
+--   '<link to the primary source>',
+--   '2026-10-03',
+--   array[1]::smallint[]
+-- )
+-- on conflict (id) do update
+--   set title = excluded.title,
+--       body = excluded.body,
+--       source_name = excluded.source_name,
+--       source_url = excluded.source_url,
+--       checked_on = excluded.checked_on,
+--       applies_to_steps = excluded.applies_to_steps;
+--
+-- Snippets the specification expects (see docs/SPEC.md, "Escalation ladder"):
+--   1. E-commerce entities must have a grievance officer and show the officer's contact details.
+--   2. The grievance officer must acknowledge within 48 hours and resolve within one month.
+--   3. Accepted refunds must be paid within a reasonable time or as the law prescribes.
+--   4. What the National Consumer Helpline is, how to reach it, and its stated timeline.
+--   5. What a consumer can do if the helpline does not resolve the grievance (e-Jagriti).
+--   6. Why a refund reference number matters and who to take it to (the bank).
+--
+-- Usage limits: set these from the free quota shown in Google AI Studio.
+--
+-- update public.app_settings
+--    set value = jsonb_build_object('per_user_daily_model_calls', 60, 'global_daily_model_calls', 600)
+--  where key = 'limits';

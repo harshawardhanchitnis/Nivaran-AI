@@ -1,0 +1,68 @@
+{
+  "name": "nivaran-ai",
+  "version": "0.0.0",
+  "description": "Nivaran AI: an agent that turns scattered refund evidence into a source-linked, human-approved complaint pack.",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "ng": "ng",
+    "postinstall": "node scripts/write-env.mjs --if-missing",
+    "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch scripts/dev-api.ts",
+    "dev:web": "node scripts/write-env.mjs && ng serve",
+    "start": "node scripts/write-env.mjs && ng serve",
+    "build": "node scripts/write-env.mjs && ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "npm run test:server && npm run test:web",
+    "test:web": "node scripts/write-env.mjs --if-missing && ng test --watch=false",
+    "test:server": "vitest run --config vitest.server.config.ts",
+    "typecheck:server": "tsc -p api/tsconfig.json --noEmit && tsc -p tsconfig.rootcheck.json --noEmit",
+    "check": "npm run typecheck:server && npm run test:server && npm run test:web && npm run build"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@10.9.2",
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.87",
+    "@ai-sdk/groq": "^4.0.54",
+    "@angular/cdk": "^21.2.14",
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/material": "^21.2.14",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/router": "^21.1.0",
+    "@supabase/supabase-js": "^2.117.2",
+    "ai": "^7.0.127",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "unpdf": "^1.8.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.1.4",
+    "@angular/cli": "^21.1.4",
+    "@angular/compiler-cli": "^21.1.0",
+    "@electric-sql/pglite": "^0.5.8",
+    "@types/node": "^26.6.3",
+    "concurrently": "^10.0.5",
+    "jsdom": "^27.1.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}
