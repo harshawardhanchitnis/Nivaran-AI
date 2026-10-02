@@ -52,6 +52,6 @@ describe('workspace progress', () => {
     expect(JSON.stringify(activity)).not.toContain('private debug');
   });
   it('does not suggest investigation has finished after reading', () => {
-    expect(workspaceStage({ status: 'running', phase: 'investigating' })).toBe('Documents read');
+    expect(workspaceStage({ status: 'running', phase: 'investigating' })).toBe('Checking the next step');
   });
 });

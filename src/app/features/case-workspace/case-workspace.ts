@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, injec
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import type { FactField } from '@shared/facts';
+import type { AgentAnswerRequest } from '@shared/api';
 import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-workspace.service';
 import { continueReading, waitForReading } from '../../core/reading-loop';
-import { workspaceActivity, workspaceFacts, workspaceStage, type DocumentPreview } from '../../core/workspace-mapper';
+import { workspaceActivity, workspaceFacts, workspaceQuestion, workspaceStage, type DocumentPreview } from '../../core/workspace-mapper';
 import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
 
 @Component({
@@ -15,15 +16,21 @@ import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
     @if (rows(); as data) {
       <app-case-workspace-view [heading]="data.case.title" [merchant]="data.case.merchant_name ?? 'Your refund case'"
         [documentCount]="data.documents.length" [stage]="stage()" [facts]="facts()" [activity]="activity()"
-        [busy]="busy()" (sourceRequested)="openSources($event)" (sourceRetry)="retrySource($event)">
+        [busy]="busy()" [question]="question()" [answerBusy]="answerBusy()"
+        (answered)="saveAnswer({ optionId: $event })" (textAnswered)="saveAnswer($event)"
+        (sourceRequested)="openSources($event)" (sourceRetry)="retrySource($event)">
         <div banner class="notice" aria-live="polite">
           @if (error(); as message) {
             <p role="alert">{{ message }}</p>
             <button mat-stroked-button type="button" [disabled]="busy()" (click)="reload()">Try again</button>
           } @else if (waiting()) {
-            <p>Waiting for model quota. Your progress is saved; reading will continue shortly.</p>
+            <p>Waiting for the model. Your progress is saved; Nivaran will continue shortly.</p>
           } @else if (busy()) {
-            <p>Reading your documents, one at a time. You can leave and return to this case.</p>
+            <p>{{ data.run?.phase === 'reading' ? 'Reading your documents, one at a time.' : 'Checking the next step.' }} You can leave and return to this case.</p>
+          } @else if (data.run?.status === 'failed') {
+            <p role="status">{{ data.run?.error ?? 'Nivaran could not finish. Your facts are saved.' }}</p>
+          } @else if (data.run?.status === 'waiting_for_user') {
+            <p>Answer the question below to continue. Your progress is saved.</p>
           } @else if (data.run?.phase === 'investigating') {
             <p>Your documents have been read. Open a fact to review its source and exact quote.</p>
           } @else if (data.documents.length === 0) {
@@ -51,6 +58,7 @@ export class CaseWorkspace {
   protected readonly rows = signal<WorkspaceRows | null>(null);
   protected readonly previews = signal<Record<string, DocumentPreview>>({});
   protected readonly busy = signal(false);
+  protected readonly answerBusy = signal(false);
   protected readonly waiting = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly facts = computed(() => {
@@ -58,6 +66,7 @@ export class CaseWorkspace {
     return data ? workspaceFacts(data.documents, data.evidence, data.facts, this.previews()) : [];
   });
   protected readonly activity = computed(() => workspaceActivity(this.rows()?.events ?? []));
+  protected readonly question = computed(() => workspaceQuestion(this.rows()?.questions ?? [], this.rows()?.run ?? null));
   protected readonly stage = computed(() => workspaceStage(this.rows()?.run ?? null));
 
   constructor() {
@@ -82,17 +91,45 @@ export class CaseWorkspace {
       await refresh();
       if (controller.signal.aborted) return;
       const initial = this.rows();
-      if (!initial?.documents.length) return;
-      await continueReading(initial.run, {
-        start: () => this.service.start(caseId), advance: run => this.service.advance(run),
-        current: async () => this.rows()?.run ?? null, refresh,
-        wait: ms => waitForReading(ms, controller.signal), delay: value => this.waiting.set(value),
-        signal: controller.signal,
-      });
+      if (!initial || !initial.documents.length && !initial.run) return;
+      await this.continueRun(initial, controller, refresh);
     } catch (error) {
       if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Could not load your case. Try again.');
     } finally {
       if (generation === this.generation) { this.busy.set(false); this.waiting.set(false); }
+    }
+  }
+
+  private async continueRun(data: WorkspaceRows, controller: AbortController, refresh: () => Promise<void>): Promise<void> {
+    const latest = data.questions?.at(-1);
+    await continueReading(data.run, {
+      start: () => this.service.start(data.case.id), advance: run => this.service.advance(run),
+      current: async () => this.rows()?.run ?? null, refresh,
+      wait: ms => waitForReading(ms, controller.signal), delay: value => this.waiting.set(value),
+      signal: controller.signal, resumeWaiting: !!latest?.answered_at && latest.id !== data.run?.agent_state?.answered_question_id,
+    });
+  }
+
+  protected async saveAnswer(answer: AgentAnswerRequest['answer']): Promise<void> {
+    const question = this.question(); const controller = this.controller; const data = this.rows();
+    if (!question || !controller || !data || this.answerBusy() || this.busy()) return;
+    const generation = this.generation;
+    this.answerBusy.set(true); this.busy.set(true); this.error.set(null);
+    const refresh = async () => {
+      const latest = await this.service.load(data.case.id);
+      if (!controller.signal.aborted) this.rows.set(latest);
+    };
+    try {
+      await this.service.answer(question.id, answer);
+      if (controller.signal.aborted) return;
+      await refresh();
+      const latest = this.rows();
+      if (latest) await this.continueRun(latest, controller, refresh);
+    } catch (error) {
+      if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Could not save your answer. Try again.');
+      if (!controller.signal.aborted) { try { await refresh(); } catch { /* Keep the loaded case usable while offline. */ } }
+    } finally {
+      if (generation === this.generation) { this.answerBusy.set(false); this.busy.set(false); this.waiting.set(false); }
     }
   }
 

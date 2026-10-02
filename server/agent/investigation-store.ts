@@ -2,14 +2,25 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AgentRunRow, CaseFactRow, DocumentRow, EvidenceItemRow, GuidanceRow, QuestionRow } from '../../shared/database.js';
 import { HttpError } from '../http.js';
 import { createReadingStore } from './store.js';
-import { investigationResponseSchema } from './rows.js';
-import type { InvestigationStore } from './loop.js';
+import { investigationResponseSchema, questionRowSchema } from './rows.js';
+import type { QuestionStore } from './answer-question.js';
 
 const unavailable = () => new HttpError(503, 'case_read_failed', 'Could not load or save this case. Please try again.');
-export function createInvestigationStore(client: SupabaseClient): InvestigationStore {
+export function createInvestigationStore(client: SupabaseClient): QuestionStore {
   const reading = createReadingStore(client);
   return {
     getRun: reading.getRun, claim: reading.claim, release: reading.release,
+    getQuestion: async id => {
+      const { data, error } = await client.from('questions').select('*').eq('id', id).maybeSingle();
+      if (error) throw unavailable();
+      if (!data) throw new HttpError(404, 'question_not_found', 'This question is not available in this browser.');
+      const parsed = questionRowSchema.safeParse(data); if (!parsed.success) throw unavailable(); return parsed.data;
+    },
+    saveAnswer: async (question, answer) => {
+      const { data, error } = await client.from('questions').update({ answer, answered_at: new Date().toISOString() })
+        .eq('id', question.id).eq('run_id', question.run_id).is('answer', null).select('id');
+      if (error) throw unavailable(); return !!data?.length;
+    },
     snapshot: async run => {
       const results = await Promise.all([
         client.from('documents').select('*').eq('case_id', run.case_id).order('label').returns<DocumentRow[]>(),

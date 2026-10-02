@@ -1,6 +1,6 @@
-import type { AgentRunRow, CaseFactRow, DocumentRow, EvidenceItemRow } from '@shared/database';
+import type { AgentRunRow, CaseFactRow, DocumentRow, EvidenceItemRow, QuestionRow } from '@shared/database';
 import { FACT_FIELDS, FACT_FIELD_LABELS } from '@shared/facts';
-import type { ActivityView, FactView, SourceView } from '../shared/ui/models';
+import type { ActivityView, FactView, SourceView, QuestionView } from '../shared/ui/models';
 
 export interface DocumentPreview { url?: string; pageImages?: Record<number, string>; loading?: boolean; error?: string }
 const DOCUMENT_KINDS: Record<string, string> = {
@@ -45,7 +45,9 @@ export function workspaceActivity(events: readonly {
   return [...events].sort((a, b) => a.seq - b.seq).map(event => {
     const message = event.payload['message'];
     const kind = event.type === 'error' ? 'error' : event.payload['tool'] === 'read_document' ? 'read'
-      : event.type === 'question' ? 'ask' : event.type === 'answer' ? 'answer' : 'decide';
+      : event.type === 'question' ? 'ask' : event.type === 'answer' ? 'answer'
+      : event.payload['tool'] === 'check_quotes' ? 'check' : event.payload['tool'] === 'search_guidance' ? 'search'
+      : event.payload['tool'] === 'propose_plan' ? 'plan' : 'decide';
     const date = new Date(event.created_at);
     return { id: event.id, kind, title: typeof message === 'string' ? message : 'Saved a case step.',
       time: Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat('en-IN', {
@@ -54,9 +56,20 @@ export function workspaceActivity(events: readonly {
   });
 }
 
+export function workspaceQuestion(questions: readonly QuestionRow[], run: AgentRunRow | null): QuestionView | null {
+  const question = questions.at(-1);
+  if (run?.status !== 'waiting_for_user' || !question || question.answer !== null) return null;
+  const options = question.options.flatMap(option => option && typeof option === 'object' && 'id' in option && 'label' in option && typeof option.id === 'string' && typeof option.label === 'string'
+    ? [{ id: option.id, label: option.label }] : []);
+  const why = question.kind === 'conflict' ? 'The sources give different values. Your choice will be saved as Your statement.'
+    : question.kind === 'document_request' ? 'A missing or unclear document prevents the next step.'
+    : question.kind === 'confirm' ? 'Please check this reading before it is used.' : 'This detail is needed to decide the next step.';
+  return { id: question.id, prompt: question.prompt, why, options };
+}
+
 export function workspaceStage(run: Pick<AgentRunRow, 'status' | 'phase'> | null): string {
   if (!run) return 'Documents added';
-  if (run.status === 'running') return run.phase === 'reading' ? 'Reading documents' : 'Documents read';
+  if (run.status === 'running') return run.phase === 'reading' ? 'Reading documents' : 'Checking the next step';
   return ({ waiting_for_user: 'Needs your answer', plan_ready: 'Plan ready', completed: 'Finished',
     out_of_scope: 'Outside Nivaran’s scope', failed: 'Could not finish' } as const)[run.status];
 }

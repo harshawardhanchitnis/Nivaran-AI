@@ -229,6 +229,27 @@ Before the routing commit, the working-tree `npm run check` passed both server t
 216 server/database tests (including the pending T6 answer tests), 59 Angular tests and the
 production build. The staged routing commit leaves the pending T6 UI and answer endpoint separate.
 
+On 2 October 2026, Codex completed T6 by connecting the existing `QuestionCard` and activity log
+to caller-owned questions and events. Offered answers take one tap; questions without choices
+use a labelled text field. Saves reject invented choices, superseded questions and overwrites.
+The answer endpoint stores the answer conditionally, then resumes the waiting run without a model
+call. The browser refreshes and continues serially, retaining the case during errors and recovering
+a saved answer after a dropped response. A new question clears the previous text input. Question
+headings receive focus; when answered, focus returns to Facts. Presentational components still
+contain no API or database calls, and the existing layout and tokens are retained.
+
+The manual T6 fixture was explicitly scripted development data: a saved conflicting refund amount,
+one question, no documents, and a pre-set ten-step ceiling to avoid a further model call. At 360 px,
+answering with the keyboard saved INR 9999 as "Your statement", resumed without reload, removed
+the question and then reached the expected ceiling. The activity log showed the actual answer
+and ceiling events. There was no horizontal scroll or browser console error. Axe reported zero
+violations and no incomplete checks on the activity view; keyboard focus was checked manually.
+Reload restored the saved statement. This fixture used zero provider calls and is not a live-model
+conflict evaluation. The earlier unrelated investigation call is disclosed above. No new migration
+was needed for T6. The pure ladder, plans and subsequent tasks remain to build.
+`npm run check` passed both server type-checks, 216 server/database tests, 60 Angular tests
+and the production build before the T6 commit.
+
 ## AI tools used
 
 | Tool | Used for |

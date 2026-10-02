@@ -8,15 +8,15 @@ const saved = {
   case: { id: 'case', title: 'Saved refund case', merchant_name: 'Fictional seller' },
   documents: [{ id: 'image', label: 'E02', file_name: 'support.png', mime_type: 'image/png', doc_type: 'support_chat' }],
   evidence: [{ id: 'reading', field: 'refund_amount', source: 'document', document_id: 'image', value_text: 'INR 9999', quote: 'Refund INR 9999', page: 1 }],
-  facts: [], events: [], run: { id: 'run', status: 'running', phase: 'investigating', turn: 7 },
+  facts: [], events: [], questions: [], run: { id: 'run', status: 'plan_ready', phase: 'done', turn: 7 },
 } as unknown as WorkspaceRows;
 
 describe('real case screen', () => {
-  const load = vi.fn(); const sourceUrl = vi.fn(); const start = vi.fn(); const advance = vi.fn();
+  const load = vi.fn(); const sourceUrl = vi.fn(); const start = vi.fn(); const advance = vi.fn(); const answer = vi.fn();
   beforeEach(() => {
     vi.resetAllMocks(); load.mockResolvedValue(saved); sourceUrl.mockResolvedValue('https://example.test/support.png');
     TestBed.configureTestingModule({ imports: [CaseWorkspace], providers: [provideRouter([]),
-      { provide: CaseWorkspaceService, useValue: { load, sourceUrl, start, advance } }],
+      { provide: CaseWorkspaceService, useValue: { load, sourceUrl, start, advance, answer } }],
     });
   });
   async function setup() {
@@ -60,5 +60,18 @@ describe('real case screen', () => {
     const { page } = await setup();
     expect(page.querySelector('[role="alert"]')?.textContent).toContain('not available');
     expect(page.querySelector('a')?.getAttribute('href')).toBe('/cases');
+  });
+  it('shows one stored conflict question and resumes after its answer without a reload', async () => {
+    const waiting = { ...saved, run: { ...saved.run!, status: 'waiting_for_user' },
+      questions: [{ id: 'q', run_id: 'run', kind: 'conflict', field: 'refund_amount', prompt: 'Which refund amount?', options: [{ id: 'one', label: 'INR 9999', value: 'INR 9999' }], answer: null, answered_at: null }] } as WorkspaceRows;
+    load.mockResolvedValueOnce(waiting).mockResolvedValue({ ...saved, run: { ...saved.run!, status: 'running', phase: 'investigating', turn: 8 } });
+    answer.mockResolvedValue({ run: { ...saved.run!, status: 'running' }, events: [] });
+    advance.mockResolvedValue({ run: { ...saved.run!, status: 'plan_ready', phase: 'done' }, events: [] });
+    const { fixture, page } = await setup();
+    expect(page.querySelectorAll('app-question-card')).toHaveLength(1);
+    expect(page.textContent).toContain('Answer the question below to continue. Your progress is saved.');
+    page.querySelector<HTMLButtonElement>('app-question-card button')!.click(); await fixture.whenStable();
+    expect(answer).toHaveBeenCalledExactlyOnceWith('q', { optionId: 'one' }); expect(advance).toHaveBeenCalledTimes(1);
+    expect(page.querySelector('app-question-card')).toBeNull();
   });
 });

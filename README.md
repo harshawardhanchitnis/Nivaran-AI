@@ -11,7 +11,8 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > readings and opens private image and PDF-page previews with quotes. Code normalisation and
 > quote checks and atomic fact persistence passed unit and hosted fixture checks. The investigating
 > loop has eight validated tools, saved state, questions and a step limit, tested with scripted models.
-> Question UI wiring and the code ladder are next. Plans, drafting and later tasks are still to build.
+> Stored questions, one-tap/text answers and the real activity log are connected; answering resumes
+> without reloading. The code ladder is next. Plans, drafting and later tasks are still to build.
 > See `docs/ai-disclosure.md` for dates and checks.
 
 Model calls use configurable vision and text lineups in `.env.example`. PDF pages with text are

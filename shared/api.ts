@@ -45,6 +45,10 @@ export interface LlmCheckResponse {
 
 export const agentStartRequestSchema = z.object({ caseId: z.uuid() });
 export const agentAdvanceRequestSchema = z.object({ runId: z.uuid(), expectedTurn: z.number().int().nonnegative() });
+export const agentAnswerRequestSchema = z.object({ questionId: z.uuid(), answer: z.union([
+  z.object({ optionId: z.string().min(1).max(100) }), z.string().trim().min(1).max(4000),
+]) });
+export type AgentAnswerRequest = z.infer<typeof agentAnswerRequestSchema>;
 export interface AgentStartResponse { run: AgentRunRow }
 export interface AgentAdvanceResponse {
   run: AgentRunRow;

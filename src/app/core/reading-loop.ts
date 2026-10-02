@@ -10,18 +10,21 @@ interface ReadingDependencies {
   wait(milliseconds: number): Promise<void>;
   delay(waiting: boolean): void;
   signal: AbortSignal;
+  resumeWaiting?: boolean;
 }
 
-/** Sequential requests; the next phase will be enabled when T5 implements investigation. */
+/** Sequential reading and investigation; questions and terminal states pause the loop. */
 export async function continueReading(initial: AgentRunRow | null, deps: ReadingDependencies): Promise<void> {
   if (deps.signal.aborted) return;
   let run = initial ?? await deps.start();
   let conflicts = 0;
-  while (!deps.signal.aborted && run.status === 'running' && run.phase === 'reading') {
+  let resumeWaiting = deps.resumeWaiting ?? false;
+  while (!deps.signal.aborted && (run.status === 'running' || run.status === 'waiting_for_user' && resumeWaiting) && run.phase !== 'done') {
     try {
       const response = await deps.advance(run);
       if (deps.signal.aborted) return;
       run = response.run;
+      resumeWaiting = false;
       conflicts = 0;
       await deps.refresh();
       if (response.retryAfterMs) {

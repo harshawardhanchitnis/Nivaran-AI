@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import type { AgentAdvanceResponse, AgentStartResponse } from '@shared/api';
-import type { AgentEventRow, AgentRunRow, CaseFactRow, CaseRow, DocumentRow, EvidenceItemRow } from '@shared/database';
+import type { AgentAdvanceResponse, AgentStartResponse, AgentAnswerRequest } from '@shared/api';
+import type { AgentEventRow, AgentRunRow, CaseFactRow, CaseRow, DocumentRow, EvidenceItemRow, QuestionRow } from '@shared/database';
 import { EVIDENCE_BUCKET } from '@shared/limits';
 import { ApiService } from './api.service';
 import { SupabaseService } from './supabase.service';
@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 
 export interface WorkspaceRows {
   case: CaseRow; documents: DocumentRow[]; evidence: EvidenceItemRow[]; facts: CaseFactRow[];
-  run: AgentRunRow | null; events: AgentEventRow[];
+  run: AgentRunRow | null; events: AgentEventRow[]; questions: QuestionRow[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,12 +29,14 @@ export class CaseWorkspaceService {
       client.from('case_facts').select('*').eq('case_id', caseId).returns<CaseFactRow[]>(),
       client.from('agent_runs').select('*').eq('case_id', caseId).order('started_at', { ascending: false }).limit(1).returns<AgentRunRow[]>(),
       client.from('agent_events').select('*').eq('case_id', caseId).order('seq').returns<AgentEventRow[]>(),
+      client.from('questions').select('*').eq('case_id', caseId).order('created_at').returns<QuestionRow[]>(),
     ]);
     if (results.some(result => result.error)) throw new Error('Could not load the latest facts. Your saved case is safe; try again.');
-    const [documents, evidence, facts, runs, events] = results;
+    const [documents, evidence, facts, runs, events, questions] = results;
     const run = runs.data?.[0] ?? null;
     return { case: caseResult.data, documents: documents.data ?? [], evidence: evidence.data ?? [],
-      facts: facts.data ?? [], run, events: (events.data ?? []).filter(event => event.run_id === run?.id) };
+      facts: facts.data ?? [], run, events: (events.data ?? []).filter(event => event.run_id === run?.id),
+      questions: (questions.data ?? []).filter(question => question.run_id === run?.id) };
   }
 
   async start(caseId: string): Promise<AgentRunRow> {
@@ -43,6 +45,9 @@ export class CaseWorkspaceService {
 
   advance(run: AgentRunRow): Promise<AgentAdvanceResponse> {
     return this.api.post('agent/advance', { runId: run.id, expectedTurn: run.turn });
+  }
+  answer(questionId: string, answer: AgentAnswerRequest['answer']): Promise<AgentAdvanceResponse> {
+    return this.api.post('agent/answer', { questionId, answer });
   }
 
   async sourceUrl(document: DocumentRow): Promise<string> {

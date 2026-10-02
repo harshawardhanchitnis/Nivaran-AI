@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, effect, inject, input, output, signal } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -67,7 +67,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
         <div class="split" role="tabpanel" id="case-panel-facts" aria-labelledby="case-tab-facts">
           <div class="stack">
             @if (question(); as open) {
-              <app-question-card [question]="open" (answered)="answered.emit($event)" />
+              <app-question-card [question]="open" [busy]="answerBusy()" (answered)="answered.emit($event)" (textAnswered)="textAnswered.emit($event)" />
             }
             <app-fact-list [facts]="facts()" [selected]="selectedField()" (factSelected)="openSource($event)" />
           </div>
@@ -331,12 +331,14 @@ export class CaseWorkspaceView {
   readonly activity = input.required<readonly ActivityView[]>();
   readonly busy = input(false);
   readonly question = input<QuestionView | null>(null);
+  readonly answerBusy = input(false);
   readonly plan = input<PlanView | null>(null);
   readonly approved = input(false);
   readonly draft = input<readonly DraftSegment[] | null>(null);
 
   /** The id of the option the user chose for the open question. */
   readonly answered = output<string>();
+  readonly textAnswered = output<string>();
   readonly approve = output<void>();
   readonly decline = output<void>();
   readonly sourceRequested = output<FactField>();
@@ -353,6 +355,19 @@ export class CaseWorkspaceView {
     { id: 'complaint', label: 'Complaint' },
   ];
   readonly tab = signal<Tab>('facts');
+  constructor() {
+    let previous: string | null = null;
+    effect(() => {
+      const question = this.question();
+      if (question && question.id !== previous) {
+        this.tab.set('facts');
+        afterNextRender(() => { const heading = this.element.nativeElement.querySelector<HTMLElement>('app-question-card h2'); heading?.setAttribute('tabindex', '-1'); heading?.focus(); }, { injector: this.injector });
+      } else if (!question && previous) {
+        afterNextRender(() => this.element.nativeElement.querySelector<HTMLButtonElement>('#case-tab-facts')?.focus(), { injector: this.injector });
+      }
+      previous = question?.id ?? null;
+    });
+  }
   protected readonly selectedField = signal<FactField | null>(null);
 
   protected readonly selectedFact = computed(
