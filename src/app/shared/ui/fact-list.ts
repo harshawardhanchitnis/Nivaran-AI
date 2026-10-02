@@ -20,6 +20,7 @@ import { StatusChip } from './status-chip';
             class="fact"
             [class.selected]="fact.field === selected()"
             [attr.aria-pressed]="fact.field === selected()"
+            [attr.data-fact-field]="fact.field"
             (click)="factSelected.emit(fact.field)"
           >
             <span class="main">
@@ -36,7 +37,7 @@ import { StatusChip } from './status-chip';
             <span class="meta">
               <app-status-chip [status]="fact.status" />
               <span class="tags">
-                @for (source of fact.sources; track source.evidence) {
+                @for (source of fact.sources; track source.id ?? source.evidence) {
                   <app-evidence-tag [label]="source.evidence" />
                 }
               </span>

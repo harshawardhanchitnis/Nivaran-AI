@@ -31,17 +31,30 @@ import { StatusChip } from './status-chip';
         <app-status-chip [status]="fact().status" />
       </div>
 
-      @for (source of fact().sources; track source.evidence) {
+      @for (source of fact().sources; track source.id ?? source.evidence) {
         <article class="doc">
           <div class="doc-head">
             <app-evidence-tag [label]="source.evidence" />
             <span class="doc-name">{{ source.documentKind }}</span>
             @if (source.page) {
-              <span class="page">Page {{ source.page }}</span>
+              <span class="doc-page">Page {{ source.page }}</span>
             }
           </div>
           @if (source.imageUrl) {
             <img class="shot" [src]="source.imageUrl" [alt]="source.documentKind + ', ' + source.documentName" />
+          }
+          @if (source.pdfImageUrl) {
+            <img class="shot" [src]="source.pdfImageUrl" [alt]="source.documentName + ', page ' + (source.page ?? 1)" />
+          }
+          @if (source.pdfUrl) {
+            <p class="file"><a [href]="source.pdfUrl" target="_blank" rel="noopener">Open original PDF in a new tab</a></p>
+          }
+          @if (source.previewLoading) { <p class="file" role="status">Opening your document…</p> }
+          @if (source.previewError) {
+            <p class="file" role="alert">{{ source.previewError }}</p>
+            @if (source.documentId) {
+              <button mat-stroked-button type="button" (click)="retry.emit(source.documentId)">Retry opening document</button>
+            }
           }
           <blockquote>
             {{ source.before }}<mark>{{ source.quote }}</mark>{{ source.after }}
@@ -128,8 +141,8 @@ import { StatusChip } from './status-chip';
       min-width: 0;
     }
 
-    .page {
-      color: var(--ink-3);
+    .doc-page {
+      color: var(--ink-2);
       font-weight: 500;
       white-space: nowrap;
     }
@@ -141,6 +154,7 @@ import { StatusChip } from './status-chip';
       object-fit: contain;
       background: #f1efe9;
     }
+
 
     blockquote {
       margin: 0;
@@ -155,7 +169,7 @@ import { StatusChip } from './status-chip';
     .file {
       margin: 0;
       padding: 0 14px 12px;
-      color: var(--ink-3);
+      color: var(--ink-2);
       font-size: 0.8rem;
       overflow-wrap: anywhere;
     }
@@ -183,7 +197,7 @@ import { StatusChip } from './status-chip';
 
     .footnote {
       margin: 0;
-      color: var(--ink-3);
+      color: var(--ink-2);
       font-size: 0.8rem;
     }
   `,
@@ -191,4 +205,5 @@ import { StatusChip } from './status-chip';
 export class SourcePanel {
   readonly fact = input.required<FactView>();
   readonly closed = output<void>();
+  readonly retry = output<string>();
 }

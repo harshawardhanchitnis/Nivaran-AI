@@ -21,6 +21,7 @@ that development may begin before the event, as recorded in `AGENTS.md`.
 | Visual design (Claude, 2 October 2026) | Design tokens, presentational case components and view models, home and new-case screens, and `/demo` with invented sample data. |
 | T1 (Codex, 2 October 2026) | Case creation, private evidence upload, document rows, and My cases with stored steps and dates, using the existing design system. |
 | T2 (Codex, 2 October 2026) | Tool-free document reader, charged calls, reading endpoints and exclusive turn claims with atomic results. Hosted PDF and image reading, repeated start and stale turn checks passed. |
+| T3 (Codex, 2 October 2026) | Real case rows drive the existing case components. Sequential reading, saved progress, private image and locally rendered PDF-page previews, source quotes and keyboard access. |
 
 The initial starter did not include document reading, verification, the agent loop and its tools,
 the escalation ladder, drafting and the linter, the evaluation set, or product screens. These are
@@ -117,6 +118,33 @@ call and moved the run to `investigating`. T2's complete manual check used seven
 diagnostics. These are manual fixture results, not product evaluation metrics. The upload notice
 now names Groq as a possible image fallback recipient before consent. T3 and investigation remain
 to build; quote confirmation remains T4, so these candidates are not labelled stated in document.
+
+On 2 October 2026, Codex implemented T3 using `CaseWorkspaceView`, `FactList`, `SourcePanel` and
+the existing view models. The screen restores the caller's case, document readings, fact rows,
+run and events. Requests advance serially through reading, recover a stale turn, wait on provider
+rate limits and stop on daily caps or network errors. Investigation remains T5; no investigation
+request is made yet. Candidate facts remain "Needs your check" until T4 confirms their quotes.
+
+T3 sources use ten-minute signed Storage links, refreshed on reopening after nine minutes.
+PDF pages render locally with the installed unpdf library after the browser's native embedded
+viewer showed a blank preview. The source components remain free of database and API calls.
+Locally created page image URLs are released when leaving the case. A source heading's CSS
+class was renamed to avoid a collision with the global page container class. Tabs now support
+arrow keys, Home and End, with labelled panels; phone sources trap focus, close with Escape and
+return focus to the selected fact.
+
+Manual T3 checks reopened the hosted two-document case and checked all fourteen fact rows:
+ten fields showed their stored sources and quotes, including both invoice pages; the four absent
+fields showed no invented source. Images and both PDF page previews rendered. Facts, Activity,
+Plan and Complaint had no horizontal page scroll at a 360 px viewport. Reload restored the same
+saved readings with no new model call; the browser reported no console errors. Axe-core 4.13.0
+reported zero violations with all rules. It left manual checks for CDK focus-trap anchors and text
+obscured by the phone sheet or highlighted with a gradient; focus trapping, return focus and the
+visible text were checked manually. This is browser accessibility checking, not a real screen-reader
+user study. T3 used zero model calls. Unit tests cover row mapping, duplicate-document quotes,
+turn recovery, rate limits, quota/network stops, leaving during a request, private links, sources,
+keyboard tabs and unavailable cases. `npm run check` passed 101 server/database tests, 55 Angular
+tests, both server type-checks and a production build. Verification and investigation remain to build.
 
 <!-- Team: add anything else prepared before the start (guidance snippets, synthetic test
      documents, interview notes) and the date it was prepared. Delete this comment when done. -->

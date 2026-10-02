@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, inject, input, output, signal } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { FactField } from '@shared/facts';
@@ -22,7 +25,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
  */
 @Component({
   selector: 'app-case-workspace-view',
-  imports: [MatButtonModule, MatIconModule, FactList, SourcePanel, ActivityLog, QuestionCard, PlanPanel, ComplaintDraft],
+  imports: [A11yModule, MatButtonModule, MatIconModule, FactList, SourcePanel, ActivityLog, QuestionCard, PlanPanel, ComplaintDraft],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="case-head">
@@ -45,7 +48,11 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
           class="tab"
           [class.active]="tab() === item.id"
           [attr.aria-selected]="tab() === item.id"
-          (click)="tab.set(item.id)"
+          [attr.id]="'case-tab-' + item.id"
+          [attr.aria-controls]="'case-panel-' + item.id"
+          [attr.tabindex]="tab() === item.id ? 0 : -1"
+          (click)="selectTab(item.id)"
+          (keydown)="tabKey($event, item.id)"
         >
           {{ item.label }}
           @if (item.id === 'facts' && attention() > 0) {
@@ -57,18 +64,21 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
 
     @switch (tab()) {
       @case ('facts') {
-        <div class="split" role="tabpanel">
+        <div class="split" role="tabpanel" id="case-panel-facts" aria-labelledby="case-tab-facts">
           <div class="stack">
             @if (question(); as open) {
               <app-question-card [question]="open" (answered)="answered.emit($event)" />
             }
-            <app-fact-list [facts]="facts()" [selected]="selectedField()" (factSelected)="selectedField.set($event)" />
+            <app-fact-list [facts]="facts()" [selected]="selectedField()" (factSelected)="openSource($event)" />
           </div>
 
           <aside class="source" [class.open]="selectedFact() !== null">
             @if (selectedFact(); as fact) {
-              <button type="button" class="backdrop" aria-label="Close source" (click)="selectedField.set(null)"></button>
-              <app-source-panel class="sheet" [fact]="fact" (closed)="selectedField.set(null)" />
+              <button type="button" class="backdrop" tabindex="-1" aria-label="Close source" (click)="closeSource()"></button>
+              <app-source-panel class="sheet" [fact]="fact" [attr.role]="phone() ? 'dialog' : 'region'"
+                [attr.aria-modal]="phone() ? 'true' : null" aria-label="Fact source"
+                cdkTrapFocus [cdkTrapFocus]="phone()" [cdkTrapFocusAutoCapture]="phone()"
+                (keydown.escape)="closeSource()" (closed)="closeSource()" (retry)="sourceRetry.emit($event)" />
             } @else {
               <div class="hint surface">
                 <mat-icon aria-hidden="true">touch_app</mat-icon>
@@ -79,28 +89,28 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
         </div>
       }
       @case ('activity') {
-        <div class="narrow-panel surface pad" role="tabpanel">
+        <div class="narrow-panel surface pad" role="tabpanel" id="case-panel-activity" aria-labelledby="case-tab-activity">
           <h2>What Nivaran did</h2>
           <p class="muted">Every step, in order. Nothing here was sent to anyone.</p>
           <app-activity-log [items]="activity()" [busy]="busy()" />
         </div>
       }
       @case ('plan') {
-        <div role="tabpanel">
+        <div role="tabpanel" id="case-panel-plan" aria-labelledby="case-tab-plan">
           @if (plan(); as current) {
             <app-plan-panel [plan]="current" [approved]="approved()" (approve)="approve.emit()" (decline)="decline.emit()" />
           } @else {
             <div class="empty surface">
               <mat-icon aria-hidden="true">hourglass_empty</mat-icon>
               <h2>No plan yet</h2>
-              <p class="muted">Nivaran needs your answer on the Facts tab before it can work out the next step.</p>
-              <button mat-stroked-button type="button" (click)="tab.set('facts')">Go to Facts</button>
+              <p class="muted">The next step appears here after Nivaran has enough facts. Check progress on the Facts tab.</p>
+              <button mat-stroked-button type="button" (click)="selectTab('facts')">Go to Facts</button>
             </div>
           }
         </div>
       }
       @case ('complaint') {
-        <div class="narrow-panel" role="tabpanel">
+        <div class="narrow-panel" role="tabpanel" id="case-panel-complaint" aria-labelledby="case-tab-complaint">
           @if (draft(); as segments) {
             <app-complaint-draft [segments]="segments" />
             <ng-content select="[draft-tools]" />
@@ -109,7 +119,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
               <mat-icon aria-hidden="true">edit_note</mat-icon>
               <h2>Nothing drafted yet</h2>
               <p class="muted">The complaint is prepared only after you approve the plan.</p>
-              <button mat-stroked-button type="button" (click)="tab.set('plan')">Go to Plan</button>
+              <button mat-stroked-button type="button" (click)="selectTab('plan')">Go to Plan</button>
             </div>
           }
         </div>
@@ -329,6 +339,12 @@ export class CaseWorkspaceView {
   readonly answered = output<string>();
   readonly approve = output<void>();
   readonly decline = output<void>();
+  readonly sourceRequested = output<FactField>();
+  readonly sourceRetry = output<string>();
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  private readonly breakpoint = toSignal(inject(BreakpointObserver).observe('(max-width: 999px)'));
+  protected readonly phone = computed(() => this.breakpoint()?.matches ?? false);
 
   protected readonly tabs: readonly { id: Tab; label: string }[] = [
     { id: 'facts', label: 'Facts' },
@@ -346,4 +362,30 @@ export class CaseWorkspaceView {
   protected readonly attention = computed(
     () => this.facts().filter((fact) => fact.status === 'conflict' || fact.status === 'needs_check').length,
   );
+
+  protected openSource(field: FactField): void {
+    this.selectedField.set(field);
+    this.sourceRequested.emit(field);
+    afterNextRender(() => this.element.nativeElement.querySelector<HTMLButtonElement>('app-source-panel button[aria-label="Close source"]')?.focus(), { injector: this.injector });
+  }
+
+  protected closeSource(): void {
+    const field = this.selectedField();
+    this.selectedField.set(null);
+    if (field) this.element.nativeElement.querySelector<HTMLButtonElement>(`[data-fact-field="${field}"]`)?.focus();
+  }
+
+  protected selectTab(tab: Tab): void { this.selectedField.set(null); this.tab.set(tab); }
+
+  protected tabKey(event: KeyboardEvent, tab: Tab): void {
+    const index = this.tabs.findIndex(item => item.id === tab);
+    const next = event.key === 'ArrowRight' ? (index + 1) % this.tabs.length
+      : event.key === 'ArrowLeft' ? (index + this.tabs.length - 1) % this.tabs.length
+      : event.key === 'Home' ? 0 : event.key === 'End' ? this.tabs.length - 1 : null;
+    if (next === null) return;
+    event.preventDefault();
+    const target = this.tabs[next]!.id;
+    this.selectTab(target);
+    this.element.nativeElement.querySelector<HTMLButtonElement>(`#case-tab-${target}`)?.focus();
+  }
 }

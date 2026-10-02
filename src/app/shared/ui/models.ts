@@ -18,6 +18,9 @@ export interface CaseSummaryView {
 
 /** Where a value was read from. */
 export interface SourceView {
+  /** Unique reading, including when one document contains several source quotes. */
+  id?: string;
+  documentId?: string;
   /** Evidence label, for example E02. */
   evidence: string;
   documentName: string;
@@ -33,6 +36,10 @@ export interface SourceView {
   after?: string;
   /** Signed URL of the page image, when there is one to show. */
   imageUrl?: string | null;
+  pdfUrl?: string | null;
+  pdfImageUrl?: string | null;
+  previewLoading?: boolean;
+  previewError?: string;
 }
 
 export interface FactView {
