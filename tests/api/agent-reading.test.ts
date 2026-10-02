@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const fake = vi.hoisted(() => ({ requireUser: vi.fn(), store: {}, reader: vi.fn(), start: vi.fn(), advance: vi.fn() }));
+const fake = vi.hoisted(() => ({ requireUser: vi.fn(), store: { getRun: vi.fn() }, reader: vi.fn(), start: vi.fn(), advance: vi.fn(), investigate: vi.fn() }));
 vi.mock('../../server/auth.js', () => ({ requireUser: fake.requireUser }));
 vi.mock('../../server/agent/store.js', () => ({ createReadingStore: () => fake.store }));
 vi.mock('../../server/reader/read-document.js', () => ({ createDocumentReader: () => fake.reader }));
 vi.mock('../../server/agent/start.js', () => ({ startReading: fake.start }));
 vi.mock('../../server/agent/reading.js', async (original) => ({ ...await original<object>(), advanceReading: fake.advance }));
+vi.mock('../../server/agent/loop.js', () => ({ advanceInvestigation: fake.investigate }));
+vi.mock('../../server/agent/investigation-store.js', () => ({ createInvestigationStore: () => fake.store }));
+vi.mock('../../server/agent/runtime.js', () => ({ createInvestigationDependencies: () => ({}) }));
 
 import { POST as start } from '../../api/agent/start.js';
 import { POST as advance } from '../../api/agent/advance.js';
@@ -22,6 +25,7 @@ beforeEach(() => {
   fake.requireUser.mockResolvedValue({ supabase: {} });
   fake.start.mockResolvedValue({ id, turn: 0 });
   fake.advance.mockResolvedValue({ run: { id, turn: 1 }, events: [] });
+  fake.store.getRun.mockResolvedValue({ id, phase: 'reading' });
 });
 
 describe('reading endpoints', () => {
@@ -44,6 +48,12 @@ describe('reading endpoints', () => {
     const response = await advance(request({ runId: id, expectedTurn: 0 }));
     expect(response.status).toBe(200);
     expect(fake.advance).toHaveBeenCalledExactlyOnceWith(fake.store, fake.reader, id, 0);
+  });
+  it('dispatches investigation without calling the document reader', async () => {
+    fake.store.getRun.mockResolvedValue({ id, phase: 'investigating' });
+    fake.investigate.mockResolvedValue({ run: { id, turn: 1 }, events: [] });
+    const response = await advance(request({ runId: id, expectedTurn: 0 }));
+    expect(response.status).toBe(200); expect(fake.investigate).toHaveBeenCalledTimes(1); expect(fake.advance).not.toHaveBeenCalled();
   });
 
   it('includes the current run in a stale-turn 409', async () => {

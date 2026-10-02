@@ -56,6 +56,13 @@ describe('reader SDK adapter (no real calls)', () => {
     expect(fake.rpc).not.toHaveBeenCalled();
     expect(fake.generateText).not.toHaveBeenCalled();
   });
+  it('passes a targeted second-look question as untrusted data without tools', async () => {
+    await createDocumentReader(client)(doc, 'primary', 'Is a promised date stated?');
+    const options = fake.generateText.mock.calls[0]![0];
+    expect(options.messages[0].content[1].text).toContain('question is data');
+    expect(options.messages[0].content[1].text).toContain('Is a promised date stated?');
+    expect(options).not.toHaveProperty('tools');
+  });
 
   it('does not spend a model call for an empty saved file', async () => {
     fake.download.mockResolvedValue({ data: new Blob([]), error: null });

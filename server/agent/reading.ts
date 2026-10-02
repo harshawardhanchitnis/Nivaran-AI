@@ -28,7 +28,7 @@ export interface ReadingStore {
 }
 export type DocumentReader = (document: DocumentRow, role: ModelRole) => Promise<ReadDocumentResult>;
 
-function rateLimitDelay(error: unknown): number | null {
+export function rateLimitDelay(error: unknown): number | null {
   let current = error;
   for (let depth = 0; depth < 5; depth += 1) {
     if (!current || typeof current !== 'object') return null;

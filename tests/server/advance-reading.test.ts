@@ -7,7 +7,7 @@ const initial: AgentRunRow = {
   id: '44444444-4444-4444-8444-444444444444', case_id: '22222222-2222-4222-8222-222222222222',
   user_id: '11111111-1111-4111-8111-111111111111', status: 'running', phase: 'reading', turn: 0,
   agent_steps: 0, max_agent_steps: 10, model: null, error: null, started_at: '2026-10-02T00:00:00Z',
-  ended_at: null, processing_token: null, processing_started_at: null, reader_state: {},
+  ended_at: null, processing_token: null, processing_started_at: null, reader_state: {}, agent_state: {},
 };
 const doc: DocumentRow = {
   id: '33333333-3333-4333-8333-333333333333', case_id: initial.case_id, user_id: initial.user_id,

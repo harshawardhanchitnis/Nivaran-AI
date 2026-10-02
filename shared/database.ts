@@ -79,6 +79,16 @@ export interface CaseFactRow {
 export type AgentRunStatus = 'running' | 'waiting_for_user' | 'plan_ready' | 'completed' | 'out_of_scope' | 'failed';
 export type AgentRunPhase = 'reading' | 'investigating' | 'done';
 
+/** Structured continuation state only; no raw document text or model instructions. */
+export interface AgentState {
+  quotes_checked?: boolean;
+  image_quote_role?: 'primary' | 'fallback';
+  pending_reread?: { document_id: string; question: string; role: 'primary' | 'fallback' };
+  next_step?: Record<string, unknown>;
+  checked_guidance?: GuidanceRow[];
+  answered_question_id?: string;
+}
+
 export interface AgentRunRow {
   id: string;
   case_id: string;
@@ -95,6 +105,7 @@ export interface AgentRunRow {
   processing_started_at: string | null;
   /** A deferred image fallback is performed on the next HTTP request. No raw document text. */
   reader_state: { fallback_document_id?: string };
+  agent_state: AgentState;
   started_at: string;
   ended_at: string | null;
 }

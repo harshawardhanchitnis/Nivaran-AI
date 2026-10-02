@@ -13,6 +13,7 @@ const stubs = readFileSync(path.join(here, 'supabase-stubs.sql'), 'utf8');
 const migration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0001_init.sql'), 'utf8');
 const readingMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0002_agent_reading.sql'), 'utf8');
 const quotaMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0003_development_quota.sql'), 'utf8');
+const investigationMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0004_agent_investigation.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -60,6 +61,7 @@ beforeAll(async () => {
   await db.exec(migration);
   await db.exec(readingMigration);
   await db.exec(quotaMigration);
+  await db.exec(investigationMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -300,6 +302,55 @@ describe('agent reading transactions', () => {
     expect(await claim(ALICE, 1)).toMatchObject({ turn: 1 });
     await db.query("update public.agent_runs set processing_started_at = now() - interval '3 minutes' where id = $1", [runId]);
     expect(await claim(ALICE, 1, otherToken)).toMatchObject({ processing_token: otherToken });
+  });
+});
+
+describe('agent investigation transactions', () => {
+  let caseId: string; let runId: string; let evidenceId: string;
+  const token = '55555555-5555-4555-8555-555555555555';
+  const questionId = '66666666-6666-4666-8666-666666666666';
+  beforeAll(async () => {
+    caseId = await createCase(ALICE, 'Investigation transaction');
+    await asUser(ALICE, () => addDocument(caseId, 'E01', ALICE));
+    const added = await asUser(ALICE, () => db.query<{ id: string }>("insert into public.evidence_items (case_id, source, document_id, field, value_text, quote, page) select $1, 'document', id, 'refund_amount', 'Rs 9999', 'Refund Rs 9999', 1 from public.documents where case_id = $1 returning id", [caseId]));
+    evidenceId = added.rows[0]!.id;
+    const run = await asUser(ALICE, () => db.query<{ id: string }>("insert into public.agent_runs(case_id, phase) values($1, 'investigating') returning id", [caseId]));
+    runId = run.rows[0]!.id;
+  });
+  const claim = (turn: number) => asUser(ALICE, () => db.query<{ claim_agent_turn: unknown }>('select public.claim_agent_turn($1,$2,$3)', [runId, turn, token]));
+  const finish = (user: string, turn: number, changes: unknown) => asUser(user, async () => {
+    const result = await db.query<{ result: unknown }>('select public.finish_agent_step($1,$2,$3,$4::jsonb) as result', [runId, turn, token, JSON.stringify(changes)]);
+    return result.rows[0]!.result;
+  });
+  it('atomically saves checked evidence, the fact sheet and two events, with an exclusive turn', async () => {
+    await claim(0);
+    const changes = { state: { quotes_checked: true }, evidence: [{ id: evidenceId, quote_verified: true, value_norm: { kind: 'amount', currency: 'INR', decimal: '9999.00' } }],
+      facts: [{ field: 'refund_amount', status: 'document', value_text: 'Rs 9999', value_norm: { kind: 'amount', currency: 'INR', decimal: '9999.00' }, evidence_item_id: evidenceId, confirmed_by_user: false }],
+      events: [{ type: 'tool_call', payload: { tool: 'check_quotes' } }, { type: 'tool_result', payload: { message: 'Checked quotes.' } }] };
+    expect(await finish(BOB, 0, changes)).toBeNull();
+    expect(await finish(ALICE, 0, changes)).toMatchObject({ run: { turn: 1, agent_state: { quotes_checked: true } }, events: [{ seq: 0 }, { seq: 1 }] });
+    expect(await finish(ALICE, 0, changes)).toBeNull();
+    const facts = await asUser(ALICE, () => db.query('select status from public.case_facts where case_id=$1', [caseId]));
+    expect(facts.rows).toEqual([{ status: 'document' }]);
+  });
+  it('rolls everything back if a mutation points outside the run case', async () => {
+    await claim(1);
+    await expect(finish(ALICE, 1, { evidence: [{ id: '99999999-9999-4999-8999-999999999999', quote_verified: true }], events: [{ type: 'decision', payload: {} }] })).rejects.toThrow(/Evidence/);
+    const run = await db.query<{ turn: number }>('select turn from public.agent_runs where id=$1', [runId]);
+    expect(run.rows[0]?.turn).toBe(1);
+  });
+  it('creates a question and pauses; only an answered question allows a resume claim', async () => {
+    const question = { id: questionId, kind: 'conflict', field: 'refund_amount', prompt: 'Which amount is right?', options: [{ id: 'one', label: '9999' }] };
+    expect(await finish(ALICE, 1, { status: 'waiting_for_user', question, count_step: true, events: [{ type: 'question', payload: { message: 'Asked you which amount is right.' } }] })).toMatchObject({ run: { turn: 2, status: 'waiting_for_user', agent_steps: 1 }, question: { id: questionId } });
+    const waiting = await claim(2); expect(waiting.rows[0]).toMatchObject({ claim_agent_turn: null });
+    await asUser(ALICE, () => db.query("update public.questions set answer='\"9999\"'::jsonb, answered_at=now() where id=$1", [questionId]));
+    const resumed = await claim(2); expect(resumed.rows[0]?.['claim_agent_turn']).toMatchObject({ processing_token: token });
+    expect(await finish(ALICE, 2, { status: 'running', statement: { field: 'refund_amount', value_text: '9999' }, events: [{ type: 'answer', payload: {} }] })).toMatchObject({ run: { turn: 3, status: 'running' } });
+  });
+  it('refuses visitors and never adds an approved plan from a model step', async () => {
+    await expect(asVisitor(() => db.query("select public.finish_agent_step($1,3,$2,'{}'::jsonb)", [runId, token]))).rejects.toThrow(/permission denied/);
+    await claim(3);
+    expect(await finish(ALICE, 3, { status: 'plan_ready', plan: { ladder_step: 1, summary: 'Ask for the refund.', reasons: [], dates: {}, guidance_ids: ['test-snippet'] }, events: [{ type: 'decision', payload: {} }] })).toMatchObject({ run: { turn: 4, status: 'plan_ready' }, plan: { approved_at: null } });
   });
 });
 

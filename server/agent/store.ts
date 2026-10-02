@@ -41,7 +41,9 @@ export function createReadingStore(supabase: SupabaseClient): ReadingStore & Sta
       const { data, error } = await supabase.from('agent_runs').select('*').eq('id', id).maybeSingle<AgentRunRow>();
       if (error) throw storeError();
       if (!data) throw new HttpError(404, 'run_not_found', 'This reading session could not be found.');
-      return data;
+      const parsed = agentRunSchema.safeParse(data);
+      if (!parsed.success) throw storeError();
+      return parsed.data;
     },
     claim: async (id, turn) => {
       const { data, error } = await supabase.rpc('claim_agent_turn', { p_run_id: id, p_turn: turn, p_token: randomUUID() });

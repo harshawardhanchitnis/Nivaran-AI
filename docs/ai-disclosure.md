@@ -23,6 +23,7 @@ that development may begin before the event, as recorded in `AGENTS.md`.
 | T2 (Codex, 2 October 2026) | Tool-free document reader, charged calls, reading endpoints and exclusive turn claims with atomic results. Hosted PDF and image reading, repeated start and stale turn checks passed. |
 | T3 (Codex, 2 October 2026) | Real case rows drive the existing case components. Sequential reading, saved progress, private image and locally rendered PDF-page previews, source quotes and keyboard access. |
 | T4 (Codex, 2 October 2026) | Code normalisation, literal PDF text-layer quote checks, one charged image-quote pass, conflict detection and the five-status fact-sheet builder. Changes are returned for T5's turn transaction. |
+| T5 (Codex, 2 October 2026) | Resumable investigating loop, eight validated tools, paused questions, checked-guidance state and atomic saves using caller-scoped SQL. Scripted model tests; hosted persistence reused prior quote results with zero new model calls. |
 
 The initial starter did not include document reading, verification, the agent loop and its tools,
 the escalation ladder, drafting and the linter, the evaluation set, or product screens. These are
@@ -170,6 +171,28 @@ different refund dates, refused charges, incomplete image responses and already 
 
 <!-- Team: add anything else prepared before the start (guidance snippets, synthetic test
      documents, interview notes) and the date it was prepared. Delete this comment when done. -->
+
+On 2 October 2026, Codex implemented T5's investigating loop and eight tools. Each request either
+chooses and runs one tool, performs a queued tool-free reread, or checks source quotes. These are
+separate requests, charged before their model calls, with retries disabled. Questions pause the run;
+the latest actual answer resumes without a model call and is stored as "Your statement". Checked
+guidance and code decisions are saved between turns; plans require checked guidance and a code
+decision. The pure ladder is intentionally still unavailable until T7. No automatic investigation
+calls are enabled in the browser until its question controls are connected in T6.
+
+The owner confirmed applying `0004_agent_investigation.sql`. It adds structured continuation
+state and a security-invoker transaction for evidence, facts, questions, plans, events and turn.
+Hosted checking reused the unchanged T4 fixture results, saved fourteen quote checks and fourteen
+fact rows (ten document fields, four missing), advanced turn 7 to 8 and refused a replay. This
+used zero additional model calls. Scripted tests cover plan selection, conflict/question/resume,
+reread/question, scope, the step ceiling, invalid inputs, refused charging, latest-question handling
+and holding the claim through a save. Fake HTTP through the actual model SDK checks eight portable
+tool schemas, one-tool selection and no provider retries. These are development checks, not
+evaluation measures. Guidance rows, live investigation, deployed checks and later tasks remain.
+`npm run check` passed both server type-checks, 197 server/database tests, 55 Angular tests and
+the production build. Twenty-seven database tests cover the migrations including atomic rollback,
+caller ownership, question pause/resume and unapproved plans. Browser reload displayed the saved
+document statuses with no new model call.
 
 ## AI tools used
 
