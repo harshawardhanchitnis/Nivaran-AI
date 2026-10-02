@@ -1,4 +1,10 @@
-/* Global styles. Phone first: everything must work at 360px wide. */
+/*
+ * Nivaran design tokens and global styles.
+ *
+ * The look: a well-kept case file. Warm paper background, ink text, one green for "settled and
+ * supported", and a marigold highlighter reserved for quotes taken from the user's documents.
+ * Phone first: everything must work at 360px wide.
+ */
 
 *,
 *::before,
@@ -7,46 +13,112 @@
 }
 
 :root {
-  --page-max-width: 760px;
+  /* Colour */
+  --ink: #151a2d;
+  --ink-2: #454b61;
+  --ink-3: #686e82;
+  --paper: #f7f5f0;
+  --surface: #ffffff;
+  --line: #e4e0d6;
+  --line-strong: #cfc9bb;
+  --brand: #0b6b53;
+  --brand-ink: #084c3b;
+  --brand-soft: #e3f1ec;
+  --highlight: #ffe08a;
+  --highlight-soft: #fff6d6;
+
+  /* The five fact statuses: text colour and soft background. Always paired with an icon and words. */
+  --st-document: #0b6b53;
+  --st-document-bg: #e3f1ec;
+  --st-user: #2b4acb;
+  --st-user-bg: #e6ebff;
+  --st-conflict: #b3401a;
+  --st-conflict-bg: #fde9e0;
+  --st-missing: #5d6373;
+  --st-missing-bg: #eceef2;
+  --st-needs_check: #8a5a00;
+  --st-needs_check-bg: #fff0cc;
+
+  /* Type */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  /* Shape and depth */
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow-1: 0 1px 2px rgb(21 26 45 / 6%), 0 4px 14px rgb(21 26 45 / 5%);
+  --shadow-2: 0 2px 6px rgb(21 26 45 / 8%), 0 18px 40px rgb(21 26 45 / 12%);
+
+  /* Layout */
+  --page-max-width: 1120px;
+  --page-narrow: 760px;
   --page-gutter: 16px;
-  --status-pass: #1b6b2f;
-  --status-fail: #b3261e;
-  --status-wait: #5f6368;
+
+  /* Used by the Status page */
+  --status-pass: var(--st-document);
+  --status-fail: var(--st-conflict);
+  --status-wait: var(--st-missing);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
-  color: var(--mat-sys-primary);
+  color: var(--brand);
 }
 
 h1,
 h2,
 h3 {
   margin: 0 0 8px;
-  line-height: 1.25;
+  color: var(--ink);
+  line-height: 1.15;
 }
 
 h1 {
-  font: var(--mat-sys-headline-medium);
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  letter-spacing: -0.02em;
 }
 
 h2 {
-  font: var(--mat-sys-title-large);
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 p {
   margin: 0 0 12px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .page {
   width: 100%;
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 20px var(--page-gutter) 32px;
+  padding: 24px var(--page-gutter) 48px;
+}
+
+.narrow {
+  max-width: var(--page-narrow);
+  margin-inline: auto;
 }
 
 .muted {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--ink-2);
 }
 
 .stack {
@@ -62,6 +134,38 @@ p {
   gap: 12px;
 }
 
+/* The standard white card. */
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+}
+
+/* Small capital label above a value or a section. */
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Order IDs, amounts, evidence labels. */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* Text copied from the user's own documents. */
+mark {
+  background: linear-gradient(transparent 12%, var(--highlight) 12%, var(--highlight) 88%, transparent 88%);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -70,13 +174,36 @@ p {
 .skip-link:focus {
   left: 8px;
   top: 8px;
-  z-index: 10;
+  z-index: 100;
   padding: 8px 12px;
-  background: var(--mat-sys-surface);
-  border-radius: 4px;
+  background: var(--surface);
+  border-radius: 6px;
 }
 
 :focus-visible {
-  outline: 2px solid var(--mat-sys-primary);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+button {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
 }

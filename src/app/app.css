@@ -7,21 +7,34 @@
 .app-bar {
   position: sticky;
   top: 0;
-  z-index: 5;
-  gap: 4px;
-  padding-inline: 12px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  z-index: 10;
+  height: 56px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
 }
 
 .brand {
-  font: var(--mat-sys-title-large);
-  color: var(--mat-sys-on-surface);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  white-space: nowrap;
-}
-
-.spacer {
-  flex: 1 1 auto;
 }
 
 nav {
@@ -29,8 +42,24 @@ nav {
   gap: 2px;
 }
 
-nav .active {
-  background: var(--mat-sys-secondary-container);
+nav a {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+nav a:hover {
+  background: #efece4;
+  color: var(--ink);
+}
+
+nav a.active {
+  background: var(--brand-soft);
+  color: var(--brand-ink);
 }
 
 main {
@@ -39,14 +68,20 @@ main {
 }
 
 .app-footer {
-  padding: 16px;
-  border-top: 1px solid var(--mat-sys-outline-variant);
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
+  padding: 20px 16px 28px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 0.8rem;
   text-align: center;
 }
 
 .app-footer p {
   max-width: 760px;
   margin: 0 auto;
+}
+
+@media (max-width: 380px) {
+  .brand span {
+    display: none;
+  }
 }

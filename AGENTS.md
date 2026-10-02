@@ -91,6 +91,26 @@ Node 22 is required (`22.x`). Angular is pinned to 21 because Angular 22 needs N
 - Plain language in the UI. A user must be able to finish without a walkthrough.
 - Follow the Angular rules at the end of this file.
 
+### The design system (already built: use it, do not restyle)
+
+- Tokens (colour, type, radius, shadow, the five status colours) are CSS variables in
+  `src/styles.css`. Use the variables; never hard-code a colour or a font.
+- `src/app/shared/ui/` holds finished presentational components: `StatusChip`, `EvidenceTag`,
+  `FactList`, `SourcePanel`, `ActivityLog`, `QuestionCard`, `LadderTrack`, `DeadlineTimeline`,
+  `PlanPanel`, `ComplaintDraft`, `UploadDropzone`, and `CaseWorkspaceView`, which composes the
+  whole case screen (tabs, fact sheet with source panel, activity, plan with approval, complaint).
+- They take the view models in `src/app/shared/ui/models.ts` and emit events. They must stay free
+  of Supabase and API calls.
+- `/demo` (`features/demo`) drives `CaseWorkspaceView` with invented data in `sample-case.ts`.
+  It is the visual reference. The real case screen does the same thing with real rows: map
+  `shared/database.ts` rows into the view models and pass them in. Do not build a second layout.
+- `features/case-new` has the finished notice, dropzone and file rules (`file-rules.ts`); task T1
+  only connects "Continue" to case creation and upload.
+- Screens still to design with the same tokens and pieces: My cases, the printable pack, the
+  "mark as sent" and "what happened" steps, and the sample-case cards on the home page.
+- Look: warm paper background, white cards, Fraunces for headings, Inter for text, IBM Plex Mono
+  for IDs and evidence labels, green for supported, marigold highlight only for quoted document text.
+
 ### Database
 
 - Never edit `0001_init.sql` once it has been applied to the hosted project. Add
@@ -107,8 +127,10 @@ Node 22 is required (`22.x`). Angular is pinned to 21 because Angular 22 needs N
 
 ## Hackathon rules that affect how you work
 
-- The core product must be built during the event (4 Oct 2026 10:00 IST to 5 Oct 14:00 IST
-  submission). The starter is disclosed in `docs/ai-disclosure.md`.
+- The team has confirmed that building may start before the event; the binding requirement is to
+  submit before the deadline (5 Oct 2026, 14:00 IST). Work through `docs/BUILD_PLAN.md` now.
+- Keep `docs/ai-disclosure.md` truthful about what was built and when. Never describe pre-event
+  work as built during the event.
 - Commit small and often with honest messages; judges may ask for proof of development.
 - Record every significant AI tool in `docs/ai-disclosure.md`.
 - Do not copy code or text from other projects. Respect licences.

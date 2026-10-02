@@ -1,19 +1,28 @@
 <a class="skip-link" href="#main">Skip to content</a>
 
-<mat-toolbar class="app-bar">
-  <a class="brand" routerLink="/">Nivaran AI</a>
-  <span class="spacer"></span>
-  <nav aria-label="Main">
-    <a mat-button routerLink="/cases" routerLinkActive="active" ariaCurrentWhenActive="page">My cases</a>
-    <a mat-button routerLink="/status" routerLinkActive="active" ariaCurrentWhenActive="page">Status</a>
-  </nav>
-</mat-toolbar>
+<header class="app-bar no-print">
+  <div class="bar-inner">
+    <a class="brand" routerLink="/" aria-label="Nivaran AI, home">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+        <rect width="32" height="32" rx="9" fill="#0b6b53" />
+        <path d="M9 23V9h2.6l8.8 9.6V9H23v14h-2.6l-8.8-9.6V23z" fill="#fff" />
+        <rect x="9" y="25" width="14" height="2" rx="1" fill="#ffe08a" />
+      </svg>
+      <span>Nivaran</span>
+    </a>
+    <nav aria-label="Main">
+      <a routerLink="/demo" routerLinkActive="active" ariaCurrentWhenActive="page">Sample</a>
+      <a routerLink="/cases" routerLinkActive="active" ariaCurrentWhenActive="page">My cases</a>
+      <a routerLink="/status" routerLinkActive="active" ariaCurrentWhenActive="page">Status</a>
+    </nav>
+  </div>
+</header>
 
 <main id="main" class="page" tabindex="-1">
   <router-outlet />
 </main>
 
-<footer class="app-footer">
+<footer class="app-footer no-print">
   <p>
     Nivaran helps you organise a refund complaint. It is not legal advice, and it never files or sends
     anything for you.

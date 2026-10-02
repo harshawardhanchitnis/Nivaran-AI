@@ -1,0 +1,349 @@
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import type { FactField } from '@shared/facts';
+
+import { ActivityLog } from './activity-log';
+import { ComplaintDraft } from './complaint-draft';
+import { FactList } from './fact-list';
+import type { ActivityView, DraftSegment, FactView, PlanView, QuestionView } from './models';
+import { PlanPanel } from './plan-panel';
+import { QuestionCard } from './question-card';
+import { SourcePanel } from './source-panel';
+
+type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
+
+/**
+ * The whole case screen as one presentational component: header, tabs, fact sheet with its
+ * source panel, activity log, plan with the approval gate, and the complaint.
+ *
+ * It holds only view state (which tab, which fact is open). Give it data, listen to its events.
+ * features/demo drives it with sample data; the real case screen drives it with database rows.
+ */
+@Component({
+  selector: 'app-case-workspace-view',
+  imports: [MatButtonModule, MatIconModule, FactList, SourcePanel, ActivityLog, QuestionCard, PlanPanel, ComplaintDraft],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <header class="case-head">
+      <p class="eyebrow">Case</p>
+      <h1>{{ heading() }}</h1>
+      <p class="meta">
+        <span><mat-icon aria-hidden="true">storefront</mat-icon>{{ merchant() }}</span>
+        <span><mat-icon aria-hidden="true">attach_file</mat-icon>{{ documentCount() }} documents</span>
+        <span class="stage">{{ stage() }}</span>
+      </p>
+    </header>
+
+    <ng-content select="[banner]" />
+
+    <div class="tabs no-print" role="tablist" aria-label="Case sections">
+      @for (item of tabs; track item.id) {
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          [class.active]="tab() === item.id"
+          [attr.aria-selected]="tab() === item.id"
+          (click)="tab.set(item.id)"
+        >
+          {{ item.label }}
+          @if (item.id === 'facts' && attention() > 0) {
+            <span class="badge" [attr.aria-label]="attention() + ' need attention'">{{ attention() }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    @switch (tab()) {
+      @case ('facts') {
+        <div class="split" role="tabpanel">
+          <div class="stack">
+            @if (question(); as open) {
+              <app-question-card [question]="open" (answered)="answered.emit($event)" />
+            }
+            <app-fact-list [facts]="facts()" [selected]="selectedField()" (factSelected)="selectedField.set($event)" />
+          </div>
+
+          <aside class="source" [class.open]="selectedFact() !== null">
+            @if (selectedFact(); as fact) {
+              <button type="button" class="backdrop" aria-label="Close source" (click)="selectedField.set(null)"></button>
+              <app-source-panel class="sheet" [fact]="fact" (closed)="selectedField.set(null)" />
+            } @else {
+              <div class="hint surface">
+                <mat-icon aria-hidden="true">touch_app</mat-icon>
+                <p>Tap any fact to see the document and the exact words it comes from.</p>
+              </div>
+            }
+          </aside>
+        </div>
+      }
+      @case ('activity') {
+        <div class="narrow-panel surface pad" role="tabpanel">
+          <h2>What Nivaran did</h2>
+          <p class="muted">Every step, in order. Nothing here was sent to anyone.</p>
+          <app-activity-log [items]="activity()" [busy]="busy()" />
+        </div>
+      }
+      @case ('plan') {
+        <div role="tabpanel">
+          @if (plan(); as current) {
+            <app-plan-panel [plan]="current" [approved]="approved()" (approve)="approve.emit()" (decline)="decline.emit()" />
+          } @else {
+            <div class="empty surface">
+              <mat-icon aria-hidden="true">hourglass_empty</mat-icon>
+              <h2>No plan yet</h2>
+              <p class="muted">Nivaran needs your answer on the Facts tab before it can work out the next step.</p>
+              <button mat-stroked-button type="button" (click)="tab.set('facts')">Go to Facts</button>
+            </div>
+          }
+        </div>
+      }
+      @case ('complaint') {
+        <div class="narrow-panel" role="tabpanel">
+          @if (draft(); as segments) {
+            <app-complaint-draft [segments]="segments" />
+            <ng-content select="[draft-tools]" />
+          } @else {
+            <div class="empty surface">
+              <mat-icon aria-hidden="true">edit_note</mat-icon>
+              <h2>Nothing drafted yet</h2>
+              <p class="muted">The complaint is prepared only after you approve the plan.</p>
+              <button mat-stroked-button type="button" (click)="tab.set('plan')">Go to Plan</button>
+            </div>
+          }
+        </div>
+      }
+    }
+  `,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    .case-head {
+      margin-bottom: 16px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 16px;
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 0.92rem;
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+
+    .stage {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand-ink);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .tabs {
+      position: sticky;
+      top: 56px;
+      z-index: 4;
+      display: flex;
+      gap: 4px;
+      margin: 16px calc(var(--page-gutter) * -1) 16px;
+      padding: 8px var(--page-gutter);
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      backdrop-filter: blur(8px);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink-2);
+      font-size: 0.92rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .tab:hover {
+      background: #efece4;
+    }
+
+    .tab.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .badge {
+      min-width: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--st-conflict);
+      color: #fff;
+      font-size: 0.72rem;
+      line-height: 20px;
+      text-align: center;
+    }
+
+    .split {
+      display: grid;
+      gap: 16px;
+    }
+
+    .pad {
+      padding: 20px;
+    }
+
+    .narrow-panel {
+      max-width: 760px;
+    }
+
+    .hint {
+      display: none;
+    }
+
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      max-width: 760px;
+      padding: 28px 22px;
+    }
+
+    .empty > mat-icon {
+      color: var(--ink-3);
+    }
+
+    /* Phones: the source opens as a sheet from the bottom. */
+    .source.open {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .backdrop {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      background: rgb(21 26 45 / 45%);
+      cursor: pointer;
+    }
+
+    .sheet {
+      position: relative;
+      width: 100%;
+      max-height: 82dvh;
+      overflow-y: auto;
+      border-radius: 20px 20px 0 0;
+      box-shadow: var(--shadow-2);
+      animation: rise 180ms ease-out;
+    }
+
+    @keyframes rise {
+      from {
+        transform: translateY(24px);
+        opacity: 0;
+      }
+    }
+
+    /* Wide screens: the source sits beside the facts. */
+    @media (min-width: 1000px) {
+      .split {
+        grid-template-columns: minmax(0, 1fr) 400px;
+        align-items: start;
+        gap: 24px;
+      }
+
+      .source,
+      .source.open {
+        position: sticky;
+        inset: auto;
+        top: 124px;
+        display: block;
+        z-index: auto;
+      }
+
+      .backdrop {
+        display: none;
+      }
+
+      .sheet {
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+      }
+
+      .hint {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 20px;
+        color: var(--ink-2);
+      }
+
+      .hint p {
+        margin: 0;
+      }
+    }
+  `,
+})
+export class CaseWorkspaceView {
+  readonly heading = input.required<string>();
+  readonly merchant = input.required<string>();
+  readonly documentCount = input.required<number>();
+  /** Short status in plain words: "Needs your answer", "Plan ready". */
+  readonly stage = input.required<string>();
+  readonly facts = input.required<readonly FactView[]>();
+  readonly activity = input.required<readonly ActivityView[]>();
+  readonly busy = input(false);
+  readonly question = input<QuestionView | null>(null);
+  readonly plan = input<PlanView | null>(null);
+  readonly approved = input(false);
+  readonly draft = input<readonly DraftSegment[] | null>(null);
+
+  /** The id of the option the user chose for the open question. */
+  readonly answered = output<string>();
+  readonly approve = output<void>();
+  readonly decline = output<void>();
+
+  protected readonly tabs: readonly { id: Tab; label: string }[] = [
+    { id: 'facts', label: 'Facts' },
+    { id: 'activity', label: 'Activity' },
+    { id: 'plan', label: 'Plan' },
+    { id: 'complaint', label: 'Complaint' },
+  ];
+  readonly tab = signal<Tab>('facts');
+  protected readonly selectedField = signal<FactField | null>(null);
+
+  protected readonly selectedFact = computed(
+    () => this.facts().find((fact) => fact.field === this.selectedField()) ?? null,
+  );
+  /** Facts the user should look at: conflicts and unconfirmed readings. */
+  protected readonly attention = computed(
+    () => this.facts().filter((fact) => fact.status === 'conflict' || fact.status === 'needs_check').length,
+  );
+}

@@ -42,6 +42,11 @@ and Groq `qwen/qwen3.8-27b` in 190 ms. These are diagnostic call durations, not 
 results. The database reported zero guidance snippets. Hand-checked guidance, quota review and
 deployed checks remain pending; core product work has not started.
 
+On 2 October 2026, Claude built the visual design layer: design tokens and theme, the
+presentational components in `src/app/shared/ui/`, a redesigned home page and app shell, the
+new-case screen with its file rules, and `/demo`, which shows the case screen with invented
+sample data (fictional seller, no model output). No agent, reader, ladder or drafting logic is in it.
+
 <!-- Team: add anything else prepared before the start (guidance snippets, synthetic test
      documents, interview notes) and the date it was prepared. Delete this comment when done. -->
 

@@ -21,7 +21,7 @@ describe('App', () => {
     await fixture.whenStable();
     const page = fixture.nativeElement as HTMLElement;
 
-    expect(page.querySelector('.brand')?.textContent).toContain('Nivaran AI');
+    expect(page.querySelector('.brand')?.textContent).toContain('Nivaran');
     expect(page.querySelector('nav[aria-label="Main"]')?.textContent).toContain('My cases');
     expect(page.querySelector('footer')?.textContent).toContain('not legal advice');
   });

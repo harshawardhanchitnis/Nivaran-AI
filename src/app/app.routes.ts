@@ -38,6 +38,12 @@ export const routes: Routes = [
     ],
   },
   {
+    // The case screen with invented sample data: no sign-in, no model calls.
+    path: 'demo',
+    title: 'Sample case · Nivaran AI',
+    loadComponent: () => import('./features/demo/demo').then((m) => m.Demo),
+  },
+  {
     path: 'status',
     title: 'Status · Nivaran AI',
     loadComponent: () => import('./features/system-check/system-check').then((m) => m.SystemCheck),
