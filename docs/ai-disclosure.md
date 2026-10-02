@@ -22,6 +22,7 @@ that development may begin before the event, as recorded in `AGENTS.md`.
 | T1 (Codex, 2 October 2026) | Case creation, private evidence upload, document rows, and My cases with stored steps and dates, using the existing design system. |
 | T2 (Codex, 2 October 2026) | Tool-free document reader, charged calls, reading endpoints and exclusive turn claims with atomic results. Hosted PDF and image reading, repeated start and stale turn checks passed. |
 | T3 (Codex, 2 October 2026) | Real case rows drive the existing case components. Sequential reading, saved progress, private image and locally rendered PDF-page previews, source quotes and keyboard access. |
+| T4 (Codex, 2 October 2026) | Code normalisation, literal PDF text-layer quote checks, one charged image-quote pass, conflict detection and the five-status fact-sheet builder. Changes are returned for T5's turn transaction. |
 
 The initial starter did not include document reading, verification, the agent loop and its tools,
 the escalation ladder, drafting and the linter, the evaluation set, or product screens. These are
@@ -146,6 +147,27 @@ turn recovery, rate limits, quota/network stops, leaving during a request, priva
 keyboard tabs and unavailable cases. `npm run check` passed 101 server/database tests, 55 Angular
 tests, both server type-checks and a production build. Verification and investigation remain to build.
 
+On 2 October 2026, Codex implemented T4's amount, date, duration, ID and boolean normalisers,
+conflict detection and fact-sheet builder. Amounts use decimal strings; day-first numeric dates are
+validated without rolling invalid dates into another month; duration ranges take the stated upper
+bound. An explicit absent bank reference is represented as absence rather than an ID. Unconfirmed
+quotes and unparseable values retain "Needs your check"; user choices remain "Your statement".
+PDF quotes are checked against the named text-layer page, with only whitespace normalised.
+The image quote pass has no tools, charges before its one call, disables retries and requires an
+answer for every requested ID without duplicates or invented IDs. Already checked image quotes
+are not automatically charged again.
+
+T4's read-only manual fixture check used two charged attempts: Gemini returned HTTP 503
+(high demand), then the configured Groq fallback confirmed the six screenshot quotes in one call.
+The code check found all eight invoice quotes on their named pages. The resulting sheet contained
+ten document fields and four missing fields, merging both amount formats and retaining the explicit
+absent reference. These are fixture checks, not evaluation metrics. The generated results are local
+and ignored; hosted evidence and fact rows were not changed. Automatic quote checking and atomic
+fact persistence will be connected in T5. No migration is needed for T4's existing row shapes.
+`npm run check` passed both server type-checks, 174 server/database tests, 55 Angular tests and
+the production build. Tests include mixed formats, invalid dates, wrong-page quotes, real PDF bytes,
+different refund dates, refused charges, incomplete image responses and already checked images.
+
 <!-- Team: add anything else prepared before the start (guidance snippets, synthetic test
      documents, interview notes) and the date it was prepared. Delete this comment when done. -->
 
@@ -156,8 +178,8 @@ tests, both server type-checks and a production build. Verification and investig
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
 | Codex (OpenAI) | Pre-event handover review, starter checks, setup preparation, diagnostic usage charging, T1 implementation and browser checks through the computer-use plugin, T2 server preparation and live checks, and PDF-skill test fixture preparation on 2 October 2026. |
-| Google Gemini API | One pre-event setup diagnostic, five failed primary reader attempts and one successful two-page invoice read on 2 October 2026. Investigation is still to build. |
-| Groq API | One pre-event setup diagnostic and one successful support-image reading check on 2 October 2026. This is a manual fixture check, not an evaluation result. |
+| Google Gemini API | One pre-event setup diagnostic, five failed primary reader attempts, one successful two-page invoice read and one image-quote attempt refused with HTTP 503 on 2 October 2026. Investigation is still to build. |
+| Groq API | One pre-event setup diagnostic, one successful support-image reading and one successful image-quote check on 2 October 2026. These are manual fixture checks, not evaluation results. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->

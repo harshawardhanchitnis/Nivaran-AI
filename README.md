@@ -8,8 +8,9 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > **Status: build in progress.** Case creation, private document uploads and My cases are connected.
 > `/demo` shows the presentational case screen with invented sample data. The document-reading
 > server passed hosted PDF and image reading checks. The real case screen now restores saved
-> readings and opens private image and PDF-page previews with quotes. Quote confirmation and the
-> investigation workflow are next in the build plan.
+> readings and opens private image and PDF-page previews with quotes. Code normalisation and
+> quote checks passed unit and manual fixture checks; automatic persistence and the investigation
+> workflow are next in the build plan.
 > Investigation and later tasks are still to build. See `docs/ai-disclosure.md` for dates and checks.
 
 ## Documents

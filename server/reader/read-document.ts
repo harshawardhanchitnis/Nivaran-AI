@@ -3,10 +3,10 @@ import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import type { DocumentRow } from '../../shared/database.js';
 import { FACT_FIELDS } from '../../shared/facts.js';
-import { MAX_FILE_BYTES } from '../../shared/limits.js';
 import { HttpError } from '../http.js';
 import { getModel, type ModelRole } from '../llm/provider.js';
 import { chargeModelCall } from '../usage.js';
+import { downloadDocument } from './download-document.js';
 
 export const documentExtractionSchema = z.object({
   doc_type: z.enum(['invoice', 'order_confirmation', 'cancellation', 'return_confirmation',
@@ -67,16 +67,7 @@ export function createDocumentReader(supabase: SupabaseClient) {
     }
     const selected = getModel(role);
     const result = await readDocument(document, {
-      download: async (row) => {
-        const { data, error } = await supabase.storage.from('evidence').download(row.storage_path);
-        if (error || !data) {
-          throw new HttpError(502, 'document_fetch_failed', 'Could not read the saved file. Please try again.');
-        }
-        if (data.size === 0 || data.size > MAX_FILE_BYTES) {
-          throw new HttpError(422, 'document_size_invalid', 'This saved file is empty or too large to read.');
-        }
-        return new Uint8Array(await data.arrayBuffer());
-      },
+      download: row => downloadDocument(supabase, row),
       charge: () => chargeModelCall(supabase),
       callModel: async ({ bytes, mediaType, fileName }) => {
         const content = { type: 'file' as const, data: { type: 'data' as const, data: bytes }, mediaType, filename: fileName };
