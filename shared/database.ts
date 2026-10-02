@@ -76,7 +76,13 @@ export interface CaseFactRow {
   updated_at: string;
 }
 
-export type AgentRunStatus = 'running' | 'waiting_for_user' | 'plan_ready' | 'completed' | 'out_of_scope' | 'failed';
+export type AgentRunStatus =
+  | 'running'
+  | 'waiting_for_user'
+  | 'plan_ready'
+  | 'completed'
+  | 'out_of_scope'
+  | 'failed';
 export type AgentRunPhase = 'reading' | 'investigating' | 'done';
 
 /** Structured continuation state only; no raw document text or model instructions. */
@@ -110,7 +116,13 @@ export interface AgentRunRow {
   ended_at: string | null;
 }
 
-export type AgentEventType = 'tool_call' | 'tool_result' | 'question' | 'answer' | 'decision' | 'error';
+export type AgentEventType =
+  | 'tool_call'
+  | 'tool_result'
+  | 'question'
+  | 'answer'
+  | 'decision'
+  | 'error';
 
 export interface AgentEventRow {
   id: string;
@@ -153,6 +165,8 @@ export interface PlanRow {
   guidance_ids: string[];
   approved_at: string | null;
   rejected_at: string | null;
+  draft_claim_token: string | null;
+  draft_claimed_at: string | null;
   sent_on: string | null;
   outcome: PlanOutcome | null;
   created_at: string;

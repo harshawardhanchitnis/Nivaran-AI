@@ -19,6 +19,7 @@ const investigationMigration = readFileSync(path.join(here, '..', '..', 'supabas
 const modelMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0005_model_availability.sql'), 'utf8');
 const logicalCapsMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0006_logical_call_caps.sql'), 'utf8');
 const planReviewMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0007_plan_review.sql'), 'utf8');
+const draftMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0008_draft_claims.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -70,6 +71,7 @@ beforeAll(async () => {
   await db.exec(modelMigration);
   await db.exec(logicalCapsMigration);
   await db.exec(planReviewMigration);
+  await db.exec(draftMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -443,6 +445,52 @@ describe('atomic plan review as the caller', () => {
     await asUser(ALICE,()=>db.query("update public.plans set guidance_ids=array['missing-rule'] where id=$1",[p.plan]));
     await expect(review(ALICE,p.plan,'approve')).rejects.toThrow(/Checked guidance/);
   });
+});
+
+describe('draft generation and versioned edits as the caller',()=> {
+ let caseId:string;let planId:string;
+ const token='77777777-7777-4777-8777-777777777777';const otherToken='88888888-8888-4888-8888-888888888888';
+ const payload={template_md:'Refund {{fact:refund_amount}}.',rendered_md:'Refund ₹9,999 [your statement].',lint:{flags:[],userStatements:[]},modelId:'scripted-test',answeringModels:['scripted-test']};
+ beforeAll(async()=> {
+  caseId=await createCase(ALICE,'Draft transaction fixture');
+  const plan=await asUser(ALICE,()=>db.query<{id:string}>("insert into public.plans(case_id,ladder_step,approved_at) values($1,1,now()) returning id",[caseId]));planId=plan.rows[0]!.id;
+ });
+ const claim=(user:string,id=planId,chosenToken=token)=>asUser(user,()=>db.query<{result:unknown}>('select public.claim_plan_draft($1,$2) as result',[id,chosenToken]));
+ const finish=(user:string,id=planId,chosenToken=token)=>asUser(user,()=>db.query<{result:unknown}>('select public.finish_plan_draft($1,$2,$3) as result',[id,chosenToken,payload]));
+ it('refuses visitors and another owner before claiming',async()=> {
+  await expect(asVisitor(()=>db.query('select public.claim_plan_draft($1,$2)',[planId,token]))).rejects.toThrow(/permission denied/);
+  expect((await claim(BOB)).rows[0]?.result).toBeNull();
+ });
+ it('never claims unapproved, rejected, wait or information-only proposals',async()=> {
+  for(const [step,approved,rejected] of [[1,false,false],[1,false,true],[0,true,false],[3,true,false]] as const){
+   const p=await asUser(ALICE,()=>db.query<{id:string}>("insert into public.plans(case_id,ladder_step,approved_at,rejected_at) values($1,$2,case when $3 then now() end,case when $4 then now() end) returning id",[caseId,step,approved,rejected]));
+   expect((await claim(ALICE,p.rows[0]!.id)).rows[0]?.result).toBeNull();
+  }
+ });
+ it('has an exclusive claim, refuses wrong finish tokens, then saves once and clears it',async()=> {
+  expect((await claim(ALICE)).rows[0]?.result).toMatchObject({draft_claim_token:token});
+  expect((await claim(ALICE,planId,otherToken)).rows[0]?.result).toBeNull();
+  expect((await finish(BOB)).rows[0]?.result).toBeNull();expect((await finish(ALICE,planId,otherToken)).rows[0]?.result).toBeNull();
+  expect((await finish(ALICE)).rows[0]?.result).toMatchObject({version:1,kind:'grievance_officer',edited_by_user:false});
+  expect((await finish(ALICE)).rows[0]?.result).toBeNull();expect((await claim(ALICE)).rows[0]?.result).toBeNull();
+  expect((await db.query('select draft_claim_token from public.plans where id=$1',[planId])).rows[0]).toEqual({draft_claim_token:null});
+ });
+ it('retains the original and adds an edit with its statement and flags without blocking',async()=> {
+  const draft=(await db.query<{id:string}>('select id from public.drafts where plan_id=$1',[planId])).rows[0]!.id;
+  const save=(user:string)=>asUser(user,()=>db.query<{result:unknown}>('select public.save_draft_edit($1,$2,$3) as result',[draft,'Refund ₹8,999. TX99887766',{flags:[{text:'₹8,999'}],userStatements:['TX99887766']}]));
+  expect((await save(BOB)).rows[0]?.result).toBeNull();
+  expect((await save(ALICE)).rows[0]?.result).toMatchObject({version:2,edited_by_user:true,lint:{userStatements:['TX99887766']}});
+  expect((await db.query('select version from public.drafts where plan_id=$1 order by version',[planId])).rows).toEqual([{version:1},{version:2}]);
+ });
+ it('recovers an expired claim and lets only its owner release it',async()=> {
+  const p=await asUser(ALICE,()=>db.query<{id:string}>("insert into public.plans(case_id,ladder_step,approved_at) values($1,2,now()) returning id",[caseId]));const id=p.rows[0]!.id;
+  await claim(ALICE,id);await db.query("update public.plans set draft_claimed_at=now()-interval '3 minutes' where id=$1",[id]);
+  expect((await claim(ALICE,id,otherToken)).rows[0]?.result).toMatchObject({draft_claim_token:otherToken});
+  await asUser(BOB,()=>db.query('select public.release_plan_draft($1,$2)',[id,otherToken]));
+  expect((await claim(ALICE,id)).rows[0]?.result).toBeNull();
+  await asUser(ALICE,()=>db.query('select public.release_plan_draft($1,$2)',[id,otherToken]));
+  expect((await claim(ALICE,id)).rows[0]?.result).toMatchObject({draft_claim_token:token});
+ });
 });
 
 describe('owner-checked guidance seed',()=> {

@@ -1,7 +1,7 @@
 import type { CaseFactRow, GuidanceRow, PlanRow } from '@shared/database';
 import { workspacePlan } from './workspace-plan';
 const guidance={id:'rule',title:'Test rule',body:'Scripted rule text.',source_name:'Test source',source_url:'https://example.org/rule',checked_on:'2026-10-01',applies_to_steps:[0,1]} as GuidanceRow;
-const plan:PlanRow={id:'plan',case_id:'case',user_id:'owner',run_id:'run',sent_on:null,outcome:null,created_at:'2026-10-01T12:00:00Z',ladder_step:1,summary:'Ask for the overdue refund.',reasons:[{text:'The refund is overdue.'},{code:'calculation_note',text:'A stated working assumption.'}],dates:{today:'2026-10-01',refund_due:'2026-09-24',acknowledge_by:'2026-10-03',resolve_by:'2026-11-01'},guidance_ids:['rule'],approved_at:null,rejected_at:null};
+const plan:PlanRow={id:'plan',case_id:'case',user_id:'owner',run_id:'run',sent_on:null,outcome:null,created_at:'2026-10-01T12:00:00Z',ladder_step:1,summary:'Ask for the overdue refund.',reasons:[{text:'The refund is overdue.'},{code:'calculation_note',text:'A stated working assumption.'}],dates:{today:'2026-10-01',refund_due:'2026-09-24',acknowledge_by:'2026-10-03',resolve_by:'2026-11-01'},guidance_ids:['rule'],approved_at:null,rejected_at:null,draft_claim_token:null,draft_claimed_at:null};
 describe('saved plans in the existing view model',()=> {
   it('uses code reasons and only stored checked rule text, source URL and date',()=> {
     const view=workspacePlan(plan,[guidance],[],'2026-10-02')!;

@@ -298,13 +298,37 @@ for its three text colours, exceeding 4.5:1. Keyboard focus was also checked. Th
 both server type-checks, 268 server/database tests (including 37 database policy/seed tests),
 70 Angular tests and the production build. Drafting and later tasks remain to build.
 
+On 2 October 2026, Codex implemented T9's approval-gated placeholder drafting, code rendering,
+shared value linter, versioned edit saves and printable pack. It reuses the existing complaint
+component and case layout. The owner confirmed applying migration 0008. A generation claim
+prevents concurrent initial drafts; an invalid template gets one repair, each logical call charges
+separately, and both share a forty-five-second deadline. The text lineup supplies the prose with
+no tools or SDK retries. Code inserts fact values and their source labels. Personal name, contact
+and address fields are filled locally and never included in the save request or model prompt.
+Typed complaint text is saved, with a clear notice to use the separate private fields.
+
+Tests and a hosted scripted fixture checked renderer rejection, seeded linter failures, known
+values, ownership, claim recovery, duplicate replay, repairs, model records and edit versions.
+At phone width a made-up ID visibly flagged and could be kept as a user statement; copy included
+local synthetic personal details and source labels. The database retained placeholders and did
+not contain those personal details. The pack had no horizontal scroll or console warnings/errors
+and zero axe violations or incomplete checks. Its browser-produced two-page PDF was rendered
+with Poppler and visually inspected; the print controls were absent. This case uses a scripted
+template and user-stated due date, not model extraction. It has no uploaded documents. The
+populated evidence index is tested with component data; source viewing had earlier T3 checks.
+These checks used zero provider calls and the hosted counter stayed at fifteen. Live model
+drafting and the deployed journey have not been checked. Amounts written solely in words and
+prose claims are known scanner limits; the editor tells the user to review the prose too.
+The full check passed both server type-checks, 318 server/database tests (including 42 policy/seed
+tests), 79 Angular tests and the production build. See `docs/t9-checks.md` for the scope and evidence.
+
 ## AI tools used
 
 | Tool | Used for |
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T5 implementation and checks, model routing with signed cooldowns, T6 preparation, browser checks through the computer-use plugin, and PDF-skill fixture preparation on 2 October 2026. |
+| Codex (OpenAI) | Pre-event handover review, T1–T9 implementation and checks, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2 October 2026. |
 | Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; new routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October 2026. These are manual fixture checks. |
 | Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing checks on 2 October 2026. The selected ladder tool remained unavailable. These are manual fixture checks, not product evaluation results. |
 

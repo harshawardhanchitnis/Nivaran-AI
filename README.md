@@ -14,13 +14,16 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > Stored questions, one-tap/text answers and the real activity log are connected; answering resumes
 > without reloading. The pure refund ladder and date arithmetic are connected to `get_next_step`.
 > Saved plans now show code decisions, checked sources and dates in the existing screen, with
-> atomic approve, request-change and reject actions. Drafting and later tasks are still to build.
+> atomic approve, request-change and reject actions. Approved complaint steps now have placeholder
+> drafting, shared edit checks and a printable pack using the existing complaint component.
+> Scripted hosted saves, edit privacy, copy and browser PDF output have passed checks. Live model
+> drafting, deployment, mark-as-sent, outcomes and the full evaluation remain unverified or to build.
 > See `docs/ai-disclosure.md` for dates and checks.
 
 Model calls use configurable vision and text lineups in `.env.example`. PDF pages with text are
 extracted locally; scanned or mixed PDFs use vision, and Groq never receives PDF file bytes.
 Each logical call is charged once, with immediate provider failover and signed database cooldowns.
-Apply migrations in order through `0007_plan_review.sql`, apply the owner-checked `supabase/seed.sql`, run
+Apply migrations in order through `0008_draft_claims.sql`, apply the owner-checked `supabase/seed.sql`, run
 `node scripts/prepare-model-cooldowns.mjs`, then apply its ignored setup SQL in the dashboard.
 Keep `MODEL_COOLDOWN_SIGNING_SECRET` server-only; add that local setting to Vercel when deploying.
 Current owner-reported Gemini daily limits support conservative app caps of 15 per user and 15

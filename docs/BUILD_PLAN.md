@@ -178,6 +178,12 @@ Build `server/draft/write-draft.ts`, `render.ts`, `server/verify/draft-lint.ts`,
 - The pack screen: complaint (editable), timeline, evidence index; the user's name and contact
   typed in the browser only; print stylesheet; "Copy text".
 
+Implementation uses migration `0008_draft_claims.sql` for an exclusive, expiring generation
+claim and versioned saves. Only approved steps one and two can draft. Reopening or replaying a
+saved draft makes no model call. A malformed template gets at most one repair; both logical
+calls share a forty-five-second request deadline. Edited text is saved separately from the private
+fields, which remain local to the current page. The linter flags values without blocking edits.
+
 Checks: unit tests for the renderer (unknown placeholder rejected) and the linter (seeded fake
 amount, date and ID each caught; values from the fact sheet not flagged; formats in words noted as
 a known limit). Typing a fake ID into the draft flags it on screen.

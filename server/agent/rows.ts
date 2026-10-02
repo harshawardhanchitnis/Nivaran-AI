@@ -10,7 +10,7 @@ export const questionRowSchema = z.object({ id: z.uuid(), run_id: z.uuid(), case
 export const planRowSchema = z.object({ id: z.uuid(), case_id: z.uuid(), user_id: z.uuid(), run_id: z.uuid().nullable(),
   ladder_step: z.number().int().min(0).max(3), summary: z.string().nullable(), reasons: z.array(z.unknown()),
   dates: z.record(z.string(), z.string()), guidance_ids: z.array(z.string()), approved_at: z.string().nullable(),
-  rejected_at: z.string().nullable().default(null),
+  rejected_at: z.string().nullable().default(null), draft_claim_token: z.string().nullable().default(null), draft_claimed_at: z.string().nullable().default(null),
   sent_on: z.string().nullable(), outcome: z.enum(['refunded', 'acknowledged', 'no_reply', 'refused']).nullable(), created_at: z.string() }) satisfies z.ZodType<PlanRow>;
 
 // RPCs return scalar JSON, not a PostgREST row set. Validate that boundary explicitly.

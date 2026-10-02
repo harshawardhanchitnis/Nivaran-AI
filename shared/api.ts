@@ -1,7 +1,7 @@
 // Request and response shapes for /api. The server validates requests with the schemas here;
 // the browser imports the types only (`import type`), so zod stays out of the client bundle.
 import { z } from 'zod';
-import type { AgentEventRow, AgentRunRow, PlanRow, QuestionRow } from './database.js';
+import type { AgentEventRow, AgentRunRow, DraftRow, PlanRow, QuestionRow } from './database.js';
 
 /** Every error response from /api has this body. */
 export interface ApiErrorBody {
@@ -44,12 +44,21 @@ export interface LlmCheckResponse {
 }
 
 export const agentStartRequestSchema = z.object({ caseId: z.uuid() });
-export const agentAdvanceRequestSchema = z.object({ runId: z.uuid(), expectedTurn: z.number().int().nonnegative() });
-export const agentAnswerRequestSchema = z.object({ questionId: z.uuid(), answer: z.union([
-  z.object({ optionId: z.string().min(1).max(100) }), z.string().trim().min(1).max(4000),
-]) });
+export const agentAdvanceRequestSchema = z.object({
+  runId: z.uuid(),
+  expectedTurn: z.number().int().nonnegative(),
+});
+export const agentAnswerRequestSchema = z.object({
+  questionId: z.uuid(),
+  answer: z.union([
+    z.object({ optionId: z.string().min(1).max(100) }),
+    z.string().trim().min(1).max(4000),
+  ]),
+});
 export type AgentAnswerRequest = z.infer<typeof agentAnswerRequestSchema>;
-export interface AgentStartResponse { run: AgentRunRow }
+export interface AgentStartResponse {
+  run: AgentRunRow;
+}
 export interface AgentAdvanceResponse {
   run: AgentRunRow;
   events: AgentEventRow[];
@@ -57,3 +66,14 @@ export interface AgentAdvanceResponse {
   plan?: PlanRow;
   retryAfterMs?: number;
 }
+export const agentDraftRequestSchema = z.object({ planId: z.uuid() });
+export interface AgentDraftResponse {
+  draft?: DraftRow;
+  retryAfterMs?: number;
+}
+export const agentDraftEditRequestSchema = z.object({
+  draftId: z.uuid(),
+  text: z.string().trim().min(1).max(20000),
+  userStatements: z.array(z.string().trim().min(1).max(200)).max(50).default([]),
+});
+export type AgentDraftEditRequest = z.infer<typeof agentDraftEditRequestSchema>;

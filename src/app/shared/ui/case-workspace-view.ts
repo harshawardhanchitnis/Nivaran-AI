@@ -28,7 +28,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
   imports: [A11yModule, MatButtonModule, MatIconModule, FactList, SourcePanel, ActivityLog, QuestionCard, PlanPanel, ComplaintDraft],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <header class="case-head">
+    <header class="case-head no-print">
       <p class="eyebrow">Case</p>
       <h1>{{ heading() }}</h1>
       <p class="meta">
@@ -112,8 +112,8 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
       @case ('complaint') {
         <div class="narrow-panel" role="tabpanel" id="case-panel-complaint" aria-labelledby="case-tab-complaint">
           @if (draft(); as segments) {
-            <app-complaint-draft [segments]="segments" />
-            <ng-content select="[draft-tools]" />
+            @if (customDraft()) { <ng-content select="[complaint-editor]" /> }
+            @else { <app-complaint-draft [segments]="segments" /> }
           } @else {
             <div class="empty surface">
               <mat-icon aria-hidden="true">edit_note</mat-icon>
@@ -122,6 +122,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
               <button mat-stroked-button type="button" (click)="selectTab('plan')">Go to Plan</button>
             </div>
           }
+          <ng-content select="[draft-tools]" />
         </div>
       }
     }
@@ -336,6 +337,8 @@ export class CaseWorkspaceView {
   readonly approved = input(false);
   readonly reviewBusy = input(false);
   readonly draft = input<readonly DraftSegment[] | null>(null);
+  readonly draftId = input<string | null>(null);
+  readonly customDraft = input(false);
 
   /** The id of the option the user chose for the open question. */
   readonly answered = output<string>();
@@ -358,10 +361,19 @@ export class CaseWorkspaceView {
   ];
   readonly tab = signal<Tab>('facts');
   constructor() {
+    let previousDraft: string | null = null;
+    effect(() => {
+      const id = this.draftId();
+      if (id && id !== previousDraft) {
+        this.selectedField.set(null); this.tab.set('complaint');
+        afterNextRender(() => { const letter = this.element.nativeElement.querySelector<HTMLElement>('app-complaint-draft article'); letter?.setAttribute('tabindex', '-1'); letter?.focus(); }, { injector: this.injector });
+      }
+      previousDraft = id;
+    });
     let previousPlan: string | undefined;
     effect(() => {
       const id = this.plan()?.id;
-      if (id && id !== previousPlan && !this.question()) {
+      if (id && id !== previousPlan && !this.question() && !this.draftId()) {
         this.selectedField.set(null); this.tab.set('plan');
         afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('#plan-title')?.focus(), { injector: this.injector });
       } else if (!id && previousPlan && !this.question()) {
@@ -373,7 +385,7 @@ export class CaseWorkspaceView {
     let previouslyApproved = false;
     effect(() => {
       const approved = this.approved();
-      if (approved && !previouslyApproved && this.plan()?.id) afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('#plan-title')?.focus(), { injector: this.injector });
+      if (approved && !previouslyApproved && this.plan()?.id && !this.draftId()) afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('#plan-title')?.focus(), { injector: this.injector });
       previouslyApproved = approved;
     });
     let previous: string | null = null;

@@ -53,7 +53,7 @@ import type { DraftSegment } from './models';
     }
 
     <ul class="legend">
-      <li><span class="value">Underlined</span> comes from your documents</li>
+      <li><span class="value">Underlined</span> values carry their source label</li>
       <li><span class="flag">Wavy</span> is not in your fact sheet</li>
       <li><span class="you">Dashed</span> is filled in on your device only</li>
     </ul>

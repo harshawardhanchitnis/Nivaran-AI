@@ -1,52 +1,146 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import type { FactField } from '@shared/facts';
 import type { AgentAnswerRequest } from '@shared/api';
 import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-workspace.service';
 import { continueReading, waitForReading } from '../../core/reading-loop';
-import { workspaceActivity, workspaceFacts, workspaceQuestion, workspaceStage, type DocumentPreview } from '../../core/workspace-mapper';
+import {
+  workspaceActivity,
+  workspaceFacts,
+  workspaceQuestion,
+  workspaceStage,
+  type DocumentPreview,
+} from '../../core/workspace-mapper';
 import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
 import { indiaCalendarDate, workspacePlan } from '../../core/workspace-plan';
+import { DraftEditor } from '../../shared/ui/draft-editor';
+import {
+  draftPresentation,
+  draftStatements,
+  workspaceDraftContext,
+} from '../../core/workspace-draft';
 
 @Component({
   selector: 'app-case-workspace',
-  imports: [CaseWorkspaceView, RouterLink, MatButtonModule],
+  imports: [CaseWorkspaceView, DraftEditor, RouterLink, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (rows(); as data) {
-      <app-case-workspace-view [heading]="data.case.title" [merchant]="data.case.merchant_name ?? 'Your refund case'"
-        [documentCount]="data.documents.length" [stage]="stage()" [facts]="facts()" [activity]="activity()"
-        [busy]="busy()" [question]="question()" [answerBusy]="answerBusy()" [plan]="plan()" [approved]="approved()" [reviewBusy]="reviewBusy()"
-        (approve)="reviewPlan('approve')" (decline)="reviewPlan('reject')" (edit)="reviewPlan('change')"
-        (answered)="saveAnswer({ optionId: $event })" (textAnswered)="saveAnswer($event)"
-        (sourceRequested)="openSources($event)" (sourceRetry)="retrySource($event)">
-        <div banner class="notice" aria-live="polite">
+      <app-case-workspace-view
+        [heading]="data.case.title"
+        [merchant]="data.case.merchant_name ?? 'Your refund case'"
+        [documentCount]="data.documents.length"
+        [stage]="stage()"
+        [facts]="facts()"
+        [activity]="activity()"
+        [busy]="busy()"
+        [question]="question()"
+        [answerBusy]="answerBusy()"
+        [plan]="plan()"
+        [approved]="approved()"
+        [reviewBusy]="reviewBusy()"
+        [draft]="draftSegments()"
+        [draftId]="data.draft?.id ?? null"
+        [customDraft]="true"
+        (approve)="reviewPlan('approve')"
+        (decline)="reviewPlan('reject')"
+        (edit)="reviewPlan('change')"
+        (answered)="saveAnswer({ optionId: $event })"
+        (textAnswered)="saveAnswer($event)"
+        (sourceRequested)="openSources($event)"
+        (sourceRetry)="retrySource($event)"
+      >
+        <div banner class="notice no-print" aria-live="polite">
           @if (error(); as message) {
             <p role="alert">{{ message }}</p>
-            <button mat-stroked-button type="button" [disabled]="busy()" (click)="reload()">Try again</button>
+            <button mat-stroked-button type="button" [disabled]="busy()" (click)="reload()">
+              Try again
+            </button>
           } @else if (waiting()) {
             <p>Waiting for the model. Your progress is saved; Nivaran will continue shortly.</p>
           } @else if (busy()) {
-            <p>{{ data.run?.phase === 'reading' ? 'Reading your documents, one at a time.' : 'Checking the next step.' }} You can leave and return to this case.</p>
+            <p>
+              {{
+                data.run?.phase === 'reading'
+                  ? 'Reading your documents, one at a time.'
+                  : 'Checking the next step.'
+              }}
+              You can leave and return to this case.
+            </p>
           } @else if (data.run?.status === 'failed') {
-            <p role="status">{{ data.run?.error ?? 'Nivaran could not finish. Your facts are saved.' }}</p>
+            <p role="status">
+              {{ data.run?.error ?? 'Nivaran could not finish. Your facts are saved.' }}
+            </p>
           } @else if (data.run?.status === 'waiting_for_user') {
             <p>Answer the question below to continue. Your progress is saved.</p>
           } @else if (data.plan?.rejected_at) {
             <p>You rejected this plan. Nothing has been drafted or sent.</p>
           } @else if (approved()) {
-            <p>You approved this plan. {{ plan()?.step === 0 ? 'Wait until the promised date; there is nothing to send yet.' : 'Nothing has been sent.' }}</p>
+            <p>
+              You approved this plan.
+              {{
+                plan()?.step === 0
+                  ? 'Wait until the promised date; there is nothing to send yet.'
+                  : 'Nothing has been sent.'
+              }}
+            </p>
           } @else if (data.run?.status === 'plan_ready') {
-            <p>{{ plan() ? 'Review the Plan tab and choose whether to accept, request a change, or reject it.' : 'The checked sources for this plan are unavailable. Your facts are saved; try again later.' }}</p>
+            <p>
+              {{
+                plan()
+                  ? 'Review the Plan tab and choose whether to accept, request a change, or reject it.'
+                  : 'The checked sources for this plan are unavailable. Your facts are saved; try again later.'
+              }}
+            </p>
           } @else if (terminalOutcome() === 'resolved') {
             <p>You recorded that the refund arrived. This case is resolved.</p>
           } @else if (terminalOutcome() === 'bank_delay') {
-            <p>The merchant states the refund was processed and supplied a reference. Take the reference to your bank to trace it. Nivaran stops here.</p>
+            <p>
+              The merchant states the refund was processed and supplied a reference. Take the
+              reference to your bank to trace it. Nivaran stops here.
+            </p>
           } @else if (data.run?.phase === 'investigating') {
             <p>Your documents have been read. Open a fact to review its source and exact quote.</p>
           } @else if (data.documents.length === 0) {
-            <p>This case has no documents yet. <a routerLink="/cases/new">Start a case with your documents.</a></p>
+            <p>
+              This case has no documents yet.
+              <a routerLink="/cases/new">Start a case with your documents.</a>
+            </p>
+          }
+        </div>
+        @if (data.draft; as draft) {
+          <app-draft-editor
+            complaint-editor
+            [draft]="draft"
+            [context]="draftContext()!"
+            [busy]="draftBusy()"
+            (saveRequested)="saveDraft($event)"
+            (copyRequested)="copyDraft($event)"
+            (printRequested)="printDraft()"
+          />
+        }
+        <div draft-tools class="notice no-print">
+          @if (draftMessage(); as message) {
+            <p role="status">{{ message }}</p>
+          }
+          @if (canPrepareDraft()) {
+            <button mat-flat-button type="button" [disabled]="draftBusy()" (click)="prepareDraft()">
+              {{ draftBusy() ? 'Preparing complaint…' : 'Prepare complaint' }}
+            </button>
+          }
+          @if (data.draft) {
+            <a [routerLink]="['/cases', caseId(), 'pack']">Open printable pack</a>
           }
         </div>
       </app-case-workspace-view>
@@ -56,10 +150,20 @@ import { indiaCalendarDate, workspacePlan } from '../../core/workspace-plan';
         <p role="alert">{{ message }}</p>
         <button mat-stroked-button type="button" (click)="reload()">Try again</button>
         <p><a routerLink="/cases">Back to My cases</a></p>
-      } @else { <p role="status">Loading your saved case…</p> }
+      } @else {
+        <p role="status">Loading your saved case…</p>
+      }
     }
   `,
-  styles: `.notice { color: var(--ink-2); margin-bottom: 16px; } .notice p { margin-bottom: 8px; }`,
+  styles: `
+    .notice {
+      color: var(--ink-2);
+      margin-bottom: 16px;
+    }
+    .notice p {
+      margin-bottom: 8px;
+    }
+  `,
 })
 export class CaseWorkspace {
   readonly caseId = input.required<string>();
@@ -72,6 +176,8 @@ export class CaseWorkspace {
   protected readonly busy = signal(false);
   protected readonly answerBusy = signal(false);
   protected readonly reviewBusy = signal(false);
+  protected readonly draftBusy = signal(false);
+  protected readonly draftMessage = signal<string | null>(null);
   protected readonly today = signal(indiaCalendarDate());
   protected readonly waiting = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -80,26 +186,89 @@ export class CaseWorkspace {
     return data ? workspaceFacts(data.documents, data.evidence, data.facts, this.previews()) : [];
   });
   protected readonly activity = computed(() => workspaceActivity(this.rows()?.events ?? []));
-  protected readonly question = computed(() => workspaceQuestion(this.rows()?.questions ?? [], this.rows()?.run ?? null));
-  protected readonly plan = computed(() => { const data = this.rows(); return data ? workspacePlan(data.plan ?? null, data.guidance ?? [], data.facts, this.today()) : null; });
+  protected readonly question = computed(() =>
+    workspaceQuestion(this.rows()?.questions ?? [], this.rows()?.run ?? null),
+  );
+  protected readonly plan = computed(() => {
+    const data = this.rows();
+    return data
+      ? workspacePlan(data.plan ?? null, data.guidance ?? [], data.facts, this.today())
+      : null;
+  });
   protected readonly approved = computed(() => !!this.rows()?.plan?.approved_at);
-  protected readonly terminalOutcome = computed(() => this.rows()?.run?.agent_state?.next_step?.['outcome']);
-  protected readonly stage = computed(() => this.rows()?.run?.status === 'waiting_for_user' ? 'Needs your answer' : this.approved() ? 'Plan approved' : this.rows()?.plan?.rejected_at ? 'Plan rejected' : this.terminalOutcome() === 'resolved' ? 'Refund arrived' : this.terminalOutcome() === 'bank_delay' ? 'Trace with your bank' : workspaceStage(this.rows()?.run ?? null));
+  protected readonly canPrepareDraft = computed(() => {
+    const data = this.rows();
+    return (
+      !!data?.plan?.approved_at &&
+      !data.plan.rejected_at &&
+      [1, 2].includes(data.plan.ladder_step) &&
+      !data.draft
+    );
+  });
+  protected readonly draftContext = computed(() => {
+    const data = this.rows();
+    return data ? workspaceDraftContext(data, this.today()) : null;
+  });
+  protected readonly draftSegments = computed(() => {
+    const data = this.rows();
+    const context = this.draftContext();
+    return data?.draft && context
+      ? draftPresentation(
+          data.draft,
+          data.draft.rendered_md ?? '',
+          context,
+          { name: '', contact: '', address: '' },
+          draftStatements(data.draft),
+        ).segments
+      : null;
+  });
+  protected readonly terminalOutcome = computed(
+    () => this.rows()?.run?.agent_state?.next_step?.['outcome'],
+  );
+  protected readonly stage = computed(() =>
+    this.rows()?.run?.status === 'waiting_for_user'
+      ? 'Needs your answer'
+      : this.approved()
+        ? 'Plan approved'
+        : this.rows()?.plan?.rejected_at
+          ? 'Plan rejected'
+          : this.terminalOutcome() === 'resolved'
+            ? 'Refund arrived'
+            : this.terminalOutcome() === 'bank_delay'
+              ? 'Trace with your bank'
+              : workspaceStage(this.rows()?.run ?? null),
+  );
 
   constructor() {
-    effect(() => { const id = this.caseId(); untracked(() => { void this.open(id); }); });
-    inject(DestroyRef).onDestroy(() => { this.controller?.abort(); this.clearPreviews(); });
+    effect(() => {
+      const id = this.caseId();
+      untracked(() => {
+        void this.open(id);
+      });
+    });
+    inject(DestroyRef).onDestroy(() => {
+      this.controller?.abort();
+      this.clearPreviews();
+    });
   }
 
-  protected reload(): void { void this.open(this.caseId()); }
+  protected reload(): void {
+    void this.open(this.caseId());
+  }
 
   private async open(caseId: string): Promise<void> {
     this.controller?.abort();
     const controller = new AbortController();
     this.controller = controller;
     const generation = ++this.generation;
-    this.error.set(null); this.waiting.set(false); this.busy.set(true); this.today.set(indiaCalendarDate());
-    this.rows.set(null); this.clearPreviews();
+    this.error.set(null);
+    this.waiting.set(false);
+    this.busy.set(true);
+    this.today.set(indiaCalendarDate());
+    this.draftMessage.set(null);
+    this.draftBusy.set(false);
+    this.rows.set(null);
+    this.clearPreviews();
     const refresh = async () => {
       const data = await this.service.load(caseId);
       if (!controller.signal.aborted) this.rows.set(data);
@@ -108,30 +277,49 @@ export class CaseWorkspace {
       await refresh();
       if (controller.signal.aborted) return;
       const initial = this.rows();
-      if (!initial || !initial.documents.length && !initial.run) return;
+      if (!initial || (!initial.documents.length && !initial.run)) return;
       await this.continueRun(initial, controller, refresh);
     } catch (error) {
-      if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Could not load your case. Try again.');
+      if (generation === this.generation)
+        this.error.set(
+          error instanceof Error ? error.message : 'Could not load your case. Try again.',
+        );
     } finally {
-      if (generation === this.generation) { this.busy.set(false); this.waiting.set(false); }
+      if (generation === this.generation) {
+        this.busy.set(false);
+        this.waiting.set(false);
+      }
     }
   }
 
-  private async continueRun(data: WorkspaceRows, controller: AbortController, refresh: () => Promise<void>): Promise<void> {
+  private async continueRun(
+    data: WorkspaceRows,
+    controller: AbortController,
+    refresh: () => Promise<void>,
+  ): Promise<void> {
     const latest = data.questions?.at(-1);
     await continueReading(data.run, {
-      start: () => this.service.start(data.case.id), advance: run => this.service.advance(run),
-      current: async () => this.rows()?.run ?? null, refresh,
-      wait: ms => waitForReading(ms, controller.signal), delay: value => this.waiting.set(value),
-      signal: controller.signal, resumeWaiting: !!latest?.answered_at && latest.id !== data.run?.agent_state?.answered_question_id,
+      start: () => this.service.start(data.case.id),
+      advance: (run) => this.service.advance(run),
+      current: async () => this.rows()?.run ?? null,
+      refresh,
+      wait: (ms) => waitForReading(ms, controller.signal),
+      delay: (value) => this.waiting.set(value),
+      signal: controller.signal,
+      resumeWaiting:
+        !!latest?.answered_at && latest.id !== data.run?.agent_state?.answered_question_id,
     });
   }
 
   protected async saveAnswer(answer: AgentAnswerRequest['answer']): Promise<void> {
-    const question = this.question(); const controller = this.controller; const data = this.rows();
+    const question = this.question();
+    const controller = this.controller;
+    const data = this.rows();
     if (!question || !controller || !data || this.answerBusy() || this.busy()) return;
     const generation = this.generation;
-    this.answerBusy.set(true); this.busy.set(true); this.error.set(null);
+    this.answerBusy.set(true);
+    this.busy.set(true);
+    this.error.set(null);
     const refresh = async () => {
       const latest = await this.service.load(data.case.id);
       if (!controller.signal.aborted) this.rows.set(latest);
@@ -143,29 +331,119 @@ export class CaseWorkspace {
       const latest = this.rows();
       if (latest) await this.continueRun(latest, controller, refresh);
     } catch (error) {
-      if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Could not save your answer. Try again.');
-      if (!controller.signal.aborted) { try { await refresh(); } catch { /* Keep the loaded case usable while offline. */ } }
+      if (generation === this.generation)
+        this.error.set(
+          error instanceof Error ? error.message : 'Could not save your answer. Try again.',
+        );
+      if (!controller.signal.aborted) {
+        try {
+          await refresh();
+        } catch {
+          /* Keep the loaded case usable while offline. */
+        }
+      }
     } finally {
-      if (generation === this.generation) { this.answerBusy.set(false); this.busy.set(false); this.waiting.set(false); }
+      if (generation === this.generation) {
+        this.answerBusy.set(false);
+        this.busy.set(false);
+        this.waiting.set(false);
+      }
     }
   }
 
   protected async reviewPlan(action: 'approve' | 'reject' | 'change'): Promise<void> {
-    const data = this.rows(); const plan = this.plan(); const generation = this.generation;
+    const data = this.rows();
+    const plan = this.plan();
+    const generation = this.generation;
     if (!data || !plan?.id || this.busy() || this.reviewBusy()) return;
-    this.reviewBusy.set(true); this.error.set(null);
+    this.reviewBusy.set(true);
+    this.error.set(null);
     try {
       await this.service.reviewPlan(plan.id, action);
       const latest = await this.service.load(data.case.id);
-      if (generation === this.generation) this.rows.set(latest);
+      if (generation === this.generation) {
+        this.rows.set(latest);
+        if (action === 'approve' && this.canPrepareDraft()) await this.prepareDraft();
+      }
     } catch (error) {
-      if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Could not save your plan decision. Try again.');
-    } finally { if (generation === this.generation) this.reviewBusy.set(false); }
+      if (generation === this.generation)
+        this.error.set(
+          error instanceof Error ? error.message : 'Could not save your plan decision. Try again.',
+        );
+    } finally {
+      if (generation === this.generation) this.reviewBusy.set(false);
+    }
+  }
+
+  protected async prepareDraft(): Promise<void> {
+    const data = this.rows();
+    const generation = this.generation;
+    if (!data?.plan || !this.canPrepareDraft() || this.draftBusy()) return;
+    this.draftBusy.set(true);
+    this.draftMessage.set(null);
+    try {
+      const result = await this.service.prepareDraft(data.plan.id);
+      if (generation !== this.generation) return;
+      if (result.draft) {
+        const draft = result.draft;
+        this.rows.update((rows) => (rows ? { ...rows, draft } : rows));
+      } else
+        this.draftMessage.set(
+          'The models are temporarily unavailable. Your approved plan is saved. Try preparing the complaint again shortly.',
+        );
+    } catch (error) {
+      if (generation === this.generation)
+        this.draftMessage.set(
+          error instanceof Error
+            ? error.message
+            : 'Could not prepare the complaint. Your approved plan is saved.',
+        );
+    } finally {
+      if (generation === this.generation) this.draftBusy.set(false);
+    }
+  }
+  protected async saveDraft(edit: { text: string; userStatements: string[] }): Promise<void> {
+    const draft = this.rows()?.draft;
+    const generation = this.generation;
+    if (!draft || this.draftBusy()) return;
+    this.draftBusy.set(true);
+    this.draftMessage.set(null);
+    try {
+      const result = await this.service.saveDraftEdit({ draftId: draft.id, ...edit });
+      if (generation === this.generation) {
+        this.rows.update((rows) => (rows ? { ...rows, draft: result.draft } : rows));
+        this.draftMessage.set('Edits saved. Nothing has been sent.');
+      }
+    } catch (error) {
+      if (generation === this.generation)
+        this.draftMessage.set(
+          error instanceof Error
+            ? error.message
+            : 'Could not save edits. Your text is still on this page.',
+        );
+    } finally {
+      if (generation === this.generation) this.draftBusy.set(false);
+    }
+  }
+  protected async copyDraft(text: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.draftMessage.set('Complaint text copied with its source labels.');
+    } catch {
+      this.draftMessage.set(
+        'Copy is unavailable in this browser. Open the printable pack or select the preview text to copy it.',
+      );
+    }
+  }
+  protected printDraft(): void {
+    window.print();
   }
 
   protected openSources(field: FactField): void {
-    const fact = this.facts().find(fact => fact.field === field);
-    const ids = new Set(fact?.sources.map(source => source.documentId).filter((id): id is string => !!id));
+    const fact = this.facts().find((fact) => fact.field === field);
+    const ids = new Set(
+      fact?.sources.map((source) => source.documentId).filter((id): id is string => !!id),
+    );
     for (const id of ids) void this.loadSource(id);
   }
 
@@ -176,30 +454,43 @@ export class CaseWorkspace {
 
   private async loadSource(id: string): Promise<void> {
     if ((this.previewExpires.get(id) ?? 0) > Date.now() || this.previews()[id]?.loading) return;
-    const document = this.rows()?.documents.find(document => document.id === id);
+    const document = this.rows()?.documents.find((document) => document.id === id);
     if (!document) return;
     const generation = this.generation;
-    Object.values(this.previews()[id]?.pageImages ?? {}).forEach(url => URL.revokeObjectURL(url));
-    this.previews.update(previews => ({ ...previews, [id]: { loading: true } }));
+    Object.values(this.previews()[id]?.pageImages ?? {}).forEach((url) => URL.revokeObjectURL(url));
+    this.previews.update((previews) => ({ ...previews, [id]: { loading: true } }));
     try {
       const url = await this.service.sourceUrl(document);
       if (generation !== this.generation) return;
-      const pages = this.rows()?.evidence.filter(item => item.document_id === id).map(item => item.page ?? 1) ?? [1];
-      const pageImages = document.mime_type === 'application/pdf' ? await this.service.pdfPages(url, pages) : undefined;
+      const pages = this.rows()
+        ?.evidence.filter((item) => item.document_id === id)
+        .map((item) => item.page ?? 1) ?? [1];
+      const pageImages =
+        document.mime_type === 'application/pdf'
+          ? await this.service.pdfPages(url, pages)
+          : undefined;
       if (generation !== this.generation || this.controller?.signal.aborted) {
-        Object.values(pageImages ?? {}).forEach(url => URL.revokeObjectURL(url)); return;
+        Object.values(pageImages ?? {}).forEach((url) => URL.revokeObjectURL(url));
+        return;
       }
       this.previewExpires.set(id, Date.now() + 540_000);
-      this.previews.update(previews => ({ ...previews, [id]: { url, pageImages } }));
+      this.previews.update((previews) => ({ ...previews, [id]: { url, pageImages } }));
     } catch (error) {
-      if (generation === this.generation) this.previews.update(previews => ({ ...previews, [id]: {
-        error: error instanceof Error ? error.message : 'Could not open the source. Try again.',
-      } }));
+      if (generation === this.generation)
+        this.previews.update((previews) => ({
+          ...previews,
+          [id]: {
+            error: error instanceof Error ? error.message : 'Could not open the source. Try again.',
+          },
+        }));
     }
   }
 
   private clearPreviews(): void {
-    Object.values(this.previews()).flatMap(preview => Object.values(preview.pageImages ?? {})).forEach(url => URL.revokeObjectURL(url));
-    this.previews.set({}); this.previewExpires.clear();
+    Object.values(this.previews())
+      .flatMap((preview) => Object.values(preview.pageImages ?? {}))
+      .forEach((url) => URL.revokeObjectURL(url));
+    this.previews.set({});
+    this.previewExpires.clear();
   }
 }
