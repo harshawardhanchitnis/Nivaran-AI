@@ -98,6 +98,8 @@ export interface TimelineItemView {
 }
 
 export interface PlanView {
+  /** Saved proposal identity; a new proposal opens the plan tab. Omitted in the presentation demo. */
+  id?: string;
   step: LadderStep;
   headline: string;
   summary: string;

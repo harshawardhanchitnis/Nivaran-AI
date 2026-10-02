@@ -206,8 +206,12 @@ rows as a stale call (HTTP 409, returning the current run). `events` are the row
 call. When the provider is rate-limited, answer 200 with `retryAfterMs` and leave the turn
 unchanged; the browser waits and shows "waiting for model quota".
 
-Answering a question and approving a plan are direct Supabase writes from the browser
-(`questions.answer`, `plans.approved_at`), followed by `advance` or `draft`.
+The browser answers a question through `POST /api/agent/answer`, which validates the offered choice
+and resumes the run without a model call. Plan review uses the caller-scoped `review_plan` Supabase
+transaction: approve records `approved_at`; request-change archives the proposal and opens a saved
+question; reject archives it and stops. These actions make no model call. Drafting follows approval.
+The plan identifies dates calculated from the recorded sent date; rule 4(5) counts from receipt,
+so these dates need adjustment if receipt was later.
 
 ## 6. Reading documents
 

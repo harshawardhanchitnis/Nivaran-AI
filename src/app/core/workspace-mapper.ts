@@ -63,6 +63,7 @@ export function workspaceQuestion(questions: readonly QuestionRow[], run: AgentR
     ? [{ id: option.id, label: option.label }] : []);
   const why = question.kind === 'conflict' ? 'The sources give different values. Your choice will be saved as Your statement.'
     : question.kind === 'document_request' ? 'A missing or unclear document prevents the next step.'
+    : question.kind === 'confirm' && question.field === null ? 'Your requested change will be considered before a new plan is proposed.'
     : question.kind === 'confirm' ? 'Please check this reading before it is used.' : 'This detail is needed to decide the next step.';
   return { id: question.id, prompt: question.prompt, why, options };
 }

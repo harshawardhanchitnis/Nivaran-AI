@@ -1,0 +1,78 @@
+{
+  "status": "HUMAN CHECKED",
+  "prepared_on": "2026-10-02",
+  "checked_on": "2026-10-02",
+  "rows": [
+    {
+      "id": "ecommerce-grievance-officer",
+      "title": "Finding the grievance officer",
+      "body": "An e-commerce entity must provide a grievance mechanism, appoint a grievance officer, and display the officer's name, contact details and designation on its platform.",
+      "source_name": "Consumer Protection (E-Commerce) Rules, 2020 — rule 4(4)",
+      "source_url": "https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=8",
+      "applies_to_steps": [
+        1,
+        2
+      ],
+      "checked_on": "2026-10-02"
+    },
+    {
+      "id": "ecommerce-grievance-timelines",
+      "title": "Complaint response timelines",
+      "body": "The grievance officer must acknowledge a consumer complaint within 48 hours and redress it within one month, measured from receipt of the complaint.",
+      "source_name": "Consumer Protection (E-Commerce) Rules, 2020 — rule 4(5)",
+      "source_url": "https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=9",
+      "applies_to_steps": [
+        1,
+        2
+      ],
+      "checked_on": "2026-10-02"
+    },
+    {
+      "id": "ecommerce-refund-payment",
+      "title": "Accepted refund requests",
+      "body": "An e-commerce entity must pay accepted refund requests within a reasonable period or the period prescribed under applicable law, following the requirements of the RBI or other competent authority. This provision does not specify a universal seven-day refund deadline.",
+      "source_name": "Consumer Protection (E-Commerce) Rules, 2020 — rule 4(10)",
+      "source_url": "https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=9",
+      "applies_to_steps": [
+        0,
+        1,
+        2
+      ],
+      "checked_on": "2026-10-02"
+    },
+    {
+      "id": "nch-overview",
+      "title": "National Consumer Helpline",
+      "body": "NCH is a pre-litigation grievance mechanism. Consumers can contact it on 1915 or register through its portal. Its information page says reaching a logical conclusion may take up to 30 days; registering does not guarantee a remedy.",
+      "source_name": "National Consumer Helpline — About, questions 1, 3, 8 and 9",
+      "source_url": "https://consumerhelpline.gov.in/public/about",
+      "applies_to_steps": [
+        2
+      ],
+      "checked_on": "2026-10-02"
+    },
+    {
+      "id": "nch-unresolved",
+      "title": "If the helpline does not resolve it",
+      "body": "A consumer dissatisfied with the helpline outcome can approach the appropriate Consumer Commission. e-Jagriti is the government's portal for Consumer Commissions. Nivaran provides information at this step and does not prepare or file a Commission complaint.",
+      "source_name": "National Consumer Helpline — About; official e-Jagriti portal",
+      "source_url": "https://consumerhelpline.gov.in/public/about",
+      "applies_to_steps": [
+        3
+      ],
+      "checked_on": "2026-10-02"
+    },
+    {
+      "id": "refund-bank-reference",
+      "title": "Tracing a processed refund",
+      "body": "In a published NCH case about a cancelled online train booking, the company advised the consumer to check the refund status with the card-issuing bank using the ARN it supplied. A reference supports tracing; it does not itself show that the account was credited. This example is practical tracing information, not a general legal deadline or a guarantee of recovery.",
+      "source_name": "National Consumer Helpline — published case 1970248",
+      "source_url": "https://consumerhelpline.gov.in/public/index.php/successstorydetails/48",
+      "applies_to_steps": [
+        0,
+        1
+      ],
+      "checked_on": "2026-10-02"
+    }
+  ]
+}

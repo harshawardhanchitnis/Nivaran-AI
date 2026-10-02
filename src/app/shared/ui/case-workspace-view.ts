@@ -98,7 +98,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
       @case ('plan') {
         <div role="tabpanel" id="case-panel-plan" aria-labelledby="case-tab-plan">
           @if (plan(); as current) {
-            <app-plan-panel [plan]="current" [approved]="approved()" (approve)="approve.emit()" (decline)="decline.emit()" />
+            <app-plan-panel [plan]="current" [approved]="approved()" [busy]="reviewBusy()" (approve)="approve.emit()" (decline)="decline.emit()" (edit)="edit.emit()" />
           } @else {
             <div class="empty surface">
               <mat-icon aria-hidden="true">hourglass_empty</mat-icon>
@@ -118,7 +118,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
             <div class="empty surface">
               <mat-icon aria-hidden="true">edit_note</mat-icon>
               <h2>Nothing drafted yet</h2>
-              <p class="muted">The complaint is prepared only after you approve the plan.</p>
+              <p class="muted">{{ plan()?.step === 0 ? 'Wait until the promised date. There is nothing to send yet.' : plan()?.step === 3 ? 'This step provides information only. Nivaran prepares no complaint.' : 'The complaint is prepared only after you approve the plan.' }}</p>
               <button mat-stroked-button type="button" (click)="selectTab('plan')">Go to Plan</button>
             </div>
           }
@@ -334,6 +334,7 @@ export class CaseWorkspaceView {
   readonly answerBusy = input(false);
   readonly plan = input<PlanView | null>(null);
   readonly approved = input(false);
+  readonly reviewBusy = input(false);
   readonly draft = input<readonly DraftSegment[] | null>(null);
 
   /** The id of the option the user chose for the open question. */
@@ -341,6 +342,7 @@ export class CaseWorkspaceView {
   readonly textAnswered = output<string>();
   readonly approve = output<void>();
   readonly decline = output<void>();
+  readonly edit = output<void>();
   readonly sourceRequested = output<FactField>();
   readonly sourceRetry = output<string>();
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -356,6 +358,24 @@ export class CaseWorkspaceView {
   ];
   readonly tab = signal<Tab>('facts');
   constructor() {
+    let previousPlan: string | undefined;
+    effect(() => {
+      const id = this.plan()?.id;
+      if (id && id !== previousPlan && !this.question()) {
+        this.selectedField.set(null); this.tab.set('plan');
+        afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('#plan-title')?.focus(), { injector: this.injector });
+      } else if (!id && previousPlan && !this.question()) {
+        this.tab.set('facts');
+        afterNextRender(() => this.element.nativeElement.querySelector<HTMLButtonElement>('#case-tab-facts')?.focus(), { injector: this.injector });
+      }
+      previousPlan = id;
+    });
+    let previouslyApproved = false;
+    effect(() => {
+      const approved = this.approved();
+      if (approved && !previouslyApproved && this.plan()?.id) afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('#plan-title')?.focus(), { injector: this.injector });
+      previouslyApproved = approved;
+    });
     let previous: string | null = null;
     effect(() => {
       const question = this.question();

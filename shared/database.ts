@@ -152,6 +152,7 @@ export interface PlanRow {
   dates: Record<string, string>;
   guidance_ids: string[];
   approved_at: string | null;
+  rejected_at: string | null;
   sent_on: string | null;
   outcome: PlanOutcome | null;
   created_at: string;

@@ -160,6 +160,11 @@ across a weekend, and month arithmetic at month ends (31 January plus one month)
   standing notes (not legal advice; recommended order), and a timeline with today and each deadline.
 - Approve sets `plans.approved_at`. Edit and reject are possible. Nothing is drafted before approval.
 
+Implementation uses migration `0007_plan_review.sql` and the caller-scoped `review_plan` transaction.
+Request-change archives the proposal and asks what to change; reject stops investigation. Neither
+review action makes a model call. Plans preserve code assumption notes and show that complaint
+dates use the recorded sent date whereas rule 4(5) counts from receipt.
+
 Checks: the "not yet due" sample shows step 0 and no draft; the overdue sample shows step 1 with
 correct dates.
 

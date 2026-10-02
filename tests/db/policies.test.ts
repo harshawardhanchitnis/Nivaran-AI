@@ -18,6 +18,7 @@ const quotaMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'mig
 const investigationMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0004_agent_investigation.sql'), 'utf8');
 const modelMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0005_model_availability.sql'), 'utf8');
 const logicalCapsMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0006_logical_call_caps.sql'), 'utf8');
+const planReviewMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0007_plan_review.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -68,6 +69,7 @@ beforeAll(async () => {
   await db.exec(investigationMigration);
   await db.exec(modelMigration);
   await db.exec(logicalCapsMigration);
+  await db.exec(planReviewMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -380,6 +382,78 @@ describe('agent investigation transactions', () => {
     await expect(asVisitor(() => db.query("select public.finish_agent_step($1,3,$2,'{}'::jsonb)", [runId, token]))).rejects.toThrow(/permission denied/);
     await claim(3);
     expect(await finish(ALICE, 3, { status: 'plan_ready', plan: { ladder_step: 1, summary: 'Ask for the refund.', reasons: [], dates: {}, guidance_ids: ['test-snippet'] }, events: [{ type: 'decision', payload: {} }] })).toMatchObject({ run: { turn: 4, status: 'plan_ready' }, plan: { approved_at: null } });
+  });
+});
+
+describe('atomic plan review as the caller', () => {
+  let caseId: string;
+  beforeAll(async () => { caseId=await createCase(ALICE,'Plan review fixture'); });
+  async function pending(step=1) {
+    await asUser(ALICE,()=>db.query("update public.agent_runs set status='completed',phase='done' where case_id=$1",[caseId]));
+    return asUser(ALICE,async()=> {
+      const run=await db.query<{id:string}>("insert into public.agent_runs(case_id,phase,status) values($1,'investigating','plan_ready') returning id",[caseId]);
+      const plan=await db.query<{id:string}>("insert into public.plans(case_id,run_id,ladder_step,guidance_ids) values($1,$2,$3,array['test-snippet']) returning id",[caseId,run.rows[0]!.id,step]);
+      return {plan:plan.rows[0]!.id,run:run.rows[0]!.id};
+    });
+  }
+  const review=(user:string,id:string,action:string)=>asUser(user,()=>db.query<{result:Record<string,unknown>|null}>('select public.review_plan($1,$2) as result',[id,action]));
+  it('refuses visitors and hides another caller\'s plan',async()=> {
+    const p=await pending();
+    await expect(asVisitor(()=>db.query('select public.review_plan($1,$2)',[p.plan,'approve']))).rejects.toThrow(/permission denied/);
+    expect((await review(BOB,p.plan,'approve')).rows[0]?.result).toBeNull();
+    const unchanged=await db.query('select approved_at,rejected_at from public.plans where id=$1',[p.plan]);
+    expect(unchanged.rows).toEqual([{approved_at:null,rejected_at:null}]);
+  });
+  it('approves once, updates the case and stops investigation without creating a draft',async()=> {
+    const p=await pending();
+    expect((await review(ALICE,p.plan,'approve')).rows[0]?.result).toMatchObject({plan:{id:p.plan,approved_at:expect.any(String)},run:{status:'completed',phase:'done'}});
+    await review(ALICE,p.plan,'approve');
+    const cases=await db.query('select status,ladder_step from public.cases where id=$1',[caseId]);
+    expect(cases.rows).toEqual([{status:'approved',ladder_step:1}]);
+    const events=await db.query('select payload from public.agent_events where run_id=$1',[p.run]);
+    expect(events.rows).toHaveLength(1);
+    const drafts=await db.query('select id from public.drafts where plan_id=$1',[p.plan]); expect(drafts.rows).toHaveLength(0);
+  });
+  it('archives a changed plan and creates one saved free-text question',async()=> {
+    const p=await pending();
+    expect((await review(ALICE,p.plan,'change')).rows[0]?.result).toMatchObject({plan:{rejected_at:expect.any(String)},run:{status:'waiting_for_user'},question:{field:null,options:[],answer:null}});
+    expect((await review(ALICE,p.plan,'change')).rows[0]?.result).toBeNull();
+    const questions=await db.query('select id from public.questions where run_id=$1',[p.run]);expect(questions.rows).toHaveLength(1);
+    const run=await db.query<{agent_state:unknown}>('select agent_state from public.agent_runs where id=$1',[p.run]);expect(run.rows[0]?.agent_state).not.toHaveProperty('next_step');
+  });
+  it('rejects without approval or further investigation, and never approves step three',async()=> {
+    const p=await pending(0);
+    expect((await review(ALICE,p.plan,'reject')).rows[0]?.result).toMatchObject({plan:{approved_at:null,rejected_at:expect.any(String)},run:{status:'completed'}});
+    const info=await pending(3);
+    await expect(review(ALICE,info.plan,'approve')).rejects.toThrow(/information only/i);
+  });
+  it('does not approve a plan after its facts have changed',async()=> {
+    const p=await pending();
+    await asUser(ALICE,()=>db.query("insert into public.case_facts(case_id,field,status,value_text) values($1,'refund_amount','user','1000')",[caseId]));
+    await expect(review(ALICE,p.plan,'approve')).rejects.toThrow(/facts have changed/i);
+    const plan=await db.query('select approved_at from public.plans where id=$1',[p.plan]);expect(plan.rows[0]).toEqual({approved_at:null});
+  });
+  it('accepts a waiting plan without adding any draft',async()=> {
+    const p=await pending(0);
+    expect((await review(ALICE,p.plan,'approve')).rows[0]?.result).toMatchObject({plan:{ladder_step:0,approved_at:expect.any(String)}});
+    expect((await db.query('select id from public.drafts where plan_id=$1',[p.plan])).rows).toHaveLength(0);
+  });
+  it('refuses approval if a cited rule is missing',async()=> {
+    const p=await pending();
+    await asUser(ALICE,()=>db.query("update public.plans set guidance_ids=array['missing-rule'] where id=$1",[p.plan]));
+    await expect(review(ALICE,p.plan,'approve')).rejects.toThrow(/Checked guidance/);
+  });
+});
+
+describe('owner-checked guidance seed',()=> {
+  it('runs and reruns the exact dashboard seed, retaining the six confirmed bodies and dates',async()=> {
+    const seed=readFileSync(path.join(here,'..','..','supabase','seed.sql'),'utf8');
+    const data=JSON.parse(readFileSync(path.join(here,'..','..','supabase','guidance-drafts.json'),'utf8')) as {status:string;checked_on:string;rows:Array<Record<string,unknown>>};
+    expect(data.status).toBe('HUMAN CHECKED'); expect(data.checked_on).toBe('2026-10-02');
+    await db.exec(seed); await db.exec(seed);
+    const result=await asUser(ALICE,()=>db.query("select id,title,body,source_name,source_url,checked_on::text,applies_to_steps from public.guidance where id<>'test-snippet' order by id"));
+    expect(result.rows).toEqual([...data.rows].sort((a,b)=>String(a['id']).localeCompare(String(b['id']))));
+    expect(result.rows).toHaveLength(6);
   });
 });
 

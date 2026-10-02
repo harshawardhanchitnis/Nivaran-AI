@@ -15,7 +15,7 @@ import type { PlanView } from './models';
     <section class="plan surface" aria-labelledby="plan-title">
       <div class="head">
         <p class="eyebrow">Recommended next step</p>
-        <h2 id="plan-title">{{ plan().headline }}</h2>
+        <h2 id="plan-title" tabindex="-1">{{ plan().headline }}</h2>
         <p class="muted">{{ plan().summary }}</p>
       </div>
 
@@ -62,9 +62,13 @@ import type { PlanView } from './models';
       <div class="gate no-print">
         @if (approved()) {
           <p class="approved"><mat-icon aria-hidden="true">verified</mat-icon> You approved this plan.</p>
+        } @else if (plan().step === 3) {
+          <p>Information only. Nivaran prepares no complaint at this step.</p>
         } @else {
-          <button mat-flat-button type="button" (click)="approve.emit()">Approve and prepare the complaint</button>
-          <button mat-button type="button" (click)="decline.emit()">Not now</button>
+          @if (plan().step === 0) { <p>The promised date has not passed. There is nothing to send yet.</p> }
+          <button mat-flat-button type="button" [disabled]="busy()" (click)="approve.emit()">{{ plan().step === 0 ? 'Accept this waiting plan' : 'Approve and prepare the complaint' }}</button>
+          <button mat-button type="button" [disabled]="busy()" (click)="edit.emit()">Request a change</button>
+          <button mat-button type="button" [disabled]="busy()" (click)="decline.emit()">Reject this plan</button>
         }
       </div>
     </section>
@@ -171,6 +175,8 @@ import type { PlanView } from './models';
 export class PlanPanel {
   readonly plan = input.required<PlanView>();
   readonly approved = input(false);
+  readonly busy = input(false);
   readonly approve = output<void>();
   readonly decline = output<void>();
+  readonly edit = output<void>();
 }

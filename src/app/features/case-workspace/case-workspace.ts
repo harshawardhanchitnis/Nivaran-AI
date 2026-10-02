@@ -7,6 +7,7 @@ import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-worksp
 import { continueReading, waitForReading } from '../../core/reading-loop';
 import { workspaceActivity, workspaceFacts, workspaceQuestion, workspaceStage, type DocumentPreview } from '../../core/workspace-mapper';
 import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
+import { indiaCalendarDate, workspacePlan } from '../../core/workspace-plan';
 
 @Component({
   selector: 'app-case-workspace',
@@ -16,7 +17,8 @@ import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
     @if (rows(); as data) {
       <app-case-workspace-view [heading]="data.case.title" [merchant]="data.case.merchant_name ?? 'Your refund case'"
         [documentCount]="data.documents.length" [stage]="stage()" [facts]="facts()" [activity]="activity()"
-        [busy]="busy()" [question]="question()" [answerBusy]="answerBusy()"
+        [busy]="busy()" [question]="question()" [answerBusy]="answerBusy()" [plan]="plan()" [approved]="approved()" [reviewBusy]="reviewBusy()"
+        (approve)="reviewPlan('approve')" (decline)="reviewPlan('reject')" (edit)="reviewPlan('change')"
         (answered)="saveAnswer({ optionId: $event })" (textAnswered)="saveAnswer($event)"
         (sourceRequested)="openSources($event)" (sourceRetry)="retrySource($event)">
         <div banner class="notice" aria-live="polite">
@@ -31,6 +33,16 @@ import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
             <p role="status">{{ data.run?.error ?? 'Nivaran could not finish. Your facts are saved.' }}</p>
           } @else if (data.run?.status === 'waiting_for_user') {
             <p>Answer the question below to continue. Your progress is saved.</p>
+          } @else if (data.plan?.rejected_at) {
+            <p>You rejected this plan. Nothing has been drafted or sent.</p>
+          } @else if (approved()) {
+            <p>You approved this plan. {{ plan()?.step === 0 ? 'Wait until the promised date; there is nothing to send yet.' : 'Nothing has been sent.' }}</p>
+          } @else if (data.run?.status === 'plan_ready') {
+            <p>{{ plan() ? 'Review the Plan tab and choose whether to accept, request a change, or reject it.' : 'The checked sources for this plan are unavailable. Your facts are saved; try again later.' }}</p>
+          } @else if (terminalOutcome() === 'resolved') {
+            <p>You recorded that the refund arrived. This case is resolved.</p>
+          } @else if (terminalOutcome() === 'bank_delay') {
+            <p>The merchant states the refund was processed and supplied a reference. Take the reference to your bank to trace it. Nivaran stops here.</p>
           } @else if (data.run?.phase === 'investigating') {
             <p>Your documents have been read. Open a fact to review its source and exact quote.</p>
           } @else if (data.documents.length === 0) {
@@ -59,6 +71,8 @@ export class CaseWorkspace {
   protected readonly previews = signal<Record<string, DocumentPreview>>({});
   protected readonly busy = signal(false);
   protected readonly answerBusy = signal(false);
+  protected readonly reviewBusy = signal(false);
+  protected readonly today = signal(indiaCalendarDate());
   protected readonly waiting = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly facts = computed(() => {
@@ -67,7 +81,10 @@ export class CaseWorkspace {
   });
   protected readonly activity = computed(() => workspaceActivity(this.rows()?.events ?? []));
   protected readonly question = computed(() => workspaceQuestion(this.rows()?.questions ?? [], this.rows()?.run ?? null));
-  protected readonly stage = computed(() => workspaceStage(this.rows()?.run ?? null));
+  protected readonly plan = computed(() => { const data = this.rows(); return data ? workspacePlan(data.plan ?? null, data.guidance ?? [], data.facts, this.today()) : null; });
+  protected readonly approved = computed(() => !!this.rows()?.plan?.approved_at);
+  protected readonly terminalOutcome = computed(() => this.rows()?.run?.agent_state?.next_step?.['outcome']);
+  protected readonly stage = computed(() => this.rows()?.run?.status === 'waiting_for_user' ? 'Needs your answer' : this.approved() ? 'Plan approved' : this.rows()?.plan?.rejected_at ? 'Plan rejected' : this.terminalOutcome() === 'resolved' ? 'Refund arrived' : this.terminalOutcome() === 'bank_delay' ? 'Trace with your bank' : workspaceStage(this.rows()?.run ?? null));
 
   constructor() {
     effect(() => { const id = this.caseId(); untracked(() => { void this.open(id); }); });
@@ -81,7 +98,7 @@ export class CaseWorkspace {
     const controller = new AbortController();
     this.controller = controller;
     const generation = ++this.generation;
-    this.error.set(null); this.waiting.set(false); this.busy.set(true);
+    this.error.set(null); this.waiting.set(false); this.busy.set(true); this.today.set(indiaCalendarDate());
     this.rows.set(null); this.clearPreviews();
     const refresh = async () => {
       const data = await this.service.load(caseId);
@@ -131,6 +148,19 @@ export class CaseWorkspace {
     } finally {
       if (generation === this.generation) { this.answerBusy.set(false); this.busy.set(false); this.waiting.set(false); }
     }
+  }
+
+  protected async reviewPlan(action: 'approve' | 'reject' | 'change'): Promise<void> {
+    const data = this.rows(); const plan = this.plan(); const generation = this.generation;
+    if (!data || !plan?.id || this.busy() || this.reviewBusy()) return;
+    this.reviewBusy.set(true); this.error.set(null);
+    try {
+      await this.service.reviewPlan(plan.id, action);
+      const latest = await this.service.load(data.case.id);
+      if (generation === this.generation) this.rows.set(latest);
+    } catch (error) {
+      if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Could not save your plan decision. Try again.');
+    } finally { if (generation === this.generation) this.reviewBusy.set(false); }
   }
 
   protected openSources(field: FactField): void {

@@ -39,6 +39,24 @@ describe('one model-chosen investigation step', () => {
     expect(finishStep.mock.calls[1]?.[1]).toMatchObject({ plan: { ladder_step: 1, dates: { refund_due: '2026-09-24' } } });
     expect(charge.mock.invocationCallOrder[0]).toBeLessThan(choose.mock.invocationCallOrder[0]!);
   });
+  it('retains code assumption notes and requires the decision’s applicable guidance', async () => {
+    run.agent_state.next_step = { outcome: 'ladder', step: 1, reasons: [{ text: 'Overdue.', guidanceIds: ['checked-rule'] }], dates: { refund_due: '2026-09-24' }, notes: ["Nivaran's working assumption, not a rule."] };
+    choose.mockResolvedValue({ name: 'propose_plan', input: { summary: 'Ask for the refund.', guidance_ids: ['checked-rule'] } });
+    await advanceInvestigation(store, deps, run.id, 0);
+    expect(finishStep.mock.calls[0]?.[1]).toMatchObject({ plan: { reasons: [expect.objectContaining({text:'Overdue.'}), {code:'calculation_note',text:"Nivaran's working assumption, not a rule."}] } });
+  });
+  it.each(['missing', 'wrong_step'])('refuses a plan with %s guidance', async mode => {
+    run.agent_state.next_step = { outcome: 'ladder', step: 0, reasons: [{ text: 'Wait.', guidanceIds: ['required-rule'] }], dates: {}, notes: [] };
+    choose.mockResolvedValue({ name: 'propose_plan', input: { summary: 'Wait.', guidance_ids: [mode==='missing' ? 'nonexistent' : 'checked-rule'] } });
+    await advanceInvestigation(store, deps, run.id, 0);
+    expect(run.status).toBe('running'); expect(finishStep.mock.calls[0]?.[1]).not.toHaveProperty('plan');
+  });
+  it.each(['resolved', 'bank_delay'])('ends the %s branch without proposing a complaint', async outcome => {
+    nextStep.mockResolvedValue({ outcome, reasons: [], dates: {}, notes: [] });
+    await advanceInvestigation(store, deps, run.id, 0);
+    expect(finishStep.mock.calls[0]?.[1]).toMatchObject({ status: 'completed', phase: 'done' });
+    expect(finishStep.mock.calls[0]?.[1]).not.toHaveProperty('plan');
+  });
   it('pauses for a conflict, resumes its actual answer without another model call', async () => {
     snapshot.facts = [{ field: 'refund_amount', status: 'conflict' }] as CaseFactRow[];
     choose.mockResolvedValue({ name: 'ask_user', input: { field: 'refund_amount', question: 'Which is right?', options: ['9999', '8999'] } });

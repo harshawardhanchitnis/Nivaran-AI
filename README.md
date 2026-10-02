@@ -13,18 +13,22 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > loop has eight validated tools, saved state, questions and a step limit, tested with scripted models.
 > Stored questions, one-tap/text answers and the real activity log are connected; answering resumes
 > without reloading. The pure refund ladder and date arithmetic are connected to `get_next_step`.
-> Plans, drafting and later tasks are still to build.
+> Saved plans now show code decisions, checked sources and dates in the existing screen, with
+> atomic approve, request-change and reject actions. Drafting and later tasks are still to build.
 > See `docs/ai-disclosure.md` for dates and checks.
 
 Model calls use configurable vision and text lineups in `.env.example`. PDF pages with text are
 extracted locally; scanned or mixed PDFs use vision, and Groq never receives PDF file bytes.
 Each logical call is charged once, with immediate provider failover and signed database cooldowns.
-Apply migrations in order through `0006_logical_call_caps.sql`, run
+Apply migrations in order through `0007_plan_review.sql`, apply the owner-checked `supabase/seed.sql`, run
 `node scripts/prepare-model-cooldowns.mjs`, then apply its ignored setup SQL in the dashboard.
 Keep `MODEL_COOLDOWN_SIGNING_SECRET` server-only; add that local setting to Vercel when deploying.
 Current owner-reported Gemini daily limits support conservative app caps of 15 per user and 15
 globally. The supplied reading benchmark and bounded live routing results are in
 [eval/model-benchmark.md](eval/model-benchmark.md); they are not the full product evaluation.
+The six guidance rows were checked by the owner on 2 October 2026; review details are in
+[docs/guidance-review.md](docs/guidance-review.md). Complaint response dates use the recorded sent
+date; rule 4(5) counts from receipt, so the plan explicitly says to adjust for later receipt.
 
 ## Documents
 

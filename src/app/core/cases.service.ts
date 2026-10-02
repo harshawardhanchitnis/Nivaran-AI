@@ -77,6 +77,7 @@ export class CasesService {
     const [documents, plans] = await Promise.all([
       client.from('documents').select('case_id').in('case_id', ids).returns<Pick<DocumentRow, 'case_id'>[]>(),
       client.from('plans').select('case_id, dates, created_at').in('case_id', ids)
+        .is('rejected_at', null)
         .order('created_at', { ascending: false }).returns<Pick<PlanRow, 'case_id' | 'dates' | 'created_at'>[]>(),
     ]);
     if (documents.error || plans.error) throw new Error('Could not load the case details. Please try again.');

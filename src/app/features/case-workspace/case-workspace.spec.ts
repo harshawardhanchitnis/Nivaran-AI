@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-workspace.service';
 import { CaseWorkspace } from './case-workspace';
+import type { GuidanceRow, PlanRow } from '@shared/database';
 
 const saved = {
   case: { id: 'case', title: 'Saved refund case', merchant_name: 'Fictional seller' },
@@ -10,13 +11,15 @@ const saved = {
   evidence: [{ id: 'reading', field: 'refund_amount', source: 'document', document_id: 'image', value_text: 'INR 9999', quote: 'Refund INR 9999', page: 1 }],
   facts: [], events: [], questions: [], run: { id: 'run', status: 'plan_ready', phase: 'done', turn: 7 },
 } as unknown as WorkspaceRows;
+const rule:GuidanceRow={id:'rule',title:'Scripted test rule',body:'Scripted checked rule.',source_name:'Scripted source',source_url:'https://example.org/rule',checked_on:'2026-10-02',applies_to_steps:[0,1,3]};
+const proposal:PlanRow={id:'plan',case_id:'case',user_id:'owner',run_id:'run',ladder_step:1,summary:'Ask for the overdue refund.',reasons:[{text:'The due date has passed.'}],dates:{refund_due:'2026-09-24'},guidance_ids:['rule'],approved_at:null,rejected_at:null,sent_on:null,outcome:null,created_at:'2026-10-02T01:00:00Z'};
 
 describe('real case screen', () => {
-  const load = vi.fn(); const sourceUrl = vi.fn(); const start = vi.fn(); const advance = vi.fn(); const answer = vi.fn();
+  const load = vi.fn(); const sourceUrl = vi.fn(); const start = vi.fn(); const advance = vi.fn(); const answer = vi.fn(); const reviewPlan=vi.fn();
   beforeEach(() => {
     vi.resetAllMocks(); load.mockResolvedValue(saved); sourceUrl.mockResolvedValue('https://example.test/support.png');
     TestBed.configureTestingModule({ imports: [CaseWorkspace], providers: [provideRouter([]),
-      { provide: CaseWorkspaceService, useValue: { load, sourceUrl, start, advance, answer } }],
+      { provide: CaseWorkspaceService, useValue: { load, sourceUrl, start, advance, answer, reviewPlan } }],
     });
   });
   async function setup() {
@@ -73,5 +76,32 @@ describe('real case screen', () => {
     page.querySelector<HTMLButtonElement>('app-question-card button')!.click(); await fixture.whenStable();
     expect(answer).toHaveBeenCalledExactlyOnceWith('q', { optionId: 'one' }); expect(advance).toHaveBeenCalledTimes(1);
     expect(page.querySelector('app-question-card')).toBeNull();
+  });
+  it.each([0,1])('opens the saved step %s plan with its checked source and no draft or model call',async step=> {
+    load.mockResolvedValue({...saved,plan:{...proposal,ladder_step:step},guidance:[rule]});
+    const {page}=await setup();
+    expect(page.querySelector('#case-tab-plan')?.getAttribute('aria-selected')).toBe('true');
+    expect(page.querySelector('app-plan-panel')?.textContent).toContain('Scripted checked rule.');
+    expect(page.querySelector('app-plan-panel')?.textContent).toContain('checked 2026-10-02');
+    expect(page.querySelector('app-plan-panel a')?.getAttribute('href')).toBe(rule.source_url);
+    expect(page.querySelector('app-complaint-draft')).toBeNull(); expect(advance).not.toHaveBeenCalled();
+    if(step===0) expect(page.textContent).toContain('nothing to send yet');
+  });
+  it.each(['approve','reject','change'] as const)('persists %s through plan review without starting another model call',async action=> {
+    const pending={...saved,plan:proposal,guidance:[rule]};
+    load.mockResolvedValueOnce(pending).mockResolvedValue({...pending,plan:{...proposal,approved_at:action==='approve'?'2026-10-02':null,rejected_at:action==='approve'?null:'2026-10-02'},run:{...saved.run!,status:action==='change'?'waiting_for_user':'completed'},questions:action==='change'?[{id:'change-question',kind:'confirm',field:null,prompt:'What would you like to change in this plan?',options:[],answer:null,answered_at:null}]:[]});
+    reviewPlan.mockResolvedValue(undefined);
+    const {page,fixture}=await setup();
+    const label=action==='approve'?'Approve and':action==='reject'?'Reject this':'Request a change';
+    Array.from(page.querySelectorAll<HTMLButtonElement>('app-plan-panel button')).find(button=>button.textContent?.includes(label))!.click();
+    await fixture.whenStable();
+    expect(reviewPlan).toHaveBeenCalledExactlyOnceWith('plan',action); expect(advance).not.toHaveBeenCalled();
+    if(action==='approve') expect(page.textContent).toContain('You approved this plan.');
+    if(action==='change') { expect(page.textContent).toContain('Needs your answer');expect(page.textContent).toContain('Your requested change will be considered'); }
+  });
+  it('keeps step three information only without an approval button',async()=> {
+    load.mockResolvedValue({...saved,plan:{...proposal,ladder_step:3},guidance:[rule]});
+    const {page}=await setup(); expect(page.textContent).toContain('Information only.');
+    expect(page.querySelectorAll('app-plan-panel button')).toHaveLength(0);
   });
 });

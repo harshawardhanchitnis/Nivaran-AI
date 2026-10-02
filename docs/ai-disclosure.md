@@ -270,6 +270,34 @@ score or a completed live investigation. Guidance rows, plan UI and approval rem
 `npm run check` passed both server type-checks, 255 server/database tests, 60 Angular tests
 and the production build before the T7 commit.
 
+On 2 October 2026, Codex completed T8's saved plan mapping, timeline and caller-owned atomic
+review. The existing PlanPanel and CaseWorkspaceView are reused, with keyboard approval,
+request-change and reject controls, saved review events and focus management. Step zero has
+nothing to send; step three is information only. No review action calls a model or creates a draft.
+Code decision notes, including the seven-day assumption and working-day holiday limitation, are
+retained. The timeline explicitly distinguishes the recorded sent date used in calculations from
+receipt under rule 4(5). The owner checked all six guidance texts against primary sources on
+2 October, correcting the bank example to a cancelled online train-ticket case. That exact text
+and date are in the seed; the owner confirmed applying migration 0007 and the seed.
+
+Three labelled scripted hosted cases exercised the real ladder, tool runner, RLS and atomic
+plan save without a provider call. The waiting case showed step zero and 10 October; the overdue
+case showed step one and 24 September. Keyboard approval persisted both, with zero drafts. The
+review case was rejected, then given a scripted sent date of 1 October and a fresh proposal,
+which showed 3 October and 1 November with the receipt caveat. Request-change archived that
+proposal and created one saved free-text question, restored on reload with focus on its heading.
+The source links and owner-checked dates appeared in the existing plan component. This checks
+code and persistence, not live-model investigation or extraction accuracy. The hosted counter
+remained at fifteen; T8 used zero provider calls.
+
+At 360 px the plan and change question had no horizontal scroll or console errors. Axe found
+zero violations on both; the plan had no incomplete checks. The change question had one incomplete
+contrast rule because its existing background is a gradient. Manual calculation against both
+computed gradient endpoints found minimum text contrast ratios of 5.61:1, 16.32:1 and 8.17:1
+for its three text colours, exceeding 4.5:1. Keyboard focus was also checked. The full check passed
+both server type-checks, 268 server/database tests (including 37 database policy/seed tests),
+70 Angular tests and the production build. Drafting and later tasks remain to build.
+
 ## AI tools used
 
 | Tool | Used for |
