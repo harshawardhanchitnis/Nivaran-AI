@@ -23,10 +23,12 @@ describe('CasesService uploads', () => {
   const ensureSignedIn = vi.fn();
   const from = vi.fn();
   const bucket = vi.fn();
+  let previousDocs: Array<{file_name:string;mime_type:string;size_bytes:number;label:string}>;
   let service: CasesService;
 
   beforeEach(() => {
     vi.resetAllMocks();
+    previousDocs=[];
     ensureSignedIn.mockResolvedValue({ user: { id: owner } });
     upload.mockResolvedValue({ error: null });
     remove.mockResolvedValue({ error: null });
@@ -34,8 +36,8 @@ describe('CasesService uploads', () => {
     insertCase.mockReturnValue({ select: () => ({ single: async () => ({ data: caseRow, error: null }) }) });
     insertDocuments.mockReturnValue({ select: () => ({ returns: async () => ({ data: [], error: null }) }) });
     from.mockImplementation((table: string) => table === 'cases'
-      ? { insert: insertCase, delete: () => ({ eq: deleteCase }) }
-      : { insert: insertDocuments });
+      ? { insert: insertCase, delete: () => ({ eq: deleteCase }),select:()=>({eq:()=>({maybeSingle:async()=>({data:caseRow,error:null})})}) }
+      : { insert: insertDocuments,select:()=>({eq:()=>({returns:async()=>({data:previousDocs,error:null}),maybeSingle:async()=>({data:null,error:null})})}) });
     bucket.mockReturnValue({ upload, remove });
     TestBed.configureTestingModule({
       providers: [{ provide: SupabaseService, useValue: {
@@ -110,5 +112,27 @@ describe('CasesService uploads', () => {
     expect(error).toBeInstanceOf(CaseUploadError);
     expect(error).toMatchObject({ caseId: caseRow.id });
     expect(deleteCase).not.toHaveBeenCalled();
+  });
+  it('adds a reply under the next label without creating or deleting its existing case',async()=>{
+    previousDocs=[{file_name:'invoice.pdf',mime_type:'application/pdf',size_bytes:100,label:'E01'}];
+    insertDocuments.mockImplementation(row=>({select:()=>({single:async()=>({data:{...row,read_status:'pending'},error:null})})}));
+    const reply=await service.addReplyDocument(caseRow.id,file('reply.png'),true);
+    expect(reply.label).toBe('E02');expect(reply.case_id).toBe(caseRow.id);
+    expect(reply.storage_path).toContain(`${owner}/${caseRow.id}/`);
+    expect(insertCase).not.toHaveBeenCalled();expect(deleteCase).not.toHaveBeenCalled();
+  });
+  it('refuses a reply without consent, a duplicate name or a full case before upload',async()=>{
+    await expect(service.addReplyDocument(caseRow.id,file('reply.png'),false)).rejects.toThrow('consent');
+    expect(ensureSignedIn).not.toHaveBeenCalled();
+    previousDocs=[{file_name:'reply.png',mime_type:'image/png',size_bytes:100,label:'E01'}];
+    await expect(service.addReplyDocument(caseRow.id,file('reply.png'),true)).rejects.toThrow('already added');
+    previousDocs=Array.from({length:6},(_,i)=>({file_name:`${i}.png`,mime_type:'image/png',size_bytes:100,label:`E0${i+1}`}));
+    await expect(service.addReplyDocument(caseRow.id,file('reply.png'),true)).rejects.toThrow('6 files');
+    expect(upload).not.toHaveBeenCalled();
+  });
+  it('cleans only the new reply if its document save fails',async()=>{
+    insertDocuments.mockReturnValue({select:()=>({single:async()=>({data:null,error:{message:'failed'}})})});
+    await expect(service.addReplyDocument(caseRow.id,file('reply.png'),true)).rejects.toThrow('earlier files are safe');
+    expect(remove).toHaveBeenCalledExactlyOnceWith([upload.mock.calls[0]![0]]);expect(deleteCase).not.toHaveBeenCalled();
   });
 });

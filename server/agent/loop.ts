@@ -10,6 +10,7 @@ import { StaleTurnError, rateLimitDelay } from './reading.js';
 import { executeTool } from './tools/index.js';
 import { questionAnswer, run as recordStatement } from './tools/record-user-statement.js';
 import type { AgentSnapshot, InvestigationChanges, ToolContext } from './tools/types.js';
+import { outcomeStep } from './outcome-step.js';
 export type { AgentSnapshot, InvestigationChanges } from './tools/types.js';
 
 export interface InvestigationStore {
@@ -88,6 +89,8 @@ export async function advanceInvestigation(store: InvestigationStore, deps: Inve
       return await commit({ state: { ...run.agent_state, quotes_checked: true, image_quote_role: undefined }, evidence: checked.evidence, model:checked.modelId,
         facts: checked.facts, events: [{ type: 'tool_result', payload: { tool: 'check_quotes', modelId:checked.modelId, message: 'Checked source quotes and built the fact sheet.' } }] });
     }
+    if (run.agent_state.outcome_update && !run.agent_state.outcome_decision_done)
+      return await commit(await outcomeStep(context));
     if (run.agent_steps >= run.max_agent_steps) return await commit({ status: 'failed', phase: 'done', error: 'Nivaran could not finish within its step limit. Your facts are saved.',
       events: [{ type: 'error', payload: { message: 'Nivaran could not finish within its step limit. Your facts are saved.' } }] });
     await deps.charge?.();

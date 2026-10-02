@@ -13,6 +13,9 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import type { FactField } from '@shared/facts';
 import type { AgentAnswerRequest } from '@shared/api';
+import type { RecordOutcomeRequest } from '@shared/api';
+import { CasesService } from '../../core/cases.service';
+import { OutcomePanel, type OutcomeSubmission } from '../../shared/ui/outcome-panel';
 import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-workspace.service';
 import { continueReading, waitForReading } from '../../core/reading-loop';
 import {
@@ -35,7 +38,7 @@ import {
 
 @Component({
   selector: 'app-case-workspace',
-  imports: [CaseWorkspaceView, DraftEditor, SentPanel, RouterLink, MatButtonModule],
+  imports: [CaseWorkspaceView, DraftEditor, SentPanel, OutcomePanel, RouterLink, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (rows(); as data) {
@@ -134,6 +137,9 @@ import {
               <p role="status">{{ message }}</p>
             }
           }
+          @if (data.sentComplaint && data.case.status !== 'resolved') {
+            <app-outcome-panel [previous]="data.sentComplaint.outcome" [completedRequest]="completedOutcome()" [existingFiles]="existingFiles()" [busy]="outcomeBusy() || busy() || draftBusy()" (outcomeRequested)="recordOutcome($event)"/>
+          }
         </div>
         @if (data.draft; as draft) {
           <app-draft-editor
@@ -203,6 +209,11 @@ export class CaseWorkspace {
   protected readonly reviewBusy = signal(false);
   protected readonly draftBusy = signal(false);
   protected readonly sentBusy = signal(false);
+  protected readonly outcomeBusy = signal(false);
+  protected readonly completedOutcome=signal<string|null>(null);
+  private readonly cases=inject(CasesService);
+  private pendingOutcome:RecordOutcomeRequest|null=null;
+  protected readonly existingFiles=computed(()=>(this.rows()?.documents??[]).map(d=>({name:d.file_name,type:d.mime_type,size:d.size_bytes})));
   protected readonly draftMessage = signal<string | null>(null);
   protected readonly today = signal(indiaCalendarDate());
   protected readonly waiting = signal(false);
@@ -229,6 +240,7 @@ export class CaseWorkspace {
       !!data?.plan?.approved_at &&
       !data.plan.rejected_at &&
       [1, 2].includes(data.plan.ladder_step) &&
+      !(data.plan.ladder_step === 1 && data.plan.sent_on) &&
       !data.draft
     );
   });
@@ -297,6 +309,9 @@ export class CaseWorkspace {
     this.draftMessage.set(null);
     this.draftBusy.set(false);
     this.sentBusy.set(false);
+    this.outcomeBusy.set(false);
+    this.pendingOutcome=null;
+    this.completedOutcome.set(null);
     this.rows.set(null);
     this.clearPreviews();
     const refresh = async () => {
@@ -506,6 +521,37 @@ export class CaseWorkspace {
       this.draftMessage.set(
         'Could not create the calendar file. Review the saved dates and try again.',
       );
+    }
+  }
+
+  protected async recordOutcome(update: OutcomeSubmission): Promise<void> {
+    const data=this.rows();const controller=this.controller;const generation=this.generation;
+    if (!data?.sentComplaint || !controller || this.busy() || this.outcomeBusy()) return;
+    this.outcomeBusy.set(true);this.busy.set(true);this.error.set(null);
+    const refresh=async()=>{
+      const latest=await this.service.load(data.case.id);
+      if (generation===this.generation) this.rows.set(latest);
+    };
+    try {
+      if (this.pendingOutcome?.requestId!==update.requestId) {
+        const reply=update.file ? await this.cases.addReplyDocument(data.case.id,update.file,update.consent) : null;
+        if (generation!==this.generation) return;
+        this.pendingOutcome={planId:data.sentComplaint.id,requestId:update.requestId,outcome:update.outcome,...(reply?{replyDocumentId:reply.id}:{})};
+      }
+      await this.service.recordOutcome(this.pendingOutcome);
+      if (generation!==this.generation) return;
+      this.completedOutcome.set(update.requestId);
+      this.pendingOutcome=null;
+      await refresh();
+      const latest=this.rows();
+      if (latest) await this.continueRun(latest,controller,refresh);
+    } catch (error) {
+      if (generation===this.generation) {
+        this.error.set(error instanceof Error?error.message:'Could not save the update. Your earlier complaint is safe; try again.');
+        try { await refresh(); } catch { /* Keep the saved screen usable while offline. */ }
+      }
+    } finally {
+      if (generation===this.generation) {this.outcomeBusy.set(false);this.busy.set(false);this.waiting.set(false);}
     }
   }
 

@@ -215,6 +215,13 @@ Four outcomes: refunded (case resolved), acknowledged only, no reply, refused (u
 which is read like any document). The ladder recomputes; step 2 produces the helpline pack from the
 same facts.
 
+Implemented with `0010_case_outcomes.sql`, confirmed applied by the owner. Outcome requests are
+replay-safe, preserve earlier approved complaints and draft versions, and recompute the ladder in
+code without a model call. Refusal replies use the existing reading and quote-checking pipeline.
+Waiting plans cannot generate another letter. The hosted scripted no-reply case produced a saved
+helpline draft; acknowledgement and refund resolution also passed browser checks. Live refusal
+reading and live drafting remain unverified. See `docs/t11-checks.md`.
+
 Checks: the "already complained" sample lands on step 2 with a helpline-shaped text.
 
 ---

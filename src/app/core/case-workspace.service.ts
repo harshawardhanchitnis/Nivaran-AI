@@ -5,6 +5,7 @@ import type {
   AgentAnswerRequest,
   AgentDraftResponse,
   AgentDraftEditRequest,
+  RecordOutcomeRequest,
 } from '@shared/api';
 import type {
   AgentEventRow,
@@ -36,6 +37,7 @@ export interface WorkspaceRows {
   plan: PlanRow | null;
   guidance: GuidanceRow[];
   draft: DraftRow | null;
+  sentComplaint: PlanRow | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -117,6 +119,7 @@ export class CaseWorkspaceService {
       questions: (questions.data ?? []).filter((question) => question.run_id === run?.id),
       plan,
       guidance: guidance.data ?? [],
+      sentComplaint: (plans.data ?? []).find(p => p.ladder_step === 1 && p.approved_at && !p.rejected_at && p.sent_on && (drafts.data ?? []).some(d => d.plan_id === p.id)) ?? null,
       draft:
         plan?.approved_at && !plan.rejected_at
           ? ((drafts.data ?? []).find((draft) => draft.plan_id === plan.id) ?? null)
@@ -139,6 +142,9 @@ export class CaseWorkspaceService {
   }
   markSent(planId: string, sentOn: string): Promise<SentPlanResult> {
     return this.api.post('agent/sent', { planId, sentOn });
+  }
+  recordOutcome(input: RecordOutcomeRequest): Promise<AgentStartResponse> {
+    return this.api.post('agent/outcome',input);
   }
   saveDraftEdit(input: AgentDraftEditRequest): Promise<{ draft: DraftRow }> {
     return this.api.post('agent/draft-edit', input);

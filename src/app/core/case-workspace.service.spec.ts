@@ -123,6 +123,13 @@ describe('CaseWorkspaceService', () => {
     });
     expect(rpc).not.toHaveBeenCalled();
   });
+  it('saves an outcome through ApiService without directly changing facts or making an advance call',async()=>{
+    const input={planId:'plan',requestId:'request',outcome:'refused' as const,replyDocumentId:'reply'};
+    post.mockResolvedValue({run:{id:'continued'}});
+    expect(await service.recordOutcome(input)).toEqual({run:{id:'continued'}});
+    expect(post).toHaveBeenCalledExactlyOnceWith('agent/outcome',input);
+    expect(rpc).not.toHaveBeenCalled();expect(from).not.toHaveBeenCalled();
+  });
   it('requests a short-lived private URL without making a model call', async () => {
     const document = { storage_path: 'owner/case/source.png' } as Parameters<
       CaseWorkspaceService['sourceUrl']

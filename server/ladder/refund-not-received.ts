@@ -70,7 +70,7 @@ export function refundNotReceived(facts: LadderFacts, today: string, context: La
     return result('ladder', [reason('no_acknowledgement', 'More than two calendar days have passed without an acknowledgement.', ['complaint_sent_date', 'complaint_acknowledged'], ['ecommerce-grievance-timelines', 'nch-overview'])], 2);
   if (today > dates['resolve_by']) return result('ladder', [reason('month_elapsed', 'More than one calendar month has passed since your complaint and the refund is still outstanding.', ['complaint_sent_date'], ['ecommerce-grievance-timelines', 'nch-overview'])], 2);
   if (today > dates['acknowledge_by'] && boolean(acknowledged) === null) return ask('complaint_acknowledged', 'Has the merchant acknowledged your complaint?');
-  return result('ladder', [reason('complaint_wait', 'Your complaint is within the calculated waiting dates.', ['complaint_sent_date'], ['ecommerce-grievance-timelines'])], 1);
+  return {...result('ladder', [reason('complaint_wait', 'Your complaint is within the calculated waiting dates.', ['complaint_sent_date'], ['ecommerce-grievance-timelines'])], 1),canDraft:false};
 }
 
 /** Narrow affirmative matching on the checked quote supporting the reference; no model inference. */

@@ -21,6 +21,7 @@ const logicalCapsMigration = readFileSync(path.join(here, '..', '..', 'supabase'
 const planReviewMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0007_plan_review.sql'), 'utf8');
 const draftMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0008_draft_claims.sql'), 'utf8');
 const sentMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0009_mark_sent.sql'), 'utf8');
+const outcomeMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0010_case_outcomes.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -74,6 +75,7 @@ beforeAll(async () => {
   await db.exec(planReviewMigration);
   await db.exec(draftMigration);
   await db.exec(sentMigration);
+  await db.exec(outcomeMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -515,6 +517,64 @@ describe('caller records sending their complaint',()=>{
  it('replays the same date without duplicate evidence or events, and permits an explicit correction',async()=>{
   await mark(ALICE);expect((await db.query("select id from public.evidence_items where case_id=$1 and field='complaint_sent_date'",[caseId])).rows).toHaveLength(1);expect((await db.query('select id from public.agent_events where run_id=$1',[run])).rows).toHaveLength(1);
   expect((await mark(ALICE,plan,'2026-10-01')).rows[0]?.result).toMatchObject({plan:{sent_on:'2026-10-01',dates:{acknowledge_by:'2026-10-03',resolve_by:'2026-11-01'}}});
+ });
+});
+
+describe('caller-recorded case outcomes',()=>{
+ let plan:string;let caseId:string;
+ const request='99999999-9999-4999-8999-999999999999';
+ const record=(user:string,outcome='no_reply',requestId=request,reply:string|null=null)=>asUser(user,()=>db.query<{result:(Record<string,unknown>&{id:string})|null}>('select public.record_case_outcome($1,$2,$3,$4,$5) as result',[plan,requestId,outcome,reply,'2026-10-02']));
+ beforeAll(async()=>{
+  const row=await db.query<{id:string;case_id:string}>('select p.id,p.case_id from public.plans p join public.drafts d on d.plan_id=p.id where p.ladder_step=1 and p.sent_on is not null limit 1');
+  plan=row.rows[0]!.id;caseId=row.rows[0]!.case_id;
+  // Prior claim-recovery fixtures deliberately leave a live claim on this reused test case.
+  await db.query('update public.plans set draft_claim_token=null,draft_claimed_at=null where case_id=$1',[caseId]);
+ });
+ it('refuses visitors, other owners, invalid outcomes and a refusal without its reply',async()=>{
+  await expect(asVisitor(()=>db.query('select public.record_case_outcome($1,$2,$3,$4,$5)',[plan,request,'no_reply',null,'2026-10-02']))).rejects.toThrow(/permission denied/);
+  expect((await record(BOB)).rows[0]?.result).toBeNull();
+  await expect(record(ALICE,'unknown')).rejects.toThrow(/Invalid outcome/);
+  await expect(record(ALICE,'refused')).rejects.toThrow(/written reply/);
+ });
+ it('stores user facts and one continuation, with an idempotent replay and preserved sent history',async()=>{
+  const first=(await record(ALICE)).rows[0]!.result!;
+  expect(first).toMatchObject({status:'running',phase:'investigating',agent_state:{quotes_checked:true,outcome_update:{outcome:'no_reply',request_id:request}}});
+  expect((await record(ALICE)).rows[0]!.result!.id).toBe(first.id);
+  expect((await db.query("select field,status,value_norm from public.case_facts where case_id=$1 and field in ('refund_received','complaint_acknowledged','complaint_refused') order by field",[caseId])).rows).toEqual(['complaint_acknowledged','complaint_refused','refund_received'].map(field=>({field,status:'user',value_norm:{kind:'boolean',value:false}})));
+  expect((await db.query('select sent_on::text,outcome from public.plans where id=$1',[plan])).rows[0]).toEqual({sent_on:'2026-10-01',outcome:'no_reply'});
+  expect((await db.query('select id from public.agent_events where run_id=$1',[first.id])).rows).toHaveLength(1);
+  await expect(record(ALICE,'acknowledged')).rejects.toThrow(/different outcome/);
+ });
+ it('refuses an update during an active step and supersedes an idle proposal on a fresh update',async()=>{
+  const first=(await record(ALICE)).rows[0]!.result!;
+  await db.query("update public.agent_runs set processing_token=$1,processing_started_at=now() where id=$2",[request,first.id]);
+  await expect(record(ALICE,'acknowledged','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')).rejects.toThrow(/current step/);
+  await db.query('update public.agent_runs set processing_token=null,processing_started_at=null where id=$1',[first.id]);
+  const p=await asUser(ALICE,()=>db.query<{id:string}>("insert into public.plans(case_id,run_id,ladder_step) values($1,$2,1) returning id",[caseId,first.id]));
+  expect((await record(ALICE,'acknowledged','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')).rows[0]?.result).toMatchObject({phase:'investigating'});
+  expect((await db.query('select rejected_at::text from public.plans where id=$1',[p.rows[0]!.id])).rows[0]).toMatchObject({rejected_at:expect.any(String)});
+  const received=await db.query<{value_norm:unknown}>("select value_norm from public.case_facts where case_id=$1 and field='complaint_acknowledged'",[caseId]);expect(received.rows[0]?.value_norm).toEqual({kind:'boolean',value:true});
+ });
+ it('carries the sent date into a waiting plan and prevents another draft claim',async()=>{
+  const p=await asUser(ALICE,()=>db.query<{id:string;sent_on:string}>("insert into public.plans(case_id,ladder_step,approved_at) values($1,1,now()) returning id,sent_on::text",[caseId]));
+  expect(p.rows[0]!.sent_on).toBe('2026-10-01');
+  expect((await asUser(ALICE,()=>db.query<{result:unknown}>('select public.claim_plan_draft($1,$2) as result',[p.rows[0]!.id,request]))).rows[0]?.result).toBeNull();
+ });
+ it('requires a pending reply owned by the same case, then reads it through the normal reading phase',async()=>{
+  const doc=await asUser(ALICE,()=>db.query<{id:string}>("insert into public.documents(case_id,label,file_name,storage_path,mime_type,size_bytes) values($1,'E06','reply.pdf',$2,'application/pdf',100) returning id",[caseId,`${ALICE}/${caseId}/reply.pdf`]));
+  const id=doc.rows[0]!.id;
+  expect((await record(ALICE,'refused','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',id)).rows[0]?.result).toMatchObject({phase:'reading',agent_state:{quotes_checked:false,outcome_update:{reply_document_id:id}}});
+  await db.query("update public.documents set read_status='read' where id=$1",[id]);
+  await expect(record(ALICE,'refused','cccccccc-cccc-4ccc-8ccc-cccccccccccc',id)).rejects.toThrow(/written reply/);
+ });
+ it('records a received refund and retains the original complaint and its versions',async()=>{
+  const r=(await record(ALICE,'refunded','dddddddd-dddd-4ddd-8ddd-dddddddddddd')).rows[0]!.result!;
+  const claim=await asUser(ALICE,()=>db.query<{result:Record<string,unknown>}>('select public.claim_agent_turn($1,0,$2) as result',[r.id,request]));
+  await asUser(ALICE,()=>db.query('select public.finish_agent_step($1,0,$2,$3)',[r.id,request,{status:'completed',phase:'done',state:{...claim.rows[0]!.result['agent_state'] as object,next_step:{outcome:'resolved'}},events:[{type:'decision',payload:{action:'outcome_recomputed',message:'You recorded that the refund arrived.'}}]}]));
+  expect((await db.query('select status from public.cases where id=$1',[caseId])).rows[0]).toEqual({status:'resolved'});
+  expect((await db.query('select version from public.drafts where plan_id=$1',[plan])).rows).toHaveLength(2);
+  expect((await record(ALICE,'refunded','dddddddd-dddd-4ddd-8ddd-dddddddddddd')).rows[0]?.result).toMatchObject({status:'completed'});
+  expect((await record(ALICE,'no_reply','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee')).rows[0]?.result).toBeNull();
  });
 });
 

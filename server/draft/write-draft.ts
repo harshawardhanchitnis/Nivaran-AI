@@ -42,6 +42,8 @@ export async function writeDraft(
     throw new HttpError(409, 'no_complaint_needed', 'This step has nothing to draft.');
   const existing = await store.existing(plan.id);
   if (existing) return existing;
+  if (plan.ladder_step === 1 && plan.sent_on)
+    throw new HttpError(409,'no_complaint_needed','Your complaint is already recorded as sent. Review the waiting dates or record what happened.');
   const claimed = await store.claim(plan.id);
   if (!claimed) {
     const saved = await store.existing(plan.id);

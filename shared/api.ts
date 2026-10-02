@@ -81,3 +81,12 @@ export const markSentRequestSchema = z.object({
   planId: z.uuid(),
   sentOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
+export const recordOutcomeRequestSchema = z.object({
+  planId: z.uuid(),
+  requestId: z.uuid(),
+  outcome: z.enum(['refunded', 'acknowledged', 'no_reply', 'refused']),
+  replyDocumentId: z.uuid().optional(),
+}).refine(input => input.outcome === 'refused' ? !!input.replyDocumentId : !input.replyDocumentId, {
+  message: 'Add the written reply for a refusal. Other outcomes do not need a reply file.',
+});
+export type RecordOutcomeRequest = z.infer<typeof recordOutcomeRequestSchema>;

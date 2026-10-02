@@ -39,6 +39,14 @@ describe('one model-chosen investigation step', () => {
     expect(finishStep.mock.calls[1]?.[1]).toMatchObject({ plan: { ladder_step: 1, dates: { refund_due: '2026-09-24' } } });
     expect(charge.mock.invocationCallOrder[0]).toBeLessThan(choose.mock.invocationCallOrder[0]!);
   });
+  it('recomputes a recorded refund outcome without charging or choosing a model tool',async()=>{
+    run.agent_state.outcome_update={plan_id:'plan',request_id:'request',outcome:'refunded',recorded_on:'2026-10-02'};
+    nextStep.mockResolvedValue({outcome:'resolved',reasons:[{text:'You recorded that the refund arrived.'}],dates:{today:'2026-10-02'}});
+    await advanceInvestigation(store,deps,run.id,0);
+    expect(run.status).toBe('completed');
+    expect(charge).not.toHaveBeenCalled();expect(choose).not.toHaveBeenCalled();
+    expect(finishStep.mock.calls[0]?.[1]).toMatchObject({events:[{type:'decision',payload:{action:'outcome_recomputed'}}]});
+  });
   it('retains code assumption notes and requires the decision’s applicable guidance', async () => {
     run.agent_state.next_step = { outcome: 'ladder', step: 1, reasons: [{ text: 'Overdue.', guidanceIds: ['checked-rule'] }], dates: { refund_due: '2026-09-24' }, notes: ["Nivaran's working assumption, not a rule."] };
     choose.mockResolvedValue({ name: 'propose_plan', input: { summary: 'Ask for the refund.', guidance_ids: ['checked-rule'] } });

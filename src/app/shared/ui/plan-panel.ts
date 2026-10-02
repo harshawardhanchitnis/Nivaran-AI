@@ -66,7 +66,8 @@ import type { PlanView } from './models';
           <p>Information only. Nivaran prepares no complaint at this step.</p>
         } @else {
           @if (plan().step === 0) { <p>The promised date has not passed. There is nothing to send yet.</p> }
-          <button mat-flat-button type="button" [disabled]="busy()" (click)="approve.emit()">{{ plan().step === 0 ? 'Accept this waiting plan' : 'Approve and prepare the complaint' }}</button>
+          @if (plan().waitingForReply) { <p>Your complaint is already recorded as sent. Wait for the dates, or record what happened.</p> }
+          <button mat-flat-button type="button" [disabled]="busy()" (click)="approve.emit()">{{ plan().step === 0 || plan().waitingForReply ? 'Accept this waiting plan' : 'Approve and prepare the complaint' }}</button>
           <button mat-button type="button" [disabled]="busy()" (click)="edit.emit()">Request a change</button>
           <button mat-button type="button" [disabled]="busy()" (click)="decline.emit()">Reject this plan</button>
         }

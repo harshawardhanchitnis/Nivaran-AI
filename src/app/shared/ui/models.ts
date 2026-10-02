@@ -114,6 +114,7 @@ export interface PlanView {
   summary: string;
   reasons: readonly ReasonView[];
   timeline: readonly TimelineItemView[];
+  waitingForReply?: boolean;
 }
 export interface SentPlanView {
   sentOn: string | null;

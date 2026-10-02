@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import type { CaseRow, DocumentRow, PlanRow } from '@shared/database';
-import { EVIDENCE_BUCKET, evidencePath } from '@shared/limits';
+import { EVIDENCE_BUCKET, evidencePath, MAX_FILES_PER_CASE } from '@shared/limits';
 import { checkFiles } from '../features/case-new/file-rules';
 import type { CaseSummaryView } from '../shared/ui/models';
 import { caseSummary } from './case-summary';
@@ -89,5 +89,35 @@ export class CasesService {
       timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
     }).format(new Date());
     return cases.map((row) => caseSummary(row, counts.get(row.id) ?? 0, dates.get(row.id) ?? {}, today));
+  }
+  /** Append one reply to an existing caller-owned case. Its earlier files are never removed. */
+  async addReplyDocument(caseId: string, file: File, consent: boolean): Promise<DocumentRow> {
+    if (!consent) throw new CaseUploadError('Please give consent before uploading.');
+    const basic=checkFiles([file],[]);
+    if (basic.problems.length) throw new CaseUploadError(basic.problems.join(' '));
+    const session=await this.supabase.ensureSignedIn();
+    const client=this.supabase.client;
+    const owner=await client.from('cases').select('id').eq('id',caseId).maybeSingle();
+    if (owner.error || !owner.data) throw new CaseUploadError('This case is not available in this browser.');
+    const previous=await client.from('documents').select('*').eq('case_id',caseId).returns<DocumentRow[]>();
+    if (previous.error) throw new CaseUploadError('Could not check the existing files. Reload and try again.');
+    const checked=checkFiles([file],(previous.data??[]).map(d=>({name:d.file_name,type:d.mime_type,size:d.size_bytes})));
+    if (checked.problems.length) throw new CaseUploadError(checked.problems.join(' '));
+    const id=crypto.randomUUID();
+    const path=evidencePath(session.user.id,caseId,id,file.name);
+    const number=Math.max(0,...(previous.data??[]).map(d=>Number(d.label.slice(1))))+1;
+    if (!Number.isSafeInteger(number) || number>MAX_FILES_PER_CASE) throw new CaseUploadError('This case has no free evidence label. Start a new case if you need more files.');
+    const row={id,case_id:caseId,label:`E${String(number).padStart(2,'0')}`,file_name:file.name,storage_path:path,mime_type:file.type,size_bytes:file.size};
+    const storage=client.storage.from(EVIDENCE_BUCKET);
+    const upload=await storage.upload(path,file,{contentType:file.type,upsert:false});
+    if (upload.error) throw new CaseUploadError('Could not upload the reply. Your earlier files are safe; try again.');
+    const saved=await client.from('documents').insert(row).select().single<DocumentRow>();
+    if (!saved.error && saved.data) return saved.data;
+    // A lost response may hide a successful insert. Confirm before cleaning up this new file.
+    const confirmed=await client.from('documents').select('*').eq('id',id).maybeSingle<DocumentRow>();
+    if (!confirmed.error && confirmed.data) return confirmed.data;
+    if (confirmed.error) throw new CaseUploadError('The reply upload could not be confirmed. Reload your case before adding it again.',caseId);
+    const cleanup=await storage.remove([path]);
+    throw new CaseUploadError(cleanup.error ? 'The reply could not be saved or cleaned up. Your earlier files are safe; reload your case.' : 'Could not save the reply. Your earlier files are safe; try again.',caseId);
   }
 }

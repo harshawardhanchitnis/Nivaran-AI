@@ -341,13 +341,29 @@ remained at fifteen. The full check passed both server type-checks, 334 server/d
 (including 46 policy/seed tests), 83 Angular tests and the production build.
 See `docs/t10-checks.md` for evidence and the remaining check.
 
+On 2 October 2026, Codex implemented T11's four outcomes, consented refusal-reply upload and
+caller-owned, replay-safe continuation with migration 0010, which the owner applied. Code
+recomputes the ladder; refusal files use the existing reader and quote checks. Waiting plans
+cannot produce a duplicate letter. Earlier approved complaints and draft versions are retained.
+The existing presentational case layout and design tokens were reused.
+
+The hosted synthetic fixture reached step two after no reply. Caller-scoped approval and an
+injected scripted generator saved helpline-shaped text using the same facts; the model label
+explicitly says `scripted-test-no-provider`. Browser checks reopened its complaint and pack at
+360 px with no horizontal scroll, no console warnings/errors and no axe violations or incomplete
+checks. Acknowledgement produced a waiting plan, and refund arrived resolved the case. All three
+saved draft versions remained in the database. The full check passed both type-checks, 351
+server/database tests (52 policy/seed tests), 90 Angular tests and production build. Zero provider
+calls were made; usage remained at fifteen. Refusal reading and helpline drafting with real
+models remain unverified. See `docs/t11-checks.md`.
+
 ## AI tools used
 
 | Tool | Used for |
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T10 implementation and checks, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2 October 2026. |
+| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation and checks, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2 October 2026. |
 | Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; new routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October 2026. These are manual fixture checks. |
 | Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing checks on 2 October 2026. The selected ladder tool remained unavailable. These are manual fixture checks, not product evaluation results. |
 

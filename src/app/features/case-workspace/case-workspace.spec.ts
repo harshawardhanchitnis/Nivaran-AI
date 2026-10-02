@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { CaseWorkspaceService, type WorkspaceRows } from '../../core/case-workspace.service';
+import { CasesService } from '../../core/cases.service';
 import { CaseWorkspace } from './case-workspace';
 import type { GuidanceRow, PlanRow } from '@shared/database';
 
@@ -77,6 +78,7 @@ describe('real case screen', () => {
       imports: [CaseWorkspace],
       providers: [
         provideRouter([]),
+        {provide:CasesService,useValue:{addReplyDocument:vi.fn()}},
         {
           provide: CaseWorkspaceService,
           useValue: { load, sourceUrl, start, advance, answer, reviewPlan, prepareDraft },
@@ -273,5 +275,13 @@ describe('real case screen', () => {
     const { page } = await setup();
     expect(page.textContent).toContain('Information only.');
     expect(page.querySelectorAll('app-plan-panel button')).toHaveLength(0);
+  });
+  it('accepts waiting dates for an already sent step-one complaint without preparing another letter',async()=>{
+    const waiting={...saved,plan:{...proposal,sent_on:'2026-10-01'},guidance:[rule]};
+    load.mockResolvedValueOnce(waiting).mockResolvedValue({...waiting,plan:{...waiting.plan,approved_at:'2026-10-02'}});
+    const {fixture,page}=await setup();
+    expect(page.textContent).toContain('already recorded as sent');
+    Array.from(page.querySelectorAll<HTMLButtonElement>('app-plan-panel button')).find(b=>b.textContent?.includes('Accept this waiting plan'))!.click();
+    await fixture.whenStable();expect(prepareDraft).not.toHaveBeenCalled();
   });
 });

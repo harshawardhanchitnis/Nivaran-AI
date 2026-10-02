@@ -19,13 +19,15 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > Scripted hosted saves, edit privacy, copy and browser PDF output have passed checks. Live model
 > drafting and the deployed journey remain unverified. Sent-date recording and a local calendar
 > download pass hosted and browser checks; a calendar-app preview is awaiting the owner.
-> Outcomes and the full evaluation remain to build.
+> Outcome recording now recomputes the ladder, waits after acknowledgement, resolves a received
+> refund, or reads an uploaded refusal. A scripted no-reply continuation produced a helpline pack.
+> The full live evaluation remains pending.
 > See `docs/ai-disclosure.md` for dates and checks.
 
 Model calls use configurable vision and text lineups in `.env.example`. PDF pages with text are
 extracted locally; scanned or mixed PDFs use vision, and Groq never receives PDF file bytes.
 Each logical call is charged once, with immediate provider failover and signed database cooldowns.
-Apply migrations in order through `0009_mark_sent.sql`, apply the owner-checked `supabase/seed.sql`, run
+Apply migrations in order through `0010_case_outcomes.sql`, apply the owner-checked `supabase/seed.sql`, run
 `node scripts/prepare-model-cooldowns.mjs`, then apply its ignored setup SQL in the dashboard.
 Keep `MODEL_COOLDOWN_SIGNING_SECRET` server-only; add that local setting to Vercel when deploying.
 Current owner-reported Gemini daily limits support conservative app caps of 15 per user and 15
@@ -61,9 +63,10 @@ You need Node 22 and a Supabase project.
    npm install
    ```
 
-2. In Supabase: run every file in `supabase/migrations/` in numeric order, through `0009`.
+2. In Supabase: run every file in `supabase/migrations/` in numeric order, through `0010`.
    They add caller-owned reading/investigation transactions, signed model availability and
-   daily caps of 15 logical calls per user and 15 globally, plan review, draft saves and sent dates.
+   daily caps of 15 logical calls per user and 15 globally, plan review, draft saves, sent dates
+   and outcome continuation.
    Apply `supabase/seed.sql` for the owner-checked guidance. Review caps against your provider limits.
    Turn on anonymous sign-ins (Authentication > Sign In / Providers).
 

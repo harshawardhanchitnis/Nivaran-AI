@@ -93,6 +93,15 @@ export interface AgentState {
   next_step?: Record<string, unknown>;
   checked_guidance?: GuidanceRow[];
   answered_question_id?: string;
+  /** Caller-recorded outcome; code recomputes the ladder after any new reply is read. */
+  outcome_update?: {
+    plan_id: string;
+    request_id: string;
+    outcome: PlanOutcome;
+    recorded_on: string;
+    reply_document_id?: string;
+  };
+  outcome_decision_done?: boolean;
 }
 
 export interface AgentRunRow {

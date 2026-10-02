@@ -122,6 +122,7 @@ export function workspacePlan(
     id: plan.id,
     step,
     headline: LADDER_STEP_LABELS[step],
+    waitingForReply: step === 1 && !!plan.sent_on,
     summary: plan.summary ?? 'Review this next step and its sources.',
     reasons,
     timeline: timeline

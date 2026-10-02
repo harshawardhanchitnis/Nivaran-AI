@@ -63,6 +63,13 @@ describe('approval-gated idempotent drafting', () => {
         });
     },
   );
+  it('does not generate another grievance letter for a sent waiting plan, but restores its saved draft',async()=>{
+    plan.sent_on='2026-10-01';
+    await expect(writeDraft(store,deps,'plan')).rejects.toMatchObject({code:'no_complaint_needed'});
+    expect(claim).not.toHaveBeenCalled();expect(generate).not.toHaveBeenCalled();
+    const old={id:'original'};existing.mockResolvedValue(old);
+    expect(await writeDraft(store,deps,'plan')).toEqual(old);
+  });
   it.each([0, 3])('prepares nothing at information/wait step %s', (step) => {
     plan.ladder_step = step;
     return expect(writeDraft(store, deps, 'plan'))
