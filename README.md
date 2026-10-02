@@ -12,7 +12,8 @@ Built for WCC Launchpad 30, Track 1 (Agentic AI).
 > quote checks and atomic fact persistence passed unit and hosted fixture checks. The investigating
 > loop has eight validated tools, saved state, questions and a step limit, tested with scripted models.
 > Stored questions, one-tap/text answers and the real activity log are connected; answering resumes
-> without reloading. The code ladder is next. Plans, drafting and later tasks are still to build.
+> without reloading. The pure refund ladder and date arithmetic are connected to `get_next_step`.
+> Plans, drafting and later tasks are still to build.
 > See `docs/ai-disclosure.md` for dates and checks.
 
 Model calls use configurable vision and text lineups in `.env.example`. PDF pages with text are

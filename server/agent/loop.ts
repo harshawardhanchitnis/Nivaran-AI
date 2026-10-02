@@ -26,7 +26,7 @@ export interface InvestigationDependencies {
   choose(snapshot: AgentSnapshot, run: AgentRunRow): Promise<{ name: string; input: unknown; modelId?: string }>;
   check(snapshot: AgentSnapshot, role: ModelRole): Promise<CheckedFactSheet>;
   reread(document: DocumentRow, role: ModelRole, question: string): Promise<ReadDocumentResult>;
-  nextStep(facts: readonly CaseFactRow[]): Promise<Record<string, unknown>>;
+  nextStep(facts: readonly CaseFactRow[], snapshot: AgentSnapshot): Promise<Record<string, unknown>>;
 }
 
 /** One charged model call OR a deferred read/check per request, and one atomic turn commit. */
@@ -48,7 +48,7 @@ export async function advanceInvestigation(store: InvestigationStore, deps: Inve
   };
   try {
     const snapshot = await store.snapshot(run);
-    const context: ToolContext = { snapshot, state: run.agent_state, searchGuidance: query => store.searchGuidance(query), nextStep: deps.nextStep };
+    const context: ToolContext = { snapshot, state: run.agent_state, searchGuidance: query => store.searchGuidance(query), nextStep: facts => deps.nextStep(facts, snapshot) };
     if (run.status === 'waiting_for_user' && answered) {
       const value = questionAnswer(answered);
       if (!value || value.length > 4000) throw new HttpError(400, 'answer_invalid', 'Please enter an answer or choose one of the options.');

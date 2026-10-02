@@ -250,6 +250,26 @@ was needed for T6. The pure ladder, plans and subsequent tasks remain to build.
 `npm run check` passed both server type-checks, 216 server/database tests, 60 Angular tests
 and the production build before the T6 commit.
 
+On 2 October 2026, Codex implemented T7's pure refund ladder, separate definition and date helpers,
+and connected them to `get_next_step`. The engine receives an injectable India calendar date.
+It follows the specification's order, pauses on conflicting/unchecked decision fields, waits on
+the due date itself, escalates only after the two-day or calendar-month boundary, and clamps
+month-end dates. Working days skip weekends and disclose that holidays are not handled. The
+seven-day assumption requires an explicit user statement that no date was given and is labelled
+as a working assumption, not a rule. A reference alone does not establish processing: the bank
+branch also needs a narrow affirmative processing statement in the checked source quote supporting
+that reference. No extra fact field or model inference was added. Step three is information only
+and requires explicit unresolved-helpline context; connecting that user outcome remains T11.
+
+Thirty-nine ladder/date/adapter tests cover all nine rules, precedence, conflicts, unknown
+acknowledgement, an absent reference including "None", negated/future processing claims, weekends,
+leap days, month ends and the India date boundary. A read-only check against the existing hosted
+T2 fact sheet returned step one for the 24 September due date and no recorded complaint date on
+2 October. It changed no row and made zero model calls. This is a fixture check, not an evaluation
+score or a completed live investigation. Guidance rows, plan UI and approval remain T8.
+`npm run check` passed both server type-checks, 255 server/database tests, 60 Angular tests
+and the production build before the T7 commit.
+
 ## AI tools used
 
 | Tool | Used for |
