@@ -8,6 +8,7 @@ import type { LanguageModel } from 'ai';
 
 import { type ServerEnv, readEnv } from '../env.js';
 import { HttpError } from '../http.js';
+import { googleFetch } from './google-fetch.js';
 
 export type ModelRole = 'primary' | 'fallback';
 
@@ -23,7 +24,7 @@ export function getModel(role: ModelRole, env: ServerEnv = readEnv()): ModelHand
     if (!env.googleApiKey) {
       throw new HttpError(503, 'model_not_configured', 'The primary model key is not set on the server.');
     }
-    const google = createGoogleGenerativeAI({ apiKey: env.googleApiKey });
+    const google = createGoogleGenerativeAI({ apiKey: env.googleApiKey, fetch: googleFetch });
     return { role, provider: 'google', modelId: env.primaryModelId, model: google(env.primaryModelId) };
   }
 

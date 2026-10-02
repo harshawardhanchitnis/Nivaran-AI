@@ -1,6 +1,7 @@
 // Request and response shapes for /api. The server validates requests with the schemas here;
 // the browser imports the types only (`import type`), so zod stays out of the client bundle.
 import { z } from 'zod';
+import type { AgentEventRow, AgentRunRow, PlanRow, QuestionRow } from './database.js';
 
 /** Every error response from /api has this body. */
 export interface ApiErrorBody {
@@ -40,4 +41,15 @@ export interface LlmCheckResponse {
   modelId: string;
   milliseconds: number;
   text: string;
+}
+
+export const agentStartRequestSchema = z.object({ caseId: z.uuid() });
+export const agentAdvanceRequestSchema = z.object({ runId: z.uuid(), expectedTurn: z.number().int().nonnegative() });
+export interface AgentStartResponse { run: AgentRunRow }
+export interface AgentAdvanceResponse {
+  run: AgentRunRow;
+  events: AgentEventRow[];
+  question?: QuestionRow;
+  plan?: PlanRow;
+  retryAfterMs?: number;
 }

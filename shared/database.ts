@@ -91,6 +91,10 @@ export interface AgentRunRow {
   max_agent_steps: number;
   model: string | null;
   error: string | null;
+  processing_token: string | null;
+  processing_started_at: string | null;
+  /** A deferred image fallback is performed on the next HTTP request. No raw document text. */
+  reader_state: { fallback_document_id?: string };
   started_at: string;
   ended_at: string | null;
 }
@@ -176,4 +180,10 @@ export interface ModelChargeResult {
   reason: 'user_limit' | 'global_limit' | null;
   user_calls: number;
   user_limit: number;
+}
+
+/** Dashboard-managed app_settings limits; callers cannot read or change them through the API. */
+export interface AppModelLimits {
+  per_user_daily_model_calls: number;
+  global_daily_model_calls: number;
 }

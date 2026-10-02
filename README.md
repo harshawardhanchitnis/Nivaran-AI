@@ -6,8 +6,10 @@ dates, and a complaint pack the consumer reviews and sends themselves.
 Built for WCC Launchpad 30, Track 1 (Agentic AI).
 
 > **Status: build in progress.** Case creation, private document uploads and My cases are connected.
-> `/demo` shows the presentational case screen with invented sample data. Document reading and
-> the agent workflow are still to build. See `docs/ai-disclosure.md` for what was built and when.
+> `/demo` shows the presentational case screen with invented sample data. The document-reading
+> server passed hosted PDF and image reading checks. The real case screen and
+> investigation workflow are next in the build plan.
+> Investigation and later tasks are still to build. See `docs/ai-disclosure.md` for dates and checks.
 
 ## Documents
 
@@ -35,8 +37,12 @@ You need Node 22 and a Supabase project.
    npm install
    ```
 
-2. In Supabase: run `supabase/migrations/0001_init.sql` in the SQL Editor, then turn on anonymous
-   sign-ins (Authentication > Sign In / Providers).
+2. In Supabase: run `supabase/migrations/0001_init.sql`, then
+   `supabase/migrations/0002_agent_reading.sql` in the SQL Editor. The second migration adds
+   reading transactions and sets daily model-call caps to 8 per user and 15 globally, based on
+   the owner's reported 20-request primary quota. Review these against your own provider limits.
+   Then run `0003_development_quota.sql`, which sets 12 per user while retaining 15 globally.
+   Turn on anonymous sign-ins (Authentication > Sign In / Providers).
 
 3. Copy `.env.example` to `.env.local` and fill it in.
 

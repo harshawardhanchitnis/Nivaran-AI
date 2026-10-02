@@ -29,7 +29,7 @@ import { checkFiles, formatBytes } from './file-rules';
       <section class="notice surface" aria-labelledby="privacy-title">
         <h2 id="privacy-title"><mat-icon aria-hidden="true">shield</mat-icon> Before you upload</h2>
         <ul>
-          <li>Your documents are sent to Google’s Gemini model to be read.</li>
+          <li>Your documents are sent to Google’s Gemini model to be read. Images may also be sent to Groq if the primary reading fails.</li>
           <li>On the free tier, Google may use that content to improve its products.</li>
           <li>Hide card numbers and anything you do not want to share before uploading.</li>
           <li>You can delete your case, files and records at any time.</li>

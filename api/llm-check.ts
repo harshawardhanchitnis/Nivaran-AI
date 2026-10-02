@@ -1,15 +1,13 @@
 // POST /api/llm-check: spends ONE model call to prove a provider key works. Used by the /status
 // page. Signed-in callers only, and only while ENABLE_LLM_CHECK=true.
 import { generateText } from 'ai';
-import { z } from 'zod';
 
 import { type LlmCheckResponse, llmCheckRequestSchema } from '../shared/api.js';
 import { requireUser } from '../server/auth.js';
 import { readEnv } from '../server/env.js';
 import { HttpError, handle, json, readJson } from '../server/http.js';
 import { getModel } from '../server/llm/provider.js';
-
-const chargeResultSchema = z.object({ allowed: z.boolean() });
+import { chargeModelCall } from '../server/usage.js';
 
 export const POST = handle(async (request) => {
   const env = readEnv();
@@ -20,14 +18,7 @@ export const POST = handle(async (request) => {
   const { role } = await readJson(request, llmCheckRequestSchema);
   const selected = getModel(role, env);
 
-  const { data, error } = await supabase.rpc('charge_model_call');
-  const charge = chargeResultSchema.safeParse(data);
-  if (error || !charge.success) {
-    throw new HttpError(503, 'usage_check_failed', 'Could not check the model call limit. Please try again.');
-  }
-  if (!charge.data.allowed) {
-    throw new HttpError(429, 'quota_exhausted', 'Today\'s model call limit has been reached. Please try again tomorrow.');
-  }
+  await chargeModelCall(supabase);
 
   const started = Date.now();
   let text: string;

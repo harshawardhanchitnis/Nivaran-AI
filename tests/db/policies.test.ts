@@ -11,6 +11,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const stubs = readFileSync(path.join(here, 'supabase-stubs.sql'), 'utf8');
 const migration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0001_init.sql'), 'utf8');
+const readingMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0002_agent_reading.sql'), 'utf8');
+const quotaMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0003_development_quota.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -56,6 +58,8 @@ beforeAll(async () => {
   db = await PGlite.create();
   await db.exec(stubs);
   await db.exec(migration);
+  await db.exec(readingMigration);
+  await db.exec(quotaMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -65,6 +69,11 @@ beforeAll(async () => {
 });
 
 describe('cases', () => {
+  it('installs daily app caps below the owner-reported primary quota', async () => {
+    const limits = await db.query<{ value: unknown }>("select value from public.app_settings where key = 'limits'");
+    expect(limits.rows[0]?.value).toMatchObject({ per_user_daily_model_calls: 12, global_daily_model_calls: 15 });
+  });
+
   it('lets a user create and read their own case, with user_id filled in', async () => {
     const caseId = await createCase(ALICE, 'Alice refund');
     const rows = await asUser(ALICE, () => db.query<{ id: string; user_id: string }>('select id, user_id from public.cases'));
@@ -227,6 +236,70 @@ describe('evidence files', () => {
     const theirs = await asUser(BOB, () => db.query('select name from storage.objects'));
     expect(mine.rows.length).toBeGreaterThan(0);
     expect(theirs.rows).toHaveLength(0);
+  });
+});
+
+describe('agent reading transactions', () => {
+  let caseId: string;
+  let runId: string;
+  const token = '33333333-3333-4333-8333-333333333333';
+  const otherToken = '44444444-4444-4444-8444-444444444444';
+
+  beforeAll(async () => {
+    caseId = await createCase(ALICE, 'Reading transaction tests');
+    await asUser(ALICE, () => addDocument(caseId, 'E01', ALICE));
+    const run = await asUser(ALICE, () => db.query<{ id: string }>('insert into public.agent_runs (case_id) values ($1) returning id', [caseId]));
+    runId = run.rows[0]!.id;
+  });
+
+  const claim = (user: string, turn: number, claimToken = token) => asUser(user, async () => {
+    const result = await db.query<{ claimed: unknown }>('select public.claim_agent_turn($1, $2, $3) as claimed', [runId, turn, claimToken]);
+    return result.rows[0]!.claimed;
+  });
+
+  it('lets only the owner claim a current turn, and excludes a second claimant', async () => {
+    expect(await claim(BOB, 0)).toBeNull();
+    expect(await claim(ALICE, 99)).toBeNull();
+    expect(await claim(ALICE, 0)).toMatchObject({ id: runId, turn: 0, processing_token: token });
+    expect(await claim(ALICE, 0, otherToken)).toBeNull();
+  });
+
+  it('releases a claim without moving the turn; another token cannot release it', async () => {
+    await asUser(ALICE, () => db.query('select public.release_agent_turn($1, $2, $3)', [runId, 0, otherToken]));
+    expect(await claim(ALICE, 0, otherToken)).toBeNull();
+    await asUser(ALICE, () => db.query('select public.release_agent_turn($1, $2, $3)', [runId, 0, token]));
+    expect(await claim(ALICE, 0)).toMatchObject({ turn: 0 });
+  });
+
+  it('commits facts, the document, the event and the turn together, and refuses a replay', async () => {
+    const doc = await db.query<{ id: string }>('select id from public.documents where case_id = $1', [caseId]);
+    const result = { doc_type: 'invoice', readable: true, facts: [{ field: 'order_id', value_text: 'MM-123456', quote: 'Order MM-123456', page: 1 }] };
+    const finish = (user: string, claimToken: string) => asUser(user, async () => {
+      const rows = await db.query<{ finished: unknown }>(
+        `select public.finish_agent_reading($1, 0, $2, $3, $4::jsonb, 'read', '{}'::jsonb, $5::jsonb, 'fake-model') as finished`,
+        [runId, claimToken, doc.rows[0]!.id, JSON.stringify(result), JSON.stringify({ type: 'tool_result', payload: { tool: 'read_document', label: 'E01' } })],
+      );
+      return rows.rows[0]!.finished;
+    });
+    expect(await finish(BOB, token)).toBeNull();
+    expect(await finish(ALICE, otherToken)).toBeNull();
+    expect(await finish(ALICE, token)).toMatchObject({ run: { turn: 1, processing_token: null }, events: [{ type: 'tool_result' }] });
+    expect(await finish(ALICE, token)).toBeNull();
+    const evidence = await db.query<{ n: number }>('select count(*)::int as n from public.evidence_items where case_id = $1', [caseId]);
+    expect(evidence.rows[0]!.n).toBe(1);
+    const documents = await db.query<{ read_status: string }>('select read_status from public.documents where case_id = $1', [caseId]);
+    expect(documents.rows[0]!.read_status).toBe('read');
+  });
+
+  it('allows one active run per case', async () => {
+    await expect(asUser(ALICE, () => db.query('insert into public.agent_runs (case_id) values ($1)', [caseId]))).rejects.toThrow(/duplicate key/);
+  });
+
+  it('refuses visitors and allows recovery of an expired claim', async () => {
+    await expect(asVisitor(() => db.query('select public.claim_agent_turn($1, 1, $2)', [runId, token]))).rejects.toThrow(/permission denied/);
+    expect(await claim(ALICE, 1)).toMatchObject({ turn: 1 });
+    await db.query("update public.agent_runs set processing_started_at = now() - interval '3 minutes' where id = $1", [runId]);
+    expect(await claim(ALICE, 1, otherToken)).toMatchObject({ processing_token: otherToken });
   });
 });
 

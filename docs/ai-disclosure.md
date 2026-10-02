@@ -20,6 +20,7 @@ that development may begin before the event, as recorded in `AGENTS.md`.
 | Documents | `docs/SPEC.md`, `docs/BUILD_PLAN.md`, `AGENTS.md`, this file. |
 | Visual design (Claude, 2 October 2026) | Design tokens, presentational case components and view models, home and new-case screens, and `/demo` with invented sample data. |
 | T1 (Codex, 2 October 2026) | Case creation, private evidence upload, document rows, and My cases with stored steps and dates, using the existing design system. |
+| T2 (Codex, 2 October 2026) | Tool-free document reader, charged calls, reading endpoints and exclusive turn claims with atomic results. Hosted PDF and image reading, repeated start and stale turn checks passed. |
 
 The initial starter did not include document reading, verification, the agent loop and its tools,
 the escalation ladder, drafting and the linter, the evaluation set, or product screens. These are
@@ -66,6 +67,57 @@ an existing text token. T1 used zero model calls. `npm run check` passed both ty
 61 server/database tests, 30 Angular tests and the production build. Reading and investigation
 remain for later tasks; deployed checks, guidance confirmation and quota review remain pending.
 
+On 2 October 2026, Codex implemented T2's server-side document reader with schema-constrained
+output and no tools, central model usage charging, and authenticated start/advance endpoints.
+The new `0002_agent_reading.sql` migration adds caller-scoped, security-invoker turn claims and
+an atomic commit of the document result, evidence items, event and turn. Image fallback is deferred
+to the next request so no request makes two model calls. Provider rate limiting releases the claim
+and returns a delay without advancing the turn; every attempted provider call is still charged.
+Tests use fake calls and in-process Postgres. At the first preparation checkpoint, hosted migration
+and live PDF/image acceptance checks had not been run. That preparation used zero real calls.
+`npm run check` passed both type-checks, 95 server/database tests, 30 Angular tests and the
+production build. An unauthenticated request through the local Angular proxy to the new start
+endpoint returned the expected HTTP 401 and plain sign-in message.
+
+The owner supplied AI Studio readings of RPM 1/5, TPM 8/250K and RPD 1/20 on 2 October 2026.
+These were interpreted as used/limit, with limits of 5 requests per minute, 250,000 tokens per
+minute and 20 requests per day. The new migration prepares app-wide daily caps of 8 per user
+and 15 globally, including calls to either provider. The owner subsequently confirmed that
+`0002_agent_reading.sql` ran successfully in the hosted project's SQL Editor.
+
+T2 live checks on 2 October 2026 created a second test case in the existing anonymous session,
+with a generated, fictional two-page invoice PDF and support screenshot. Hosted start was
+idempotent and stale advance returned HTTP 409 with the current turn. Six charged provider
+attempts were made: five primary attempts failed and one image fallback returned six candidate
+facts, with source quotes and page 1, stored in `evidence_items`. The PDF attempt still failed;
+T2 was incomplete at that checkpoint and these results are not evaluation metrics. One API retry returned 401
+because the temporary session token expired; refreshing the existing browser sign-in fixed
+authentication and that refused request used no model call.
+
+The initial primary errors included Google's "Request contains an invalid argument" and rejection
+of the MIME string in `responseFormat.text`. Codex added a tested transport adapter using the
+REST reference's `APPLICATION_JSON` enum and a simpler provider schema; strict local Zod
+validation still enforces fact fields, nonempty quotes, lengths and positive integer pages.
+The corrected reader is tested through the actual SDK with fake HTTP responses. The live PDF
+failure at that checkpoint was unresolved. Bounded failure diagnostics redact configured credentials.
+
+The hosted usage function then returned `allowed: false`, `reason: user_limit`, `user_calls: 8`
+and `user_limit: 8` (two earlier setup diagnostics plus six T2 attempts). No further provider call
+was made. `0003_development_quota.sql` prepares a per-user cap of 12, retaining the global cap
+of 15. Further live reading checks waited for the owner to run it.
+At that checkpoint `npm run check` passed both server type-checks, 101 server/database tests,
+30 Angular tests and the production build. T2 was not committed while the PDF check failed.
+
+The owner subsequently confirmed that `0003_development_quota.sql` ran successfully. One
+additional charged primary call then read the two-page invoice successfully, returning eight
+candidate facts with quotes from pages 1 and 2. These and the six image candidates are stored in
+the hosted case; both documents have `read_status: read`. A following advance made no model
+call and moved the run to `investigating`. T2's complete manual check used seven charged attempts
+(six primary, of which five failed, and one successful fallback), in addition to the two setup
+diagnostics. These are manual fixture results, not product evaluation metrics. The upload notice
+now names Groq as a possible image fallback recipient before consent. T3 and investigation remain
+to build; quote confirmation remains T4, so these candidates are not labelled stated in document.
+
 <!-- Team: add anything else prepared before the start (guidance snippets, synthetic test
      documents, interview notes) and the date it was prepared. Delete this comment when done. -->
 
@@ -75,9 +127,9 @@ remain for later tasks; deployed checks, guidance confirmation and quota review 
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, starter checks, setup preparation, diagnostic usage charging, T1 implementation and browser checks through the computer-use plugin on 2 October 2026. |
-| Google Gemini API | One pre-event setup diagnostic on 2 October 2026. Intended product use: reads documents and drives the agent; that workflow is not built yet. |
-| Groq API | One pre-event setup diagnostic on 2 October 2026. Intended product use: fallback model; that workflow is not built yet. |
+| Codex (OpenAI) | Pre-event handover review, starter checks, setup preparation, diagnostic usage charging, T1 implementation and browser checks through the computer-use plugin, T2 server preparation and live checks, and PDF-skill test fixture preparation on 2 October 2026. |
+| Google Gemini API | One pre-event setup diagnostic, five failed primary reader attempts and one successful two-page invoice read on 2 October 2026. Investigation is still to build. |
+| Groq API | One pre-event setup diagnostic and one successful support-image reading check on 2 October 2026. This is a manual fixture check, not an evaluation result. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->
