@@ -6,6 +6,16 @@
 import type { FactField, FactStatus } from '@shared/facts';
 import type { LadderStep } from '@shared/ladder';
 
+export interface CaseSummaryView {
+  id: string;
+  title: string;
+  merchant: string | null;
+  status: string;
+  documentCount: number;
+  step: string | null;
+  nextDate: { label: string; date: string; overdue: boolean } | null;
+}
+
 /** Where a value was read from. */
 export interface SourceView {
   /** Evidence label, for example E02. */

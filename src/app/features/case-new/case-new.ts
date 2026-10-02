@@ -1,22 +1,22 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 
 import { EvidenceTag } from '../../shared/ui/evidence-tag';
+import { CasesService, CaseUploadError } from '../../core/cases.service';
 import { UploadDropzone } from '../../shared/ui/upload-dropzone';
 import { checkFiles, formatBytes } from './file-rules';
 
 /**
  * New case: privacy notice with consent, then documents.
  *
- * The screen and its file rules are finished. What is NOT connected yet (build task T1): creating
- * the case row, uploading to storage and opening the workspace. Until then "Continue" is disabled
- * and says so.
+ * Uses the existing notice, dropzone and file rules. CasesService persists the case and documents.
  */
 @Component({
   selector: 'app-case-new',
-  imports: [MatButtonModule, MatCheckboxModule, MatIconModule, UploadDropzone, EvidenceTag],
+  imports: [MatButtonModule, MatCheckboxModule, MatIconModule, UploadDropzone, EvidenceTag, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="narrow stack">
@@ -35,12 +35,12 @@ import { checkFiles, formatBytes } from './file-rules';
           <li>You can delete your case, files and records at any time.</li>
           <li>Nivaran never sends or files anything. You review and send the complaint yourself.</li>
         </ul>
-        <mat-checkbox [checked]="consent()" (change)="consent.set($event.checked)">
+        <mat-checkbox [checked]="consent()" [disabled]="saving()" (change)="consent.set($event.checked)">
           I understand and want to continue
         </mat-checkbox>
       </section>
 
-      <app-upload-dropzone [disabled]="!consent()" (filesPicked)="add($event)" />
+      <app-upload-dropzone [disabled]="!consent() || saving() || createdCaseId() !== null" (filesPicked)="add($event)" />
       @if (!consent()) {
         <p class="muted small">Tick the box above to add documents.</p>
       }
@@ -60,7 +60,7 @@ import { checkFiles, formatBytes } from './file-rules';
               <app-evidence-tag [label]="label(index)" />
               <span class="name">{{ file.name }}</span>
               <span class="size">{{ size(file.size) }}</span>
-              <button mat-icon-button type="button" [attr.aria-label]="'Remove ' + file.name" (click)="remove(file.name)">
+              <button mat-icon-button type="button" [disabled]="saving() || createdCaseId() !== null" [attr.aria-label]="'Remove ' + file.name" (click)="remove(file.name)">
                 <mat-icon>close</mat-icon>
               </button>
             </li>
@@ -69,8 +69,15 @@ import { checkFiles, formatBytes } from './file-rules';
       }
 
       <div class="row">
-        <button mat-flat-button type="button" disabled>Continue</button>
-        <span class="muted small">Uploading is connected in build task T1.</span>
+        <button mat-flat-button type="button" [disabled]="!canContinue()" (click)="continue()">
+          {{ saving() ? 'Saving your documents…' : 'Continue' }}
+        </button>
+        @if (saving()) {
+          <span class="muted small" role="status">Keep this page open while your documents are saved.</span>
+        }
+        @if (partialCaseId(); as id) {
+          <a [routerLink]="['/cases', id]">Open the partial case</a>
+        }
       </div>
     </div>
   `,
@@ -160,11 +167,42 @@ import { checkFiles, formatBytes } from './file-rules';
   `,
 })
 export class CaseNew {
+  private readonly cases = inject(CasesService);
+  private readonly router = inject(Router);
   protected readonly consent = signal(false);
   protected readonly files = signal<readonly File[]>([]);
   protected readonly problems = signal<readonly string[]>([]);
+  protected readonly saving = signal(false);
+  protected readonly createdCaseId = signal<string | null>(null);
+  protected readonly partialCaseId = signal<string | null>(null);
+  protected readonly canContinue = computed(() => this.consent() && this.files().length > 0 && !this.saving());
+
+  protected async continue(): Promise<void> {
+    if (!this.canContinue()) return;
+    this.saving.set(true);
+    this.problems.set([]);
+    this.partialCaseId.set(null);
+    try {
+      let id = this.createdCaseId();
+      if (!id) {
+        const created = await this.cases.createWithDocuments(this.files(), this.consent());
+        id = created.case.id;
+        this.createdCaseId.set(id);
+      }
+      const opened = await this.router.navigate(['/cases', id]);
+      if (!opened) this.problems.set(['Your documents are saved. Choose Continue to open your case.']);
+    } catch (error) {
+      this.problems.set([this.createdCaseId()
+        ? 'Your documents are saved. Choose Continue to open your case.'
+        : error instanceof Error ? error.message : 'Could not save your documents. Please try again.']);
+      if (error instanceof CaseUploadError) this.partialCaseId.set(error.caseId);
+    } finally {
+      this.saving.set(false);
+    }
+  }
 
   protected add(picked: File[]): void {
+    if (!this.consent() || this.saving() || this.createdCaseId()) return;
     const result = checkFiles(picked, this.files());
     this.files.update((files) => [...files, ...result.accepted]);
     this.problems.set(result.problems);

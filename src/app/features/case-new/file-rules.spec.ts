@@ -3,6 +3,16 @@ import { checkFiles, formatBytes } from './file-rules';
 const pdf = (name: string, size = 1000) => ({ name, type: 'application/pdf', size });
 
 describe('checkFiles', () => {
+  it.each(['image/png', 'image/jpeg', 'application/pdf'])('accepts exactly five megabytes for %s', (type) => {
+    expect(checkFiles([{ name: 'boundary', type, size: 5 * 1024 * 1024 }], []).problems).toEqual([]);
+  });
+
+  it('refuses duplicate names within the same selection', () => {
+    const result = checkFiles([pdf('same.pdf'), pdf('same.pdf')], []);
+    expect(result.accepted).toHaveLength(1);
+    expect(result.problems[0]).toContain('already added');
+  });
+
   it('accepts allowed files', () => {
     const result = checkFiles([pdf('invoice.pdf'), { name: 'chat.png', type: 'image/png', size: 2000 }], []);
     expect(result.accepted).toHaveLength(2);

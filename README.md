@@ -5,9 +5,9 @@ dates, and a complaint pack the consumer reviews and sends themselves.
 
 Built for WCC Launchpad 30, Track 1 (Agentic AI).
 
-> **Status: starter template.** The product workflow is not built yet. What exists is the project
-> skeleton, the database with its security rules, and a `/status` page that proves the setup.
-> See `docs/ai-disclosure.md` for exactly what was prepared before the event.
+> **Status: build in progress.** Case creation, private document uploads and My cases are connected.
+> `/demo` shows the presentational case screen with invented sample data. Document reading and
+> the agent workflow are still to build. See `docs/ai-disclosure.md` for what was built and when.
 
 ## Documents
 

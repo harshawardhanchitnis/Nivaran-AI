@@ -86,7 +86,7 @@ import { ALLOWED_MIME_TYPES, MAX_FILES_PER_CASE, MAX_FILE_BYTES } from '@shared/
     }
 
     .limits {
-      color: var(--ink-3);
+      color: var(--ink-2);
       font-size: 0.82rem;
     }
   `,
