@@ -106,8 +106,49 @@ An initial assumption that step zero needed no checked guidance was corrected af
 validator and seed; no change allowing unchecked plans was made.
 
 The runner was paused during a pacing wait at 22 logical calls / 23 SDK attempts: clean 14/15,
-conflicting amounts 5/5, and three reads of the not-yet-due case. Its two finished audits and their
+conflicting amounts 5/5, and two reads plus one choice for the not-yet-due case. Its two finished audits and their
 case cleanup are preserved. After fake-provider checks, it resumes that existing checkpoint
 with eighteen logical calls remaining; neither completed case is retried. The not-yet-due case
-therefore has reads from the earlier revision and investigation from the retrieval fix. Active
-runner seconds include pacing but exclude this offline pause. The final report remains pending.
+therefore has reads and its first choice from `49d8a74`, with later investigation from `61d214b`.
+Active runner seconds include pacing but exclude this offline pause.
+
+## Final capped result
+
+The pass ended on 4 October with **40 logical charges / 41 SDK attempts**. It did not complete
+all twelve cases: five finished, the sixth stopped on the local budget, and six never started.
+No repetition two or three was attempted. See `eval/rerun-stage-one-report.md` and its six JSON
+audits; the original `eval/report.md` and original result files are unchanged.
+
+| Case | Result | Logical / SDK attempts | Code used |
+|---|---|---|---|
+| clean-overdue | Failed: repeated empty guidance search; E04 unreadable | 14 / 15 | 49d8a74 |
+| conflicting-amounts | Wrong missing-date pause; E02 readable but zero facts | 5 / 5 | 49d8a74 |
+| not-yet-due | Correct step zero, no pause; receipt fact still Missing | 7 / 7 | Mixed as documented above |
+| already-complained | Wrong missing-date pause; E01/E02 unreadable | 5 / 5 | 61d214b |
+| out-of-scope | Correct out-of-scope outcome, no pause | 5 / 5 | 61d214b |
+| missing-order-id | Budget interruption after one targeted reread | 4 / 4 | 61d214b |
+| unreadable-image, injected-instruction, mixed-amount-formats, two-refund-dates, written-refusal, bank-reference | Not started: no remaining budget | 0 / 0 | No live run |
+
+Google made three attempts with two routed responses: Gemini 3.8 Flash read the support image
+after 3.6 failed, then Gemini 3.6 checked the image quotes. Groq made thirty-eight attempts and
+returned thirty-eight routed responses. There was one fallback response. Every metered Groq
+HTTP response was 200: no RPM/TPM failure or account-limit interruption occurred. Daily-only
+cooldown stopping and waiting after a transient all-model cooldown remain fake-provider tested,
+not live exercised in this pass. Empty extraction and unreadable responses remain measured
+quality failures; no explanation of the model's internal reason is asserted.
+
+Twenty-two actual tool-choice requests measured **1,304–1,827 prompt tokens**. The first was
+1,827 prompt / 15 output tokens. Total Groq reported usage was 37,177 prompt / 4,025 completion
+tokens across the pass, not in a single minute. Active runner time was 2,310.65 seconds including
+pacing, excluding the offline pause. Two of five completed outcomes were correct, three of five
+pause sets matched, and the initial receipt field was correct in two of five finished cases.
+All 54 extracted document quotes passed literal checking; this does not measure extraction
+coverage or establish that each quote belongs to the model-selected field. No live draft or
+injection evaluation completed. T12 acceptance remains incomplete.
+
+Hosted cleanup verification used only the caller: zero rows remained for old/new evaluation IDs
+in all nine case tables, and twelve storage prefixes contained zero entries. Six earlier fixtures
+remain; zero evaluation cases remain. India-day usage was 46 on 3 October and 30 on 4 October;
+subtracting the pre-pass 36 gives exactly forty charges. Counters were not reset. The owner was
+asked to restore 15/15 using `eval/restore-caps.sql` and confirmed "Caps restored" on 4 October. The final retrieval
+fix check passed 397 server/database tests, 90 Angular tests, both type-checks and the build.

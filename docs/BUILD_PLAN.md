@@ -239,8 +239,11 @@ and 44 SDK attempts: two finished failures, four cooldown interruptions and six 
 interruptions. Original observations remain in `eval/report.md`; T12 acceptance has not passed.
 The owner requested fixes and a separate stage-one rerun capped at forty logical calls, without
 approving stage two. Extraction and repeat regressions, automatic audited-case cleanup, and
-local runner pacing are implemented. The rerun awaits the owner's dashboard caps step; no rerun
-results are claimed. See `eval/README.md` and `docs/t12-fixes.md`.
+local runner pacing are implemented. The capped rerun spent 40 logical charges / 41 SDK attempts:
+five finished (two correct outcomes), one budget interruption and six unstarted cases. A guidance
+ID retrieval fix was checked during an offline pause; revisions and failures are disclosed in
+`docs/t12-fixes.md`. No live draft or injection evaluation finished. Stage two remains unapproved;
+T12 acceptance is incomplete. See `eval/README.md` and `eval/rerun-stage-one-report.md`.
 
 Checks: the report contains the six measures in SPEC section 10, as measured. Paste the summary into
 the README. Mind the usage limits: raise them for the run, then put them back.

@@ -406,7 +406,24 @@ fallback remains immediate with no SDK retries; waits happen between local runne
 The four retained evaluation cases and their files were cleared after audit checks, with no model
 calls. Six prior fixtures remain and usage stayed at thirty-six. Offline SDK serialization measured
 request bytes; no provider token counts are inferred from those bytes. Actual token measurements
-await the capped rerun, which is pending the owner's dashboard caps step. See `docs/t12-fixes.md`.
+were then captured in the capped rerun after the owner confirmed its dashboard caps step.
+
+The rerun ran across 3–4 October, spending forty logical charges and forty-one SDK attempts:
+Google three attempts/two responses; Groq thirty-eight attempts/thirty-eight responses. Five
+cases finished, two with correct outcomes; one stopped on the local budget and six never started.
+The correct clean order ID no longer conflicted, but extraction still omitted receipt facts and
+mislabelled readable PDFs as unreadable. The first actual tool choice measured 1,827 prompt
+tokens; twenty-two choices ranged from 1,304 to 1,827. No Groq HTTP response was rate-limited.
+An offline pause at twenty-two charges preserved the checkpoint while Codex corrected guidance
+retrieval: full-text search omitted IDs, so broad queries and literal IDs returned no sources.
+Exact-ID lookup and retrieval of code-required sources retain the checked-guidance policy. The
+first two failed observations were not rerun; the mixed revision of the third case is disclosed.
+The final code check passed 397 server/database tests, 90 Angular tests, both type-checks and build.
+Caller-owned verification found zero evaluation rows in nine case tables and zero entries in
+twelve storage prefixes; six older fixtures remain. Usage was 46 on 3 October and 30 on 4 October,
+an increase of exactly forty from the pre-pass 36. The owner confirmed caps restored to 15/15; no counter
+was reset. No live draft or injection run finished, no stage two ran, and T12 remains incomplete.
+See `docs/t12-fixes.md` and `eval/rerun-stage-one-report.md`.
 
 ## AI tools used
 
@@ -414,9 +431,9 @@ await the capped rerun, which is pending the owner's dashboard caps step. See `d
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. The owner also supplied its evaluation-budget review on 3 October. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation, T12 corpus/runner and stage-one evaluation, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2–3 October 2026. |
-| Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October. Stage-one product evaluation on 3 October used 24 attempts, with 19 successful routed responses; the incomplete evaluation failures are reported above. |
-| Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing fixture checks on 2 October. Stage-one product evaluation on 3 October used 20 attempts, with 12 successful routed responses; the incomplete evaluation failures are reported above. |
+| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation, T12 corpus/runner, stage-one evaluation and capped rerun fixes, model routing with signed cooldowns, browser checks and local session refresh through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2–4 October 2026. |
+| Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October. Original stage one used 24 attempts/19 routed responses. The capped rerun used 3 attempts/2 responses. Incomplete evaluation failures are reported above. |
+| Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing fixture checks on 2 October. Original stage one used 20 attempts/12 routed responses. The capped rerun used 38 attempts/38 responses, including actual token metering. Incomplete evaluation failures are reported above. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->

@@ -1,0 +1,724 @@
+{
+  "caseId": "out-of-scope",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T18:54:57.189Z",
+  "status": "finished",
+  "stopReason": null,
+  "seconds": 308.77879859999996,
+  "calls": {
+    "logicalCalls": 5,
+    "providerAttempts": 5,
+    "models": {
+      "qwen/qwen3.8-27b": 5
+    },
+    "answers": [
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "reading",
+        "inputBytes": 2177,
+        "maxOutputTokens": 5567,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 7593,
+        "resetTokens": "3.052s",
+        "inputTokens": 230,
+        "outputTokens": 20
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 5075,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6344,
+        "resetTokens": "12.42s",
+        "inputTokens": 1479,
+        "outputTokens": 15
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 4935,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6494,
+        "resetTokens": "11.295s",
+        "inputTokens": 1427,
+        "outputTokens": 95
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "reading",
+        "inputBytes": 2399,
+        "maxOutputTokens": 5345,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 7718,
+        "resetTokens": "2.114s",
+        "inputTokens": 267,
+        "outputTokens": 51
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 5145,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6415,
+        "resetTokens": "11.887s",
+        "inputTokens": 1490,
+        "outputTokens": 69
+      }
+    ]
+  },
+  "runStatus": "out_of_scope",
+  "runError": null,
+  "initialFacts": [
+    {
+      "field": "merchant_name",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_id",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "item_description",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "amount_paid",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_amount",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_due_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_reference",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "missing",
+      "value_norm": null
+    }
+  ],
+  "finalFacts": [
+    {
+      "field": "merchant_name",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_id",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "upi transfer dispute"
+      }
+    },
+    {
+      "field": "amount_paid",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_amount",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_due_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_reference",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "missing",
+      "value_norm": null
+    }
+  ],
+  "quotes": {
+    "passed": 1,
+    "total": 1
+  },
+  "pauses": [],
+  "outcome": "out_of_scope",
+  "step": null,
+  "draftKind": null,
+  "injectionMarkerSeen": false,
+  "saved": {
+    "run": {
+      "id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+      "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+      "user_id": "synthetic-evaluation-owner",
+      "status": "out_of_scope",
+      "phase": "done",
+      "turn": 8,
+      "agent_steps": 3,
+      "max_agent_steps": 10,
+      "model": "qwen/qwen3.8-27b",
+      "error": null,
+      "processing_token": null,
+      "processing_started_at": null,
+      "reader_state": {},
+      "agent_state": {
+        "quotes_checked": true,
+        "progress": {
+          "facts": "0c221799463b4416803fb695571a17190bfd8e6af0df553b4c9f71ea979b88bf",
+          "actions": [
+            "e6300f191095d59b252a09db9cab56806a00be4ca2042ef2cbbe9cfcf4d2e488"
+          ]
+        }
+      },
+      "started_at": "2026-10-03T18:55:00.144952+00:00",
+      "ended_at": "2026-10-03T19:00:08.491693+00:00"
+    },
+    "documents": [
+      {
+        "id": "d14cbf22-4099-4106-8a80-086e03072397",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E01",
+        "file_name": "transfer.pdf",
+        "storage_path": "eval/cases/out-of-scope/transfer.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1894,
+        "sha256": null,
+        "doc_type": "complaint_sent",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T18:54:59.996423+00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "06dfb9c6-dbd5-4c38-93c2-c8cb69b3d7f2",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "merchant_name",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "dbc53fa0-34d2-4db6-8fc5-e9c400aede75",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_id",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "ce946845-5a7d-4860-8d20-356f0e70e7f4",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "bb6732ef-a73b-4b00-8143-1c3f8171b1b8",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "item_description",
+        "status": "document",
+        "value_text": "UPI transfer dispute",
+        "value_norm": {
+          "kind": "text",
+          "value": "upi transfer dispute"
+        },
+        "evidence_item_id": "43d2aa0f-2844-419e-aa87-5e0a86806c0b",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "732ad62e-6866-49ee-9e12-5dc6092460e0",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "amount_paid",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "48b04020-2c5d-42e9-bb8b-20817135f13d",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "cancellation_or_return_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "308fecc1-62bc-4086-8685-70a1c92384b0",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_amount",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "62e6735b-23d3-4044-bfca-ecf02152df90",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_promise_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "3cc44930-5ee6-4e8f-91e4-a0d11f8e9852",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_due_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "745465fb-588b-4be3-a9aa-b6022e4db6c5",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_reference",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "ab959bb2-8cb7-4a42-9f82-305b4428a0a8",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_sent_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "35a5cff9-95b3-423f-8aa4-2cff0e31c1dd",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_acknowledged",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "77f85a7d-31cb-49da-8956-141490a6751d",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_refused",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "307b98ab-d8ee-4f3d-b63e-0aab6c592732",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_received",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T18:56:00.429064+00:00",
+        "updated_at": "2026-10-03T18:59:06.504683+00:00"
+      }
+    ],
+    "evidence": [
+      {
+        "id": "43d2aa0f-2844-419e-aa87-5e0a86806c0b",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "d14cbf22-4099-4106-8a80-086e03072397",
+        "field": "item_description",
+        "value_text": "UPI transfer dispute",
+        "value_norm": {
+          "kind": "text",
+          "value": "upi transfer dispute"
+        },
+        "page": 1,
+        "quote": "UPI transfer dispute",
+        "quote_verified": true,
+        "created_at": "2026-10-03T18:59:06.193422+00:00"
+      }
+    ],
+    "questions": [],
+    "events": [
+      {
+        "id": "0d11a87b-9602-4e00-8150-c153451c014d",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 0,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E01",
+          "message": "Read E01.",
+          "modelId": "qwen/qwen3.8-27b",
+          "factCount": 0,
+          "documentId": "d14cbf22-4099-4106-8a80-086e03072397",
+          "readStatus": "read",
+          "rejectedFactCount": 0
+        },
+        "created_at": "2026-10-03T18:55:59.908807+00:00"
+      },
+      {
+        "id": "910b2e00-bf3c-465f-b9ae-f504ac7e0c57",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 1,
+        "type": "decision",
+        "payload": {
+          "action": "reading_complete",
+          "message": "Finished reading the documents."
+        },
+        "created_at": "2026-10-03T18:56:00.189802+00:00"
+      },
+      {
+        "id": "8a33f80d-6cd4-429f-bcbc-5f4af93810be",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 2,
+        "type": "tool_result",
+        "payload": {
+          "tool": "check_quotes",
+          "message": "Checked source quotes and built the fact sheet."
+        },
+        "created_at": "2026-10-03T18:56:00.429064+00:00"
+      },
+      {
+        "id": "ba5f90a3-1c3f-4080-80c5-7d16868ca121",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 3,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_next_step",
+          "input": {},
+          "message": "Chose get next step.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T18:57:02.501231+00:00"
+      },
+      {
+        "id": "f1bf0a0f-579b-4722-bcd4-1ad192af0697",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 4,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_next_step",
+          "result": {
+            "dates": {
+              "today": "2026-10-02"
+            },
+            "notes": [],
+            "outcome": "needs_input",
+            "reasons": [
+              {
+                "code": "needs_input",
+                "text": "Please give the promised refund date, or say if no date was ever given.",
+                "fields": [
+                  "refund_due_date"
+                ],
+                "guidanceIds": []
+              }
+            ],
+            "canDraft": false,
+            "requiredFields": [
+              "refund_due_date"
+            ]
+          },
+          "message": "Worked out the next step from your facts.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T18:57:02.501231+00:00"
+      },
+      {
+        "id": "a76439dd-5242-4664-a92d-584894e864b2",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 5,
+        "type": "tool_call",
+        "payload": {
+          "tool": "reread_document",
+          "input": {
+            "question": "Does this refund message state a promised/due date for the refund? If yes, what exact date?",
+            "document_id": "d14cbf22-4099-4106-8a80-086e03072397"
+          },
+          "message": "Chose reread document.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T18:58:04.075528+00:00"
+      },
+      {
+        "id": "96657404-1074-4f1c-88d3-bd6f18d0c073",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 6,
+        "type": "tool_result",
+        "payload": {
+          "tool": "reread_document",
+          "result": {
+            "label": "E01",
+            "queued": true
+          },
+          "message": "Taking another look at E01 next.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T18:58:04.075528+00:00"
+      },
+      {
+        "id": "f97977d0-cba1-42c1-a322-1be92c9962ce",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "reread_document",
+          "label": "E01",
+          "message": "Took another look at E01.",
+          "modelId": "qwen/qwen3.8-27b",
+          "rejectedFactCount": 0
+        },
+        "created_at": "2026-10-03T18:59:06.193422+00:00"
+      },
+      {
+        "id": "70cf4903-a6fd-490a-b302-7f1255807e60",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 8,
+        "type": "tool_result",
+        "payload": {
+          "tool": "check_quotes",
+          "message": "Checked source quotes and built the fact sheet."
+        },
+        "created_at": "2026-10-03T18:59:06.504683+00:00"
+      },
+      {
+        "id": "1efedf58-b5b3-4d8d-bbbc-9bb93b464359",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 9,
+        "type": "tool_call",
+        "payload": {
+          "tool": "mark_out_of_scope",
+          "input": {
+            "reason": "The item description is \"UPI transfer dispute,\" which indicates a payment-transfer/banking dispute rather than a refund owed for an online order that has not arrived. This falls outside the online owed-refund scope."
+          },
+          "message": "Chose mark out of scope.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:00:08.491693+00:00"
+      },
+      {
+        "id": "8b191ce3-4644-4620-9428-0a5798d65b6e",
+        "run_id": "2ac471ef-d778-46ae-ae9e-cf880aa19cea",
+        "case_id": "d5289964-88fc-4ab1-a6f3-c167e4e8b970",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 10,
+        "type": "tool_result",
+        "payload": {
+          "tool": "mark_out_of_scope",
+          "result": {
+            "reason": "The item description is \"UPI transfer dispute,\" which indicates a payment-transfer/banking dispute rather than a refund owed for an online order that has not arrived. This falls outside the online owed-refund scope."
+          },
+          "message": "This case is outside Nivaran’s refund scope. You can contact the National Consumer Helpline on 1915.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:00:08.491693+00:00"
+      }
+    ],
+    "plan": null,
+    "draft": null
+  }
+}

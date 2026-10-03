@@ -42,10 +42,18 @@ and 29 generated documents. [The report](eval/report.md) records **2/36 finished
 runs, both failing acceptance, and 10 interruptions** from stage one on 3 October. The batch used
 36 logical charges and 44 provider attempts (24 Gemini, 20 Groq); fallback responses are labelled.
 Six cases could not start because retained interrupted cases filled the ten-case account limit.
+After fixes, the [40-call stage-one rerun](eval/rerun-stage-one-report.md) on 3–4 October used
+40 logical charges / 41 attempts: **38 Groq attempts and 3 Gemini attempts**. Five cases finished,
+with two correct outcomes; one stopped on budget and six never started. Initial `order_id` was
+correct in 5/5 finished cases, but `refund_received` only in 2/5. All 54 extracted quotes matched
+literally; this does not establish extraction coverage. The first tool-choice request measured
+1,827 prompt tokens. Cleanup left zero evaluation files/rows and preserved six earlier fixtures.
+A checked-guidance retrieval fix was made during an offline pause; the measured revisions and
+remaining extraction failures are disclosed in [docs/t12-fixes.md](docs/t12-fixes.md).
 The full evaluation and consistency remain incomplete. The separate deterministic linter
 probe caught **3/3** seeded amount, date and ID errors. These are local checks, not model scores.
-Stage two awaits the owner's reply; the shared total budget is 300 logical charges and 450 provider
-attempts. Temporary caps must be restored to 15/15 after evaluation with `eval/restore-caps.sql`.
+Stage two remains unapproved. The rerun reached its 40-call limit; no extra calls are authorised.
+The owner confirmed caps restored to 15/15 with `eval/restore-caps.sql`, retaining usage.
 
 ## Documents
 
