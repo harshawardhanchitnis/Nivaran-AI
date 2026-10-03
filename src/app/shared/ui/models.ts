@@ -82,6 +82,7 @@ export interface QuestionOptionView {
 }
 
 export interface QuestionView {
+  documentRequest?: boolean;
   id: string;
   prompt: string;
   /** Why Nivaran is asking. */

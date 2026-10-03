@@ -45,6 +45,13 @@ export class CaseWorkspaceService {
   private readonly supabase = inject(SupabaseService);
   private readonly api = inject(ApiService);
 
+  async resumeDocumentReading(caseId: string, documentId: string): Promise<AgentRunRow> {
+    await this.supabase.ensureSignedIn();
+    const {data,error} = await this.supabase.client.rpc('resume_document_reading',{p_case_id:caseId,p_document_id:documentId});
+    if (error || !data) throw new Error('Your new file is saved, but reading could not resume. Retry without uploading again.');
+    return data as AgentRunRow;
+  }
+
   async load(caseId: string): Promise<WorkspaceRows> {
     await this.supabase.ensureSignedIn();
     const client = this.supabase.client;

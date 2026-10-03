@@ -5,6 +5,7 @@ import type { AllowedMimeType } from './limits.js';
 
 /** Advice only; charge_model_call still checks and charges before provider attempts. */
 export interface ModelBudgetStatus { day: string; remaining: number; reason: 'user_limit' | 'global_limit' | null; reset_at: string }
+export interface ResumeDocumentReadingRequest { caseId: string; documentId: string }
 
 export type CaseStatus =
   | 'open'

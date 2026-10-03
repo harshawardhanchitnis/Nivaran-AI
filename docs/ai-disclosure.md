@@ -470,3 +470,10 @@ quota advice is migration 0011; consent and Continue are required for live uploa
 passed 410 server/database tests, 91 Angular tests, type checks and build; a 360 px source sheet
 had no horizontal overflow or axe A/AA violations. See docs/t13-checks.md. Codex generated no new
 model output while implementing samples.
+
+T14 adds code-constrained useful tool choices, draft-readiness gaps, and consented clearer-file
+recovery. Tests replay actual final-pass failure triggers with fake providers/data; no new live
+evaluation was run and measured accuracy is unchanged. Migration 0012 preserves the existing
+step count and makes the caller-owned resume replay-safe. Local checks passed 419 server/database
+and 92 Angular tests, both type checks and production build. Hosted migration application and
+file-recovery smoke checks remain pending. See docs/t14-checks.md.

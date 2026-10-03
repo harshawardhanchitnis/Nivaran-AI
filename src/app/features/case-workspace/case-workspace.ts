@@ -30,6 +30,7 @@ import { indiaCalendarDate, workspacePlan, sentPlanView } from '../../core/works
 import { DraftEditor } from '../../shared/ui/draft-editor';
 import { SentPanel } from '../../shared/ui/sent-panel';
 import { downloadPlanDates } from '../../core/calendar-download';
+import { ReplacementUpload } from '../../shared/ui/replacement-upload';
 import {
   draftPresentation,
   draftStatements,
@@ -38,7 +39,7 @@ import {
 
 @Component({
   selector: 'app-case-workspace',
-  imports: [CaseWorkspaceView, DraftEditor, SentPanel, OutcomePanel, RouterLink, MatButtonModule],
+  imports: [CaseWorkspaceView, DraftEditor, SentPanel, OutcomePanel, ReplacementUpload, RouterLink, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (rows(); as data) {
@@ -67,6 +68,10 @@ import {
         (sourceRetry)="retrySource($event)"
       >
         <div banner class="notice no-print" aria-live="polite">
+          @if (canAddDocument()) {
+            <app-replacement-upload [busy]="replacementBusy()" [uploaded]="replacementDocumentId() !== null"
+              (submitted)="addReplacement($event)" (retry)="addReplacement()" />
+          }
           @if (error(); as message) {
             <p role="alert">{{ message }}</p>
             <button mat-stroked-button type="button" [disabled]="busy()" (click)="reload()">
@@ -206,6 +211,24 @@ export class CaseWorkspace {
   protected readonly previews = signal<Record<string, DocumentPreview>>({});
   protected readonly busy = signal(false);
   protected readonly answerBusy = signal(false);
+  protected readonly replacementBusy = signal(false);
+  protected readonly replacementDocumentId = signal<string|null>(null);
+  protected readonly canAddDocument = computed(() => {
+    const data=this.rows();const question=data?.questions.at(-1);
+    return !this.busy() && !!data && (data.run?.status==='failed' || data.run?.status==='waiting_for_user' && question?.kind==='document_request') && (data.documents.length<6 || data.documents.some(d=>d.read_status==='pending'));
+  });
+  protected async addReplacement(file?: File):Promise<void> {
+    const data=this.rows();if(!data||this.replacementBusy()||this.busy()||!this.canAddDocument())return;
+    this.replacementBusy.set(true);this.error.set(null);
+    try {
+      let documentId=this.replacementDocumentId();
+      if(!documentId) { if(!file)return; const document=await this.cases.addReplyDocument(data.case.id,file,true);documentId=document.id;this.replacementDocumentId.set(documentId); }
+      await this.service.resumeDocumentReading(data.case.id,documentId);
+      this.replacementDocumentId.set(null);
+      await this.reload();
+    } catch(error) {this.error.set(error instanceof Error?error.message:'Could not add the clearer file. Earlier facts are saved.');}
+    finally {this.replacementBusy.set(false);}
+  }
   protected readonly reviewBusy = signal(false);
   protected readonly draftBusy = signal(false);
   protected readonly sentBusy = signal(false);
@@ -323,6 +346,9 @@ export class CaseWorkspace {
       if (controller.signal.aborted) return;
       const initial = this.rows();
       if (!initial || (!initial.documents.length && !initial.run)) return;
+      if (initial.run?.status==='failed' || initial.run?.status==='waiting_for_user' && initial.questions.at(-1)?.kind==='document_request') {
+        this.replacementDocumentId.set(initial.documents.filter(d=>d.read_status==='pending').at(-1)?.id ?? null);
+      }
       await this.continueRun(initial, controller, refresh);
     } catch (error) {
       if (generation === this.generation)

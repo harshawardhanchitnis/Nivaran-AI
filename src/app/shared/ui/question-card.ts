@@ -24,7 +24,7 @@ import type { QuestionView } from './models';
           </button>
         }
       </div>
-      @if (question().options.length === 0 && !readOnly()) {
+      @if (question().options.length === 0 && !readOnly() && !question().documentRequest) {
         <form (submit)="submitText($event)">
           <label [for]="'question-answer-' + question().id">Your answer</label>
           <textarea [id]="'question-answer-' + question().id" [formControl]="text" maxlength="4000" rows="3" [readOnly]="busy()"></textarea>

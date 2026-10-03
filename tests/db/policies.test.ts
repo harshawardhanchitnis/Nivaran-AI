@@ -23,6 +23,7 @@ const draftMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'mig
 const sentMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0009_mark_sent.sql'), 'utf8');
 const outcomeMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0010_case_outcomes.sql'), 'utf8');
 const budgetMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0011_model_budget_status.sql'), 'utf8');
+const resumeMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0012_resume_document_reading.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -78,6 +79,7 @@ beforeAll(async () => {
   await db.exec(sentMigration);
   await db.exec(outcomeMigration);
   await db.exec(budgetMigration);
+  await db.exec(resumeMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -625,5 +627,35 @@ describe('read-only model budget advice', () => {
   it('denies visitors and cannot be called with another user ID', async () => {
     await expect(asVisitor(()=>db.query('select public.model_budget_status()'))).rejects.toThrow(/permission denied/);
     await expect(asUser(ALICE,()=>db.query('select public.model_budget_status($1::uuid)',[BOB]))).rejects.toThrow(/does not exist/);
+  });
+});
+
+describe('caller-owned missing-file resume',()=>{
+  it('resumes one saved question without resetting steps and replays without duplicate events',async()=>{
+    await db.exec('begin');
+    try {
+      await db.query('delete from public.cases where user_id=$1',[ALICE]);
+      const caseId=await createCase(ALICE,'Resume missing file');
+      const result=await asUser(ALICE,()=>db.query<{id:string}>(`insert into public.agent_runs(case_id,status,phase,agent_steps,agent_state) values($1,'waiting_for_user','investigating',3,'{"quotes_checked":true}') returning id`,[caseId]));
+      const runId=result.rows[0]!.id;
+      await asUser(ALICE,()=>db.query(`insert into public.questions(run_id,case_id,kind,prompt) values($1,$2,'document_request','Add a clearer file')`,[runId,caseId]));
+      await asUser(ALICE,()=>addDocument(caseId,'E01',ALICE));
+      const document=await asUser(ALICE,()=>db.query<{id:string}>('select id from public.documents where case_id=$1',[caseId]));
+      const documentId=document.rows[0]!.id;
+      await asUser(BOB,async()=>{
+        await db.exec('savepoint foreign_case');
+        try {await expect(db.query('select public.resume_document_reading($1,$2)',[caseId,documentId])).rejects.toThrow(/not available/);}
+        finally {await db.exec('rollback to savepoint foreign_case');}
+      });
+      const resume=()=>asUser(ALICE,()=>db.query<{run:{phase:string;status:string;turn:number;agent_steps:number}}>('select public.resume_document_reading($1,$2) as run',[caseId,documentId]));
+      const first=(await resume()).rows[0]!.run;
+      expect(first).toMatchObject({phase:'reading',status:'running',turn:1,agent_steps:3});
+      const second=(await resume()).rows[0]!.run;expect(second.turn).toBe(1);
+      const events=await asUser(ALICE,()=>db.query('select * from public.agent_events where run_id=$1',[runId]));expect(events.rows).toHaveLength(1);
+      const questions=await asUser(ALICE,()=>db.query<{answer:unknown}>('select answer from public.questions where run_id=$1',[runId]));expect(questions.rows[0]!.answer).toEqual({documentId});
+    } finally {await db.exec('rollback');}
+  });
+  it('denies anonymous resume',async()=>{
+    await expect(asVisitor(()=>db.query('select public.resume_document_reading($1::uuid,$2::uuid)',[ALICE,BOB]))).rejects.toThrow(/permission denied/);
   });
 });

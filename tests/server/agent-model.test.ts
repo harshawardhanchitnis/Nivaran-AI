@@ -35,7 +35,7 @@ describe('tool selection through the actual SDK with fake HTTP', () => {
   });
   it('offers the relevant conflict actions without resending all eight schemas',()=>{
     const conflict={...snapshot,facts:[{field:'refund_amount',status:'conflict'}] as AgentSnapshot['facts']};
-    expect(activeToolNames(conflict,run)).toEqual(['ask_user','reread_document']);
+    expect(activeToolNames(conflict,run)).toEqual(['ask_user']);
     expect(JSON.stringify(agentTools(activeToolNames(conflict,run))).length).toBeLessThan(JSON.stringify(agentTools()).length);
   });
   it('does not retry a refused provider request', async () => {
@@ -46,3 +46,4 @@ describe('tool selection through the actual SDK with fake HTTP', () => {
     expect(http).toHaveBeenCalledTimes(1);
   });
 });
+
