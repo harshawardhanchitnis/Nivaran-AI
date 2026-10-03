@@ -3,6 +3,7 @@ import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import type { DocumentRow } from '../../shared/database.js';
 import { FACT_FIELDS } from '../../shared/facts.js';
+import { normaliseFact } from '../../shared/normalise.js';
 import { HttpError } from '../http.js';
 import type { ModelRole } from '../llm/provider.js';
 import { createRoutedModelCall } from '../llm/routed-call.js';
@@ -35,6 +36,24 @@ export interface ReadDocumentResult {
   readable: boolean;
   facts: z.infer<typeof documentExtractionSchema>['facts'];
   modelId?: string;
+  rejectedFactCount?: number;
+}
+
+/** One unsupported candidate must not discard other properly quoted candidates. */
+export function parseDocumentExtraction(raw: unknown): ReadDocumentResult {
+  const envelope=documentExtractionSchema.extend({facts:z.array(z.unknown()).max(100)}).parse(raw);
+  if(!envelope.readable)return {docType:envelope.doc_type,readable:false,facts:[]};
+  const facts:ReadDocumentResult['facts']=[];
+  for(const candidate of envelope.facts) {
+    const parsed=documentExtractionSchema.shape.facts.element.safeParse(candidate);
+    if(!parsed.success)continue;
+    const fact=parsed.data;
+    if((fact.field==='order_id'||fact.field==='refund_reference')&&!normaliseFact(fact.field,fact.value_text))continue;
+    facts.push(fact);
+  }
+  const rejectedFactCount=envelope.facts.length-facts.length;
+  if(rejectedFactCount&&!facts.length)throw new Error('Every extraction candidate lacked a valid field, value, page or quote.');
+  return {docType:envelope.doc_type,readable:true,facts,...(rejectedFactCount?{rejectedFactCount}:{})};
 }
 export interface ReaderRequest { bytes: Uint8Array; mediaType: string; fileName: string }
 export interface ReaderDependencies {
@@ -55,10 +74,9 @@ There are no tools. Return only the schema-constrained extraction.`;
 export async function readDocument(document: DocumentRow, deps: ReaderDependencies): Promise<ReadDocumentResult> {
   const bytes = await deps.download(document);
   await deps.charge();
-  const output = documentExtractionSchema.parse(await deps.callModel({
+  return parseDocumentExtraction(await deps.callModel({
     bytes, mediaType: document.mime_type, fileName: document.file_name,
   }));
-  return { docType: output.doc_type, readable: output.readable, facts: output.readable ? output.facts : [] };
 }
 
 export function createDocumentReader(supabase: SupabaseClient) {
@@ -81,8 +99,8 @@ export function createDocumentReader(supabase: SupabaseClient) {
           maxOutputTokens: 8000,
           abortSignal: signal,
         });
-        return documentExtractionSchema.parse(response.output);
+        return parseDocumentExtraction(response.output);
     });
-    return { docType:result.value.doc_type,readable:result.value.readable,facts:result.value.readable?result.value.facts:[],modelId:result.modelId };
+    return { ...result.value,modelId:result.modelId };
   };
 }

@@ -1,0 +1,87 @@
+# Stage-one failure investigation and rerun preparation
+
+Owner requested these fixes on 3 October 2026, without approving stage two. The next live batch
+is a separate stage-one attempt with a hard 40-logical-call limit. Its results must not replace
+or reclassify the original failed observations.
+
+## Causes found in the saved audit
+
+1. The false clean-case ID came from **E01 / invoice.pdf**, read by Qwen. Its exact candidate
+   value and quote were `FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION`. That footer
+   really exists in the PDF, so the literal quote check passed. The old ID normaliser accepted
+   any nonempty string of at most 160 characters, including sentences. This was a field
+   misclassification followed by overly permissive normalisation, not a character misread or
+   explicit-absence conflict. All actual IDs in E01/E02/E03 are `MM260901`. A regression uses the
+   exact footer and retains the real ID candidate while excluding that malformed candidate.
+   ID punctuation and leading zeroes, and the measured reference value `None`, remain tested.
+2. `refund_received` was **Missing in clean-overdue**, not true instead of false. E04 /
+   customer-status.pdf failed extraction validation: the diagnostic identifies `facts[2].quote`
+   as an empty string. The strict whole-response parse discarded every candidate, so no receipt
+   evidence reached the fact sheet. The original raw response was not retained; the field at
+   index two and the content of the other candidates cannot be recovered. The reader now validates
+   candidates separately, retains properly quoted candidates and records rejected counts. An
+   all-invalid response still fails. The regression retains `Refund not received.` alongside an
+   independently invalid candidate with the exact observed empty-quote error at index two. It is
+   a scripted reconstruction, not a claim about an unavailable original response.
+3. In conflicting-amounts, the recorded choices were get-next-step, reread E02, get-next-step,
+   reread E02, get-next-step, reread E02, reread E02, a failed choice, and two get-next-step choices.
+   The source amount conflict stayed open; the model never selected ask-user. No recorded output
+   reveals the model's internal reason. The input exposed the conflict's null value but omitted
+   its source alternatives and action history, and code permitted repeated unchanged steps.
+   The context now exposes checked source alternatives. Active tool schemas favour ask-user and
+   reread for an open conflict. A persisted fact fingerprint and action signatures recognise one
+   repeat, including rephrased rereads of the same document. Code then executes one ask-user tool
+   with actual source alternatives, without counting the repeated selection as progress. Without
+   an open conflict, it stops with a clear message. A changed semantic fact sheet resets history.
+   Scripted tests cover the original reread wording and an unchanged repeated get-next-step.
+4. The ten-case account limit filled because interrupted evaluation cases were retained.
+   Every saved result now permits scoped cleanup of its own storage paths and rows, including
+   interruptions. Audit saving precedes deletion; owner, exact title and every path are checked.
+   The old four retained cases were cleaned with zero model calls. Hosted read-only checking
+   confirmed six earlier fixtures remain, zero evaluation cases remain, and usage stays at 36.
+
+## Pacing and request size
+
+Owner supplied Groq limits: **30 RPM / 8,000 TPM**. The local runner spaces Groq windows by at
+least 61 seconds and conservatively reserves UTF-8 text bytes plus output allowance and framing
+margin. Image bytes are not treated as text tokens: an image request reserves a full window,
+with provider quota enforcing its actual pixel-token cost. No HTTP handler or provider-fallback
+attempt sleeps. A local pacing refusal is an application error and cannot write provider cooldowns.
+Between advances, the runner reads the signed cooldown table and waits for a non-daily model to
+become usable. A provider-cooldown stop requires **every suitable model** to be daily-blocked.
+Budget, validation, storage and network failures remain honest failures; they are not quota successes.
+
+Offline serialization through the actual Groq SDK measured one amount-conflict choice request:
+
+| Tool configuration | Tool-schema UTF-8 bytes | Input-payload UTF-8 bytes |
+|---|---|---|
+| All eight schemas | 3,036 | 7,054 |
+| Two relevant schemas | 1,127 | 5,145 |
+
+These are **byte measurements, not token counts**. The chooser output allowance also fell from
+2,500 to 600 tokens. The rerun transport records actual Groq `prompt_tokens` and completion usage,
+including tool-choice requests, plus only safe rate-limit headers. No request body, key or token
+is retained. Details are in `eval/tool-request-size.json`; the measurement script makes no network
+or database calls. Groq documents token-minute headers and cooldown hints at
+https://console.groq.com/docs/rate-limits.
+
+## Rerun gate
+
+The full preparation check passed both server type-checks, 394 server/database tests, 90 Angular
+tests and the production build. These are fake-provider and deterministic checks, not live results.
+
+The owner restored caps to 15/15. After the full code check passes, the owner applies
+`eval/raise-rerun-caps.sql`, which grants only forty more logical charges on the India day without
+resetting usage. The live command selects repetition one only and uses a separate checkpoint:
+
+```sh
+npx tsx eval/run-eval.ts --live --batch rerun-stage-one --session-file tmp/t2/session.json --max-logical-calls 40 --max-provider-attempts 120 --repetitions 1 --continue-on-stop
+```
+
+It saves to `eval/results/rerun-stage-one/` and `eval/rerun-stage-one-report.md`; original results
+remain untouched. A named-rerun CLI guard rejects another repetition or a limit above forty.
+Forty calls cannot complete every production journey: there are 29 document reads and at least
+one investigating choice per each of 12 cases, before image quote checks, plans or drafts.
+Any budget-limited cases must remain explicitly incomplete. Stage two has not been approved.
+
+Restore 15/15 with `eval/restore-caps.sql` after the rerun stops. No live rerun has happened yet.

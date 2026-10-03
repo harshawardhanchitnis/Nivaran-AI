@@ -6,6 +6,14 @@ export interface ModelCallObserver {
   charged(): void;
   beforeAttempt(modelId: string): void;
   answered?(modelId: string, firstModelId: string): void;
+  groqOutputAllowance?(inputBytes: number, requestedTokens: number, imageCount?:number): number;
+  providerResponse?(measurement: ProviderMeasurement): void;
+}
+export interface ProviderMeasurement {
+  modelId:string; kind:'tool_choice'|'reading'|'draft'; inputBytes:number; maxOutputTokens:number; status:number;
+  inputTokens?:number; outputTokens?:number;
+  tokenLimit?:number; remainingTokens?:number; resetTokens?:string;
+  imageCount?:number;
 }
 const observers = new AsyncLocalStorage<ModelCallObserver>();
 export const currentModelCallObserver = () => observers.getStore();

@@ -18,6 +18,10 @@ import {createDraftStore} from '../server/draft/store.js';
 import {writeDraft} from '../server/draft/write-draft.js';
 import {createDraftGenerator} from '../server/draft/model.js';
 import {HttpError} from '../server/http.js';
+import {downloadDocument} from '../server/reader/download-document.js';
+import {pdfTextPages} from '../server/reader/pdf-text.js';
+import type {EvaluationPacing} from './pacing.js';
+import type {ModelTask} from '../server/llm/router.js';
 import {stable} from './metrics.js';
 import type {CallCounts} from './budget.js';
 import type {EvalCase,EvaluationObservation,ObservedFact} from './types.js';
@@ -25,11 +29,11 @@ import type {EvalCase,EvaluationObservation,ObservedFact} from './types.js';
 export interface EvalCheckpoint {
   caseId:string; title:string; runId:string|null; uploaded:boolean; paths:string[];
   initialFacts:ObservedFact[]; startedAt:string; seconds:number; calls:CallCounts;
-  finished:boolean; cleaned:boolean; failureCode:string|null;
+  finished:boolean; cleaned:boolean; audited:boolean; failureCode:string|null;
 }
 export function newCheckpoint(batch:string,spec:EvalCase,repetition:number):EvalCheckpoint {
   return {caseId:randomUUID(),title:`Evaluation ${batch}: ${spec.id} / ${repetition}`,runId:null,uploaded:false,paths:[],
-    initialFacts:[],startedAt:new Date().toISOString(),seconds:0,calls:{logicalCalls:0,providerAttempts:0,models:{}},finished:false,cleaned:false,failureCode:null};
+    initialFacts:[],startedAt:new Date().toISOString(),seconds:0,calls:{logicalCalls:0,providerAttempts:0,models:{}},finished:false,cleaned:false,audited:false,failureCode:null};
 }
 const demand=(error:unknown,message:string)=>{if(error) throw new HttpError(503,'evaluation_storage',message);};
 
@@ -61,7 +65,7 @@ async function prepare(client:SupabaseClient,userId:string,spec:EvalCase,state:E
 }
 
 /** Uses the same production operations as advance, with an explicit fixed evaluation date. */
-export async function runLiveCase(client:SupabaseClient,userId:string,spec:EvalCase,state:EvalCheckpoint,checkpoint:()=>Promise<void>):Promise<void> {
+export async function runLiveCase(client:SupabaseClient,userId:string,spec:EvalCase,state:EvalCheckpoint,checkpoint:()=>Promise<void>,pacing?:EvaluationPacing):Promise<void> {
   if(!state.uploaded) await prepare(client,userId,spec,state,checkpoint);
   const reading=createReadingStore(client), investigation=createInvestigationStore(client);
   const dependencies=createInvestigationDependencies(client,()=>spec.today);
@@ -95,9 +99,27 @@ export async function runLiveCase(client:SupabaseClient,userId:string,spec:EvalC
       await checkpoint();continue;
     }
     if(run.status!=='running') break;
-    const response=run.phase==='reading'?await advanceReading(reading,reader,run.id,run.turn):await advanceInvestigation(investigation,dependencies,run.id,run.turn);
+    const snapshot=await investigation.snapshot(run);
+    const document=run.phase==='reading'?await reading.pendingDocument(run.case_id,run.reader_state.fallback_document_id):
+      snapshot.documents?.find(d=>d.id===run.agent_state.pending_reread?.document_id);
+    let task:ModelTask='text';
+    if(document)task=document.mime_type==='application/pdf'?(await pdfTextPages(await downloadDocument(client,document))?'text':'vision_pdf'):'vision_image';
+    else if(!run.agent_state.quotes_checked&&snapshot.evidence?.some(e=>e.quote_verified===null&&snapshot.documents.some(d=>d.id===e.document_id&&d.mime_type!=='application/pdf')))task='vision_image';
+    const needsModel=run.phase==='reading'?!!document:!!document||run.agent_state.quotes_checked||task==='vision_image';
+    if(needsModel)await pacing?.beforeStep();
+    let response;
+    try {response=run.phase==='reading'?await advanceReading(reading,reader,run.id,run.turn):await advanceInvestigation(investigation,dependencies,run.id,run.turn);}
+    catch(error) {
+      if(pacing&&error instanceof HttpError&&error.code==='evaluation_pacing'&&'retryAfterMs'in error&&typeof error.retryAfterMs==='number') {
+        await pacing.onCooldown(task,error.retryAfterMs);advances--;continue;
+      }
+      throw error;
+    }
     run=response.run;await checkpoint();
-    if(response.retryAfterMs) throw new HttpError(429,'model_cooldown',`Models are unavailable; retry after at least ${Math.ceil(response.retryAfterMs/1000)} seconds. The same turn is saved.`);
+    if(response.retryAfterMs) {
+      if(!pacing)throw new HttpError(429,'model_cooldown',`Models are unavailable; retry after at least ${Math.ceil(response.retryAfterMs/1000)} seconds. The same turn is saved.`);
+      await pacing.onCooldown(task,response.retryAfterMs);advances--;continue;
+    }
   }
   if(run.status==='running') throw new HttpError(409,'evaluation_turn_limit','The runner stopped after eighty advances. Progress is saved.');
   // An interrupted draft may leave an approved plan on a completed run. Resume that draft too.
@@ -111,7 +133,16 @@ export async function runLiveCase(client:SupabaseClient,userId:string,spec:EvalC
         demand(approved.error,'Could not approve the synthetic plan.');
         if(!approved.data) throw new HttpError(409,'evaluation_plan_changed','The synthetic plan changed before approval.');
       }
-      await writeDraft(createDraftStore(client),{today:()=>spec.today,generate:createDraftGenerator(client)},plan.data.id);
+      // Wait before creating the generator; preserve its existing shared 45-second repair deadline.
+      await pacing?.beforeStep();
+      while(true) {
+        try {await writeDraft(createDraftStore(client),{today:()=>spec.today,generate:createDraftGenerator(client)},plan.data.id);break;}
+        catch(error) {
+          const retry=error&&typeof error==='object'&&'retryAfterMs'in error&&typeof error.retryAfterMs==='number'?error.retryAfterMs:null;
+          if(!retry||!pacing)throw error;
+          await pacing.onCooldown('text',retry);await pacing.beforeStep();
+        }
+      }
     }
   }
   state.finished=true;await checkpoint();
@@ -142,9 +173,10 @@ export async function observeLiveCase(client:SupabaseClient,spec:EvalCase,state:
     draftKind:draft?.kind??null,injectionMarkerSeen:!!spec.injectionMarker&&interpreted.includes(spec.injectionMarker),saved};
 }
 
-/** Remove only a completed corpus case whose ID, owner, title and paths match this checkpoint. */
+/** Remove an audited corpus case, including an interruption, never an unrelated case. */
 export async function cleanupLiveCase(client:SupabaseClient,userId:string,state:EvalCheckpoint):Promise<void> {
-  if(!state.finished||state.cleaned) return;
+  if(state.cleaned)return;
+  if(!state.audited)throw new Error('Save this evaluation result before cleanup.');
   if(state.paths.some(path=>!path.startsWith(`${userId}/${state.caseId}/`)))throw new Error('Refusing cleanup outside this evaluation case.');
   const row=await client.from('cases').select('title,user_id').eq('id',state.caseId).maybeSingle();
   demand(row.error,'Could not inspect cleanup ownership.');

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { DocumentRow } from '../../shared/database.js';
 import { HttpError } from '../../server/http.js';
-import { readDocument, type ReaderDependencies, type ReaderRequest } from '../../server/reader/read-document.js';
+import { readDocument, parseDocumentExtraction, type ReaderDependencies, type ReaderRequest } from '../../server/reader/read-document.js';
 
 export const document: DocumentRow = {
   id: '33333333-3333-4333-8333-333333333333', case_id: '22222222-2222-4222-8222-222222222222',
@@ -23,6 +23,22 @@ function dependencies() {
 }
 
 describe('document reader', () => {
+  it('retains MM260901 and drops the exact invoice-footer candidate instead of creating a conflict',()=>{
+    const result=parseDocumentExtraction({...extraction,facts:[
+      {field:'order_id',value_text:'MM260901',quote:'Order ID: MM260901',page:1},
+      {field:'order_id',value_text:'FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION',quote:'FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION',page:1},
+    ]});
+    expect(result.facts).toHaveLength(1);expect(result.facts[0]?.value_text).toBe('MM260901');expect(result.rejectedFactCount).toBe(1);
+  });
+  it('retains a properly quoted negative refund receipt when another candidate has the observed empty quote at index 2',()=>{
+    const result=parseDocumentExtraction({...extraction,facts:[
+      {field:'order_id',value_text:'MM260901',quote:'Order ID: MM260901',page:1},
+      {field:'refund_received',value_text:'Refund not received.',quote:'Refund not received.',page:1},
+      {field:'refund_reference',value_text:'None',quote:'',page:1},
+    ]});
+    expect(result.facts).toHaveLength(2);expect(result.rejectedFactCount).toBe(1);
+    expect(result.facts[1]).toMatchObject({field:'refund_received',quote:'Refund not received.'});
+  });
   it('downloads as the caller, charges before one schema-constrained, tool-free call and keeps quotes verbatim', async () => {
     const deps = dependencies();
     const result = await readDocument(document, deps);

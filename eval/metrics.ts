@@ -38,8 +38,11 @@ export function reportMarkdown(cases:readonly EvalCase[], observations:readonly 
   const lint=seededLintMeasure();
   const consistent=cases.filter(c=>{const runs=measured.filter(r=>r.caseId===c.id);return runs.length===3&&new Set(runs.map(resultSignature)).size===1;});
   const completeTriples=cases.filter(c=>measured.filter(r=>r.caseId===c.id).length===3);
+  const stageOne=current.filter(r=>r.repetition===1);
+  const notStarted=cases.filter(c=>!stageOne.some(r=>r.caseId===c.id));
   const lines=['# Evaluation report','',`Dataset SHA-256: \`${datasetHash}\`. Fixed evaluation date: 2 October 2026 (India).`,
     '',`**${measured.length}/36 required live runs finished. ${current.filter(r=>r.status==='interrupted').length} run(s) interrupted.**`,
+    `Stage-one saved observations: ${stageOne.length}/${cases.length}. Cases without a saved repetition-one observation: ${notStarted.map(c=>c.id).join(', ')||'None'}. These are not completed runs.`,
     measured.length?'Results below include completed failures. Interrupted runs and their spent calls are listed separately.':'No live product-evaluation results are available yet. Zero is a run count, not an accuracy score.',
     '', 'The runner uses the production reader, quote checks, agent loop, ladder, caller-scoped Postgres transactions and draft generator. It does not test the deployed HTTP/browser journey.',
     'Input documents are synthetic. Expected facts and scripted answers are never included in model context. Answers are supplied only after the matching question is asked.',
@@ -55,7 +58,7 @@ export function reportMarkdown(cases:readonly EvalCase[], observations:readonly 
     const present=measured.filter(r=>{const e=cases.find(c=>c.id===r.caseId)!.expected.facts[field];return e&& !['absent','missing'].includes(e.status);}).length;
     lines.push(`| ${field} | ${scored.filter(r=>r.score.facts[field]).length}/${measured.length} | ${present}/${measured.length-present} |`);
   }
-  lines.push('', '## Runs', '', '| Case / repeat | State | Step correct | Pauses correct | Draft kind correct | Logical / provider | Active seconds |', '|---|---|---|---|---|---|---|');
+  lines.push('', '## Runs', '', '| Case / repeat | State | Step correct | Pauses correct | Draft kind correct | Logical / provider | Elapsed seconds |', '|---|---|---|---|---|---|---|');
   for(const r of current) {
     const score=scoreRun(cases.find(c=>c.id===r.caseId)!,r);
     const checks=r.status==='finished'?[score.stepCorrect,score.pausesCorrect,score.draftCorrect]:['N/A','N/A','N/A'];
@@ -78,6 +81,15 @@ export function reportMarkdown(cases:readonly EvalCase[], observations:readonly 
     const responses=current.reduce((n,r)=>n+(r.calls.answers??[]).filter(a=>a.modelId.startsWith(prefix)).length,0);
     lines.push(`| ${provider} | ${attempts} | ${responses} |`);
   }
+  lines.push('', '## Groq request and token measurements', '',
+    'Elapsed run time includes local pacing waits. Input bytes are serialized payload measurements, not token counts. Prompt/output tokens below come from provider response usage; N/A means no usage was returned. No raw prompts or secrets are retained.',
+    '', '| Case / repeat | Task | Input bytes | Prompt tokens | Output tokens | Output allowance | HTTP status |','|---|---|---|---|---|---|---|');
+  let metered=0;
+  for(const r of current)for(const request of r.calls.requests??[]) {
+    metered++;
+    lines.push(`| ${r.caseId} / ${r.repetition} | ${request.kind} | ${request.inputBytes} | ${request.inputTokens??'N/A'} | ${request.outputTokens??'N/A'} | ${request.maxOutputTokens} | ${request.status} |`);
+  }
+  if(!metered)lines.push('| No metered provider responses yet | N/A | N/A | N/A | N/A | N/A | N/A |');
   lines.push('', 'The per-run JSON preserves actual answering model IDs, events, initial/final facts and failures. It contains only synthetic case data; authentication and signing secrets stay outside these files.',
     '', '## Injection check','', `${measured.filter(r=>cases.find(c=>c.id===r.caseId)?.injectionMarker).length}/3 injection runs completed. A marker check is combined with field, pause and outcome scoring; absence of the marker alone does not establish resistance.`,
     '', '## Limits','', 'Small synthetic set, one fixed date, and only the configured provider lineups. PDF quote matching checks literal source text; image confirmation is a weaker second model pass. No survey results or real consumer outcomes are measured here.', '');

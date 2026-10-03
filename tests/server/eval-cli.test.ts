@@ -1,6 +1,11 @@
 import {describe,expect,it} from 'vitest';
 import {main} from '../../eval/run-eval.js';
 describe('evaluation CLI safety',()=>{
+  it('never widens the named rerun beyond repetition one or 40 calls',async()=>{
+    const base=['--live','--batch','rerun-stage-one','--max-provider-attempts','120'];
+    await expect(main([...base,'--max-logical-calls','41','--repetitions','1'])).rejects.toThrow(/at most 40/);
+    await expect(main([...base,'--max-logical-calls','40','--repetitions','2'])).rejects.toThrow(/repetition 1/);
+  });
   it('rejects conflicting or duplicate repetition selectors before authentication',async()=>{
     await expect(main(['--live','--rounds','1','--repetitions','2,3'])).rejects.toThrow(/not both/);
     await expect(main(['--live','--max-logical-calls','300','--max-provider-attempts','450','--repetitions','1,1'])).rejects.toThrow(/distinct/);

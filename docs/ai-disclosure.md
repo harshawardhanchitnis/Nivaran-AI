@@ -397,6 +397,17 @@ All twelve first-stage outcomes, answering models, fallbacks, failures and spent
 interrupted outcomes are not scored as successes. Stage two was not run. Full consistency and
 product-evaluation acceptance remain pending. See `docs/t12-stage-one.md` and `eval/report.md`.
 
+On 3 October, the owner rejected stage two for now and requested failure fixes plus a stage-one
+rerun capped at forty logical calls. Codex traced the original JSON audits, corrected permissive
+ID normalisation and whole-response rejection, added persisted repeat detection and source-backed
+conflict choices, reduced active tool schemas and added local pacing and token telemetry. The
+owner supplied Groq limits of thirty requests and eight thousand tokens per minute. Provider
+fallback remains immediate with no SDK retries; waits happen between local runner advances.
+The four retained evaluation cases and their files were cleared after audit checks, with no model
+calls. Six prior fixtures remain and usage stayed at thirty-six. Offline SDK serialization measured
+request bytes; no provider token counts are inferred from those bytes. Actual token measurements
+await the capped rerun, which is pending the owner's dashboard caps step. See `docs/t12-fixes.md`.
+
 ## AI tools used
 
 | Tool | Used for |

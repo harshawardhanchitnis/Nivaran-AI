@@ -26,6 +26,7 @@ export const agentRunSchema = z.object({
     pending_reread: z.object({ document_id: z.uuid(), question: z.string(), role: z.enum(['primary', 'fallback']) }).optional(),
     next_step: z.record(z.string(), z.unknown()).optional(), checked_guidance: z.array(guidanceRowSchema).optional(),
     answered_question_id: z.uuid().optional(), outcome_decision_done: z.boolean().optional(),
+    progress: z.object({facts:z.string(),actions:z.array(z.string()).max(10)}).optional(),
     outcome_update: z.object({ plan_id:z.uuid(), request_id:z.uuid(), outcome:z.enum(['refunded','acknowledged','no_reply','refused']),recorded_on:z.string(),reply_document_id:z.uuid().optional() }).optional() }).default({}),
   started_at: z.string(), ended_at: z.string().nullable(),
 }) satisfies z.ZodType<AgentRunRow>;

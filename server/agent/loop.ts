@@ -11,6 +11,7 @@ import { executeTool } from './tools/index.js';
 import { questionAnswer, run as recordStatement } from './tools/record-user-statement.js';
 import type { AgentSnapshot, InvestigationChanges, ToolContext } from './tools/types.js';
 import { outcomeStep } from './outcome-step.js';
+import {conflictAction,progressFor,toolSignature} from './progress.js';
 export type { AgentSnapshot, InvestigationChanges } from './tools/types.js';
 
 export interface InvestigationStore {
@@ -72,7 +73,7 @@ export async function advanceInvestigation(store: InvestigationStore, deps: Inve
       }
       return await commit({ state: { ...run.agent_state, pending_reread: undefined, quotes_checked: false, next_step: undefined }, model: result.modelId,
         reread: { document_id: document.id, read_status: result.readable ? 'read' : 'unreadable', doc_type: result.docType, facts: result.facts },
-        events: [{ type: 'tool_result', payload: { tool: 'reread_document', label: document.label, modelId:result.modelId, message: `Took another look at ${document.label}.` } }] });
+        events: [{ type: 'tool_result', payload: { tool: 'reread_document', label: document.label, modelId:result.modelId,rejectedFactCount:result.rejectedFactCount??0, message: `Took another look at ${document.label}.` } }] });
     }
     if (!run.agent_state.quotes_checked) {
       let checked: CheckedFactSheet;
@@ -101,14 +102,28 @@ export async function advanceInvestigation(store: InvestigationStore, deps: Inve
       const delay = rateLimitDelay(error); if (delay !== null) return { run: current, events: [], retryAfterMs: delay };
       return await commit({ count_step: true, events: [{ type: 'error', payload: { message: 'The model could not choose a usable step. Your facts are saved.' } }] });
     }
+    const progress=progressFor(snapshot,run),signature=toolSignature(selection.name,selection.input);
+    const repeated=progress.actions.includes(signature);
     const call = { type: 'tool_call' as const, payload: { tool: selection.name, input: selection.input, modelId:selection.modelId, message: `Chose ${selection.name.replaceAll('_', ' ')}.` } };
+    if(repeated) {
+      const forced=conflictAction(snapshot);
+      if(!forced)return await commit({status:'failed',phase:'done',model:selection.modelId,
+        error:'The same step was repeated without changing the facts. Your case is saved; please review the missing information.',
+        events:[call,{type:'error',payload:{action:'no_progress',message:'Stopped a repeated step that did not change the facts.'}}]});
+      const tool=await executeTool(forced.name,forced.input,context);
+      return await commit({...tool.changes,model:selection.modelId,count_step:false,
+        events:[call,{type:'decision',payload:{action:'repeat_guard',tool:forced.name,field:forced.input.field,message:'A step repeated without changing the facts. Code requested your choice for the open conflict.'}},
+          {type:'question',payload:{tool:forced.name,result:tool.result,message:tool.message}}]});
+    }
+    const state={...run.agent_state,progress:{facts:progress.facts,actions:[...progress.actions,signature].slice(-10)}};
+    context.state=state;
     let tool: Awaited<ReturnType<typeof executeTool>>;
     try { tool = await executeTool(selection.name, selection.input, context); }
     catch {
-      return await commit({ count_step: true, model: selection.modelId,
+      return await commit({ count_step: true, state, model: selection.modelId,
         events: [call, { type: 'error', payload: { tool: selection.name, modelId:selection.modelId, message: 'Nivaran could not use that step. Your facts are saved.' } }] });
     }
-    return await commit({ ...tool.changes, count_step: true, model: selection.modelId,
+    return await commit({ state, ...tool.changes, count_step: true, model: selection.modelId,
       events: [call, { type: tool.changes?.question ? 'question' : 'tool_result', payload: { tool: selection.name, modelId:selection.modelId, result: tool.result, message: tool.message } }] });
   } finally { if (!finished) await store.release(run); }
 }

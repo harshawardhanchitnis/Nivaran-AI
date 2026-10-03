@@ -91,7 +91,8 @@ export function normaliseFact(field: FactField, text: string): NormalisedFact | 
   }
   if (field === 'refund_reference' || field === 'order_id') {
     if (/^(?:none|not provided|not available|no (?:refund )?reference(?: number)?(?: has been issued| was issued| was provided)?|no order id)\.?$/i.test(value)) return { kind: 'absent', value: false };
-    return value.length <= 160 ? { kind: 'id', value: value.toUpperCase() } : null;
+    // Identifiers are single tokens, not narrative sentences or document disclaimers.
+    return value.length <= 160 && /^[\p{L}\p{N}._/#:-]+$/u.test(value) ? { kind: 'id', value: value.toUpperCase() } : null;
   }
   if (field === 'refund_received' || field === 'complaint_acknowledged' || field === 'complaint_refused') {
     const boolean = booleanValue(value, field); return boolean === null ? null : { kind: 'boolean', value: boolean };

@@ -6,6 +6,7 @@ import type { LanguageModel } from 'ai';
 import { type ServerEnv, readEnv } from '../env.js';
 import { HttpError } from '../http.js';
 import { googleFetch } from './google-fetch.js';
+import { groqFetch } from './groq-fetch.js';
 
 /** Compatibility for continuation state saved by T2; it no longer chooses a provider. */
 export type ModelRole = 'primary' | 'fallback';
@@ -24,5 +25,5 @@ export function getModelById(provider: 'google' | 'groq', modelId: string, env: 
     return { role: 'primary', provider, modelId, model: google(modelId) };
   }
   if (!env.groqApiKey) throw new HttpError(503, 'model_not_configured', 'The Groq model key is not set on the server.');
-  return { role: 'fallback', provider, modelId, model: createGroq({ apiKey: env.groqApiKey })(modelId) };
+  return { role: 'fallback', provider, modelId, model: createGroq({ apiKey: env.groqApiKey,fetch:groqFetch })(modelId) };
 }

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AgentRunRow, EvidenceItemRow } from '../../shared/database.js';
-import { createAgentToolChooser, agentTools } from '../../server/agent/model.js';
+import { createAgentToolChooser, agentTools, activeToolNames } from '../../server/agent/model.js';
 import { routingClient } from './routed-test-client.js';
 import { investigationContext } from '../../server/agent/prompts.js';
 import type { AgentSnapshot } from '../../server/agent/loop.js';
@@ -29,9 +29,14 @@ describe('tool selection through the actual SDK with fake HTTP', () => {
     else await expect(chooseAgentTool(snapshot, run)).rejects.toThrow('exactly one tool');
     expect(http).toHaveBeenCalledTimes(1);
     const body = JSON.parse(String(http.mock.calls[0]![1]?.body));
-    expect(body.tools[0].functionDeclarations).toHaveLength(8);
+    expect(body.tools[0].functionDeclarations).toHaveLength(activeToolNames(snapshot,run).length);
     expect(body.toolConfig.functionCallingConfig.mode).toBe('ANY');
     expect(JSON.stringify(body.tools)).not.toContain('maxLength');
+  });
+  it('offers the relevant conflict actions without resending all eight schemas',()=>{
+    const conflict={...snapshot,facts:[{field:'refund_amount',status:'conflict'}] as AgentSnapshot['facts']};
+    expect(activeToolNames(conflict,run)).toEqual(['ask_user','reread_document']);
+    expect(JSON.stringify(agentTools(activeToolNames(conflict,run))).length).toBeLessThan(JSON.stringify(agentTools()).length);
   });
   it('does not retry a refused provider request', async () => {
     vi.stubEnv('GOOGLE_GENERATIVE_AI_API_KEY', 'fake-key');

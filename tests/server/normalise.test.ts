@@ -40,6 +40,10 @@ describe('duration normalisation', () => {
 });
 
 describe('field-specific values', () => {
+  it('rejects the exact footer Qwen misclassified as the clean invoice order ID',()=>{
+    expect(normaliseFact('order_id','FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION')).toBeNull();
+    expect(normaliseFact('order_id','MM260901')).toEqual({kind:'id',value:'MM260901'});
+  });
   it('does not turn an explicit missing bank reference into an ID', () => {
     // Qwen's measured reading: value "None", source quote "No refund reference has been issued".
     expect(normaliseFact('refund_reference', 'None')).toEqual({ kind: 'absent', value: false });

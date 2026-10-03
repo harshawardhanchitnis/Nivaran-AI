@@ -93,6 +93,8 @@ export interface AgentState {
   next_step?: Record<string, unknown>;
   checked_guidance?: GuidanceRow[];
   answered_question_id?: string;
+  /** Signatures of tool choices since the last semantic fact change, never raw source text. */
+  progress?: { facts: string; actions: string[] };
   /** Caller-recorded outcome; code recomputes the ladder after any new reply is read. */
   outcome_update?: {
     plan_id: string;

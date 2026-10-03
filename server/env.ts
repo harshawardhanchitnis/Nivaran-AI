@@ -11,6 +11,8 @@ export interface ServerEnv {
   textLineup: string[];
   modelAttemptTimeoutMs: number;
   modelCooldownSigningSecret: string | undefined;
+  evaluationGroqTpm:number;
+  evaluationGroqRpm:number;
 }
 
 export const DEFAULT_VISION_LINEUP = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'qwen/qwen3.8-27b'];
@@ -33,5 +35,7 @@ export function readEnv(source: Record<string, string | undefined> = process.env
     visionLineup: list('LLM_VISION_LINEUP', DEFAULT_VISION_LINEUP), textLineup: list('LLM_TEXT_LINEUP', DEFAULT_TEXT_LINEUP),
     modelAttemptTimeoutMs: Number.isInteger(timeout) && timeout >= 1000 && timeout <= 8000 ? timeout : 8000,
     modelCooldownSigningSecret: clean(source['MODEL_COOLDOWN_SIGNING_SECRET']),
+    evaluationGroqTpm:Number(source['EVAL_GROQ_TPM']??8000),
+    evaluationGroqRpm:Number(source['EVAL_GROQ_RPM']??30),
   };
 }

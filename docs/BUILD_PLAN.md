@@ -234,12 +234,13 @@ Build `eval/cases/` (12 cases: documents, expected facts, expected step, expecte
 `eval/run-eval.ts`, which runs each case three times against the real model and writes
 `eval/report.md`.
 
-The corpus and bounded, resumable runner were prepared on 2–3 October. The runner uses production
-server operations and caller-scoped storage/transactions, records actual answering models, and
-writes all six measures without inventing empty accuracy scores. The generated report currently
-has zero live runs and three successful local linter probes. The full live batch is pending the
-owner's approval (the handover requires approval above about thirty calls) and dashboard caps;
-T12's live acceptance check is not yet passed. See `eval/README.md`.
+The corpus and bounded runner were prepared on 2–3 October. Stage one spent 36 logical charges
+and 44 SDK attempts: two finished failures, four cooldown interruptions and six case-limit
+interruptions. Original observations remain in `eval/report.md`; T12 acceptance has not passed.
+The owner requested fixes and a separate stage-one rerun capped at forty logical calls, without
+approving stage two. Extraction and repeat regressions, automatic audited-case cleanup, and
+local runner pacing are implemented. The rerun awaits the owner's dashboard caps step; no rerun
+results are claimed. See `eval/README.md` and `docs/t12-fixes.md`.
 
 Checks: the report contains the six measures in SPEC section 10, as measured. Paste the summary into
 the README. Mind the usage limits: raise them for the run, then put them back.

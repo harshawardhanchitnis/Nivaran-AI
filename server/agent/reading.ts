@@ -80,6 +80,7 @@ export async function advanceReading(store: ReadingStore, read: DocumentReader, 
         readStatus = result.readable ? 'read' : 'unreadable';
         event = { type: 'tool_result', payload: { tool: 'read_document', documentId: document.id,
           label: document.label, modelId:result.modelId, readStatus, factCount: result.facts.length,
+          rejectedFactCount: result.rejectedFactCount??0,
           message: result.readable ? `Read ${document.label}.` : `Could not read ${document.label}. Please add a clearer copy.` } };
       } catch (error) {
         if (error instanceof HttpError) throw error;

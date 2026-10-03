@@ -39,6 +39,32 @@ describe('one model-chosen investigation step', () => {
     expect(finishStep.mock.calls[1]?.[1]).toMatchObject({ plan: { ladder_step: 1, dates: { refund_due: '2026-09-24' } } });
     expect(charge.mock.invocationCallOrder[0]).toBeLessThan(choose.mock.invocationCallOrder[0]!);
   });
+  it('forces the real source alternatives after one repeated get_next_step',async()=>{
+    snapshot.facts=[{field:'refund_amount',status:'conflict',value_norm:null}] as CaseFactRow[];
+    snapshot.evidence=[{field:'refund_amount',value_text:'INR 9,999.00',quote_verified:true},{field:'refund_amount',value_text:'INR 8,999.00',quote_verified:true}] as AgentSnapshot['evidence'];
+    await advanceInvestigation(store,deps,run.id,0);
+    await advanceInvestigation(store,deps,run.id,1);
+    expect(choose).toHaveBeenCalledTimes(2);expect(nextStep).toHaveBeenCalledTimes(1);
+    expect(run.agent_steps).toBe(1);expect(run.status).toBe('waiting_for_user');
+    expect(snapshot.questions[0]).toMatchObject({field:'refund_amount',kind:'conflict',options:[{value:'INR 9,999.00'},{value:'INR 8,999.00'}]});
+    expect(finishStep.mock.calls[1]?.[1]).toMatchObject({count_step:false,events:expect.arrayContaining([expect.objectContaining({type:'decision',payload:expect.objectContaining({action:'repeat_guard'})})])});
+  });
+  it('stops a repeated unchanged action clearly when there is no open conflict',async()=>{
+    await advanceInvestigation(store,deps,run.id,0);await advanceInvestigation(store,deps,run.id,1);
+    expect(run.status).toBe('failed');expect(run.agent_steps).toBe(1);expect(nextStep).toHaveBeenCalledTimes(1);
+    expect(finishStep.mock.calls[1]?.[1]).toMatchObject({error:expect.stringContaining('same step')});
+  });
+  it('recognises rephrased rereads of the same document as the same unsuccessful action',async()=>{
+    snapshot.facts=[{field:'refund_amount',status:'conflict',value_norm:null}] as CaseFactRow[];
+    snapshot.evidence=[{field:'refund_amount',value_text:'9999',quote_verified:true},{field:'refund_amount',value_text:'8999',quote_verified:true}] as AgentSnapshot['evidence'];
+    snapshot.documents=[{id:'33333333-3333-4333-8333-333333333333',label:'E02'}] as AgentSnapshot['documents'];
+    choose.mockResolvedValueOnce({name:'reread_document',input:{document_id:snapshot.documents[0]!.id,question:'What is the refund amount stated in E02?'}})
+      .mockResolvedValueOnce({name:'reread_document',input:{document_id:snapshot.documents[0]!.id,question:'What is the exact refund amount stated in the refund message?'}});
+    reread.mockResolvedValue({docType:'refund_message',readable:true,facts:[]});
+    await advanceInvestigation(store,deps,run.id,0);await advanceInvestigation(store,deps,run.id,1);
+    await advanceInvestigation(store,deps,run.id,2);await advanceInvestigation(store,deps,run.id,3);
+    expect(choose).toHaveBeenCalledTimes(2);expect(reread).toHaveBeenCalledTimes(1);expect(run.agent_steps).toBe(1);expect(run.status).toBe('waiting_for_user');
+  });
   it('recomputes a recorded refund outcome without charging or choosing a model tool',async()=>{
     run.agent_state.outcome_update={plan_id:'plan',request_id:'request',outcome:'refunded',recorded_on:'2026-10-02'};
     nextStep.mockResolvedValue({outcome:'resolved',reasons:[{text:'You recorded that the refund arrived.'}],dates:{today:'2026-10-02'}});

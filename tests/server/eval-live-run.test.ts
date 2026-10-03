@@ -3,7 +3,7 @@ import type {SupabaseClient} from '@supabase/supabase-js';
 import type {AgentRunRow,PlanRow,QuestionRow} from '../../shared/database.js';
 import type {EvalCase} from '../../eval/types.js';
 const mock=vi.hoisted(()=>({run:{} as AgentRunRow,snapshot:vi.fn(),getRun:vi.fn(),reading:vi.fn(),advance:vi.fn(),answer:vi.fn(),draft:vi.fn(),dependencies:vi.fn()}));
-vi.mock('../../server/agent/store.js',()=>({createReadingStore:()=>({getRun:mock.getRun})}));
+vi.mock('../../server/agent/store.js',()=>({createReadingStore:()=>({getRun:mock.getRun,pendingDocument:async()=>null})}));
 vi.mock('../../server/agent/investigation-store.js',()=>({createInvestigationStore:()=>({snapshot:mock.snapshot})}));
 vi.mock('../../server/agent/runtime.js',()=>({createInvestigationDependencies:mock.dependencies}));
 vi.mock('../../server/reader/read-document.js',()=>({createDocumentReader:()=>vi.fn()}));
@@ -55,9 +55,26 @@ describe('live runner control flow with fake operations',()=>{
     await expect(runLiveCase(client(),'owner',spec,checkpoint,async()=>{})).rejects.toThrow(/retry after/);
     expect(mock.advance).toHaveBeenCalledTimes(1);expect(checkpoint.finished).toBe(false);
   });
+  it('waits between advances on a transient cooldown and resumes the same turn',async()=>{
+    mock.advance.mockResolvedValueOnce({run:mock.run,retryAfterMs:10000}).mockResolvedValueOnce({run:{...mock.run,status:'out_of_scope'}});
+    const pacing={beforeStep:vi.fn(async()=>{}),onCooldown:vi.fn(async()=>{})};const checkpoint=state();
+    await runLiveCase(client(),'owner',spec,checkpoint,async()=>{},pacing);
+    expect(pacing.onCooldown).toHaveBeenCalledWith('text',10000);expect(mock.advance).toHaveBeenCalledTimes(2);
+    expect(mock.advance.mock.calls[0]?.[4]).toBe(mock.advance.mock.calls[1]?.[4]);expect(checkpoint.finished).toBe(true);
+  });
   it('refuses cleanup outside the owned synthetic checkpoint',async()=>{
-    const checkpoint=state();checkpoint.finished=true;checkpoint.paths=['other-owner/another-case/file.pdf'];
+    const checkpoint=state();checkpoint.finished=true;checkpoint.audited=true;checkpoint.paths=['other-owner/another-case/file.pdf'];
     const c=client();await expect(cleanupLiveCase(c,'owner',checkpoint)).rejects.toThrow(/outside/);
     expect(c.from).not.toHaveBeenCalled();
+  });
+  it('refuses to delete any interrupted case before saving its audit',async()=>{
+    const checkpoint=state(),c=client();await expect(cleanupLiveCase(c,'owner',checkpoint)).rejects.toThrow(/Save/);expect(c.from).not.toHaveBeenCalled();
+  });
+  it('deletes audited interruptions files first, then caller-owned rows',async()=>{
+    const checkpoint=state();checkpoint.audited=true;checkpoint.paths=[`owner/${checkpoint.caseId}/file.pdf`];const order:string[]=[];
+    const query={select:()=>query,eq:()=>query,maybeSingle:async()=>({data:{title:checkpoint.title,user_id:'owner'},error:null}),
+      delete:()=>{order.push('rows');return query;},then:(resolve:(v:unknown)=>void)=>resolve({error:null})};
+    const c={from:()=>query,storage:{from:()=>({remove:async()=>{order.push('files');return {error:null};}})}} as unknown as SupabaseClient;
+    await cleanupLiveCase(c,'owner',checkpoint);expect(order).toEqual(['files','rows']);expect(checkpoint.cleaned).toBe(true);expect(checkpoint.finished).toBe(false);
   });
 });

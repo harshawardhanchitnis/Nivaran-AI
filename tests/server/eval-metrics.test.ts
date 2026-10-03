@@ -4,6 +4,13 @@ import type {EvalCase,EvaluationObservation} from '../../eval/types.js';
 const spec:EvalCase={id:'case',title:'Case',today:'2026-10-02',documents:[],answers:{},expected:{facts:{refund_amount:{status:'document',value:{kind:'amount',decimal:'9999.00',currency:'INR'}}},outcome:'ladder',step:1,pauses:[],draftKind:'grievance_officer'}};
 function observed():EvaluationObservation {return {caseId:'case',repetition:1,mode:'live',datasetHash:'hash',startedAt:'now',status:'finished',stopReason:null,seconds:2,calls:{logicalCalls:4,providerAttempts:5,models:{}},runStatus:'completed',runError:null,initialFacts:[{field:'refund_amount',status:'document',value_norm:{kind:'amount',currency:'INR',decimal:'9999.00'}}],finalFacts:[],quotes:{passed:2,total:3},pauses:[],outcome:'ladder',step:1,draftKind:'grievance_officer',injectionMarkerSeen:false,saved:null};}
 describe('honest evaluation metrics',()=>{
+  it('names cases without a stage-one observation and never infers provider tokens from bytes',()=>{
+    const result=observed();result.calls.requests=[{modelId:'qwen/model',kind:'tool_choice',inputBytes:5145,maxOutputTokens:600,status:429}];
+    const report=reportMarkdown([spec,{...spec,id:'unstarted'}],[result],'hash');
+    expect(report).toContain('Stage-one saved observations: 1/2');
+    expect(report).toContain('observation: unstarted.');
+    expect(report).toContain('| tool_choice | 5145 | N/A | N/A | 600 | 429 |');
+  });
   it('does not score interrupted or never-started runs as correct absent drafts or pauses',()=>{
     const result=observed();result.status='interrupted';result.runStatus=null;
     const report=reportMarkdown([spec],[result],'hash');
