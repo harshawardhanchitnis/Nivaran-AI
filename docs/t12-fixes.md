@@ -84,4 +84,30 @@ Forty calls cannot complete every production journey: there are 29 document read
 one investigating choice per each of 12 cases, before image quote checks, plans or drafts.
 Any budget-limited cases must remain explicitly incomplete. Stage two has not been approved.
 
-Restore 15/15 with `eval/restore-caps.sql` after the rerun stops. No live rerun has happened yet.
+Restore 15/15 with `eval/restore-caps.sql` after the rerun stops.
+
+## Live rerun observations and an offline pause
+
+The owner confirmed the forty-call SQL on 3 October. The pass started on commit `49d8a74`,
+crossing into 4 October India time. The first tool-choice response measured 1,827 prompt tokens
+and 15 completion tokens (600 output allowance), rather than inferring tokens from byte size.
+The clean ID is now `MM260901` with document status. The clean case still failed: Qwen marked
+E04 unreadable with zero facts, independently of the original empty-quote validation error.
+The amount-conflict case also failed: E02 returned readable with zero facts, so the initial
+conflict and due date were missing. These original rerun failures stay in the saved results.
+
+The clean case made differently worded guidance searches returning zero rows, then its identical
+repeated source-ID query was stopped by the new repeat guard. Investigation confirmed that the
+stored full-text index contains only `title || body`, not source IDs. Websearch combines terms
+as required terms, and literal IDs are not reliable searches of those words. Retrieval now uses
+an exact ID lookup for source IDs and fetches missing code-required source IDs when a broad
+search fails. The checked-guidance policy and plan validation remain intact, including step zero.
+An initial assumption that step zero needed no checked guidance was corrected after reading the
+validator and seed; no change allowing unchecked plans was made.
+
+The runner was paused during a pacing wait at 22 logical calls / 23 SDK attempts: clean 14/15,
+conflicting amounts 5/5, and three reads of the not-yet-due case. Its two finished audits and their
+case cleanup are preserved. After fake-provider checks, it resumes that existing checkpoint
+with eighteen logical calls remaining; neither completed case is retried. The not-yet-due case
+therefore has reads from the earlier revision and investigation from the retrieval fix. Active
+runner seconds include pacing but exclude this offline pause. The final report remains pending.

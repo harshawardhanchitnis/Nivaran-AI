@@ -43,7 +43,8 @@ export function createInvestigationStore(client: SupabaseClient): QuestionStore 
     },
     searchGuidance: async query => {
       let request = client.from('guidance').select('*').order('id').limit(50);
-      if (query.trim()) request = request.textSearch('fts', query, { type: 'websearch', config: 'english' });
+      if (/^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$/.test(query.trim())) request = request.eq('id', query.trim());
+      else if (query.trim()) request = request.textSearch('fts', query, { type: 'websearch', config: 'english' });
       const { data, error } = await request.returns<GuidanceRow[]>();
       if (error) throw unavailable(); return data ?? [];
     },
