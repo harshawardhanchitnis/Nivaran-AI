@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 
 import { EvidenceTag } from '../../shared/ui/evidence-tag';
 import { StatusChip } from '../../shared/ui/status-chip';
+import { SAMPLE_CASES } from '@shared/samples';
 
 @Component({
   selector: 'app-home',
@@ -22,7 +23,7 @@ import { StatusChip } from '../../shared/ui/status-chip';
         </p>
         <div class="row">
           <a mat-flat-button routerLink="/cases/new">Start a case</a>
-          <a mat-stroked-button routerLink="/demo">See a sample case</a>
+          <a mat-stroked-button routerLink="/samples/clean-overdue">See a saved run</a>
         </div>
         <p class="small muted">No sign-up. Nothing is sent or filed for you.</p>
       </div>
@@ -60,6 +61,18 @@ import { StatusChip } from '../../shared/ui/status-chip';
       </div>
     </section>
 
+    <section class="steps" aria-labelledby="samples-title">
+      <h2 id="samples-title">Try a saved case</h2>
+      <p class="muted">Real recorded runs using fictional documents. Opening them makes no model calls. Failures are shown too.</p>
+      <div class="sample-grid">
+        @for (sample of samples; track sample.id) {
+          <article class="surface card">
+            <p class="eyebrow">Saved run</p><h3>{{ sample.title }}</h3><p>{{ sample.description }}</p>
+            <a mat-stroked-button [routerLink]="['/samples',sample.id]">Open {{ sample.title.toLowerCase() }}</a>
+          </article>
+        }
+      </div>
+    </section>
     <section class="steps" aria-labelledby="how-title">
       <h2 id="how-title">How it works</h2>
       <ol>
@@ -95,6 +108,7 @@ import { StatusChip } from '../../shared/ui/status-chip';
     </section>
   `,
   styles: `
+    .sample-grid { display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)) }
     .hero {
       display: grid;
       gap: 28px;
@@ -262,6 +276,7 @@ import { StatusChip } from '../../shared/ui/status-chip';
   `,
 })
 export class Home {
+  protected readonly samples = SAMPLE_CASES;
   protected readonly steps = [
     { icon: 'upload_file', title: 'Add your documents', text: 'Invoice, cancellation or return message, refund message, support chat.' },
     { icon: 'fact_check', title: 'Check the facts', text: 'Each fact shows its source. Nivaran asks only when documents disagree or something is missing.' },

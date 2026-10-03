@@ -60,7 +60,9 @@ import type { PlanView } from './models';
       </p>
 
       <div class="gate no-print">
-        @if (approved()) {
+        @if (readOnly()) {
+          <p>{{ approved() ? 'This plan was approved in the saved run.' : 'Saved proposal. This view cannot approve or change it.' }}</p>
+        } @else if (approved()) {
           <p class="approved"><mat-icon aria-hidden="true">verified</mat-icon> You approved this plan.</p>
         } @else if (plan().step === 3) {
           <p>Information only. Nivaran prepares no complaint at this step.</p>
@@ -177,6 +179,7 @@ export class PlanPanel {
   readonly plan = input.required<PlanView>();
   readonly approved = input(false);
   readonly busy = input(false);
+  readonly readOnly = input(false);
   readonly approve = output<void>();
   readonly decline = output<void>();
   readonly edit = output<void>();

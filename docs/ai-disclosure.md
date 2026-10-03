@@ -462,3 +462,11 @@ was not retained. No three-run consistency was measured. Cleanup found no evalua
 files; six earlier fixtures remain. The India-day counter rose from 30 to 100. The owner was asked
 to restore 15/15 caps; no further evaluation will run. See docs/t12-final-pass.md and the final
 report. T13–T17 now proceed under the owner's explicit instruction despite incomplete T12.
+
+T13 now provides five public Saved run views from actual synthetic audits using the existing
+workspace components. The older waiting-plan result is labelled with its provenance; failures
+remain visible. Replay has disabled approval/answer controls and makes no model call. Read-only
+quota advice is migration 0011; consent and Continue are required for live uploads. Local checks
+passed 410 server/database tests, 91 Angular tests, type checks and build; a 360 px source sheet
+had no horizontal overflow or axe A/AA violations. See docs/t13-checks.md. Codex generated no new
+model output while implementing samples.

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import type { CaseRow, DocumentRow, PlanRow } from '@shared/database';
+import type { CaseRow, DocumentRow, PlanRow, ModelBudgetStatus } from '@shared/database';
 import { EVIDENCE_BUCKET, evidencePath, MAX_FILES_PER_CASE } from '@shared/limits';
 import { checkFiles } from '../features/case-new/file-rules';
 import type { CaseSummaryView } from '../shared/ui/models';
@@ -18,6 +18,13 @@ export interface CreatedCase { case: CaseRow; documents: DocumentRow[] }
 @Injectable({ providedIn: 'root' })
 export class CasesService {
   private readonly supabase = inject(SupabaseService);
+
+  async modelBudget(): Promise<ModelBudgetStatus> {
+    await this.supabase.ensureSignedIn();
+    const { data, error } = await this.supabase.client.rpc('model_budget_status');
+    if (error || !data || !Number.isSafeInteger(data.remaining) || data.remaining < 0) throw new Error('Live availability could not be checked. You can still open every saved run.');
+    return data as ModelBudgetStatus;
+  }
 
   async createWithDocuments(files: readonly File[], consent: boolean): Promise<CreatedCase> {
     if (!consent) throw new CaseUploadError('Please give consent before uploading.');

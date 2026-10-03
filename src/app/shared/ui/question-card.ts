@@ -11,12 +11,12 @@ import type { QuestionView } from './models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="card" [attr.aria-labelledby]="'question-title-' + question().id" [attr.aria-busy]="busy()">
-      <p class="eyebrow"><mat-icon aria-hidden="true">help</mat-icon> Nivaran needs one answer</p>
+      <p class="eyebrow"><mat-icon aria-hidden="true">help</mat-icon> {{ readOnly() ? 'Question from the saved run' : 'Nivaran needs one answer' }}</p>
       <h2 [id]="'question-title-' + question().id">{{ question().prompt }}</h2>
       <p class="why">{{ question().why }}</p>
       <div class="options">
         @for (option of question().options; track option.id) {
-          <button type="button" class="option" [disabled]="busy()" (click)="answered.emit(option.id)">
+          <button type="button" class="option" [disabled]="busy() || readOnly()" (click)="answered.emit(option.id)">
             <span class="label">{{ option.label }}</span>
             @if (option.hint) {
               <span class="hint">{{ option.hint }}</span>
@@ -24,7 +24,7 @@ import type { QuestionView } from './models';
           </button>
         }
       </div>
-      @if (question().options.length === 0) {
+      @if (question().options.length === 0 && !readOnly()) {
         <form (submit)="submitText($event)">
           <label [for]="'question-answer-' + question().id">Your answer</label>
           <textarea [id]="'question-answer-' + question().id" [formControl]="text" maxlength="4000" rows="3" [readOnly]="busy()"></textarea>
@@ -113,6 +113,7 @@ import type { QuestionView } from './models';
 export class QuestionCard {
   readonly question = input.required<QuestionView>();
   readonly busy = input(false);
+  readonly readOnly = input(false);
   /** Emits the id of the chosen option. */
   readonly answered = output<string>();
   readonly textAnswered = output<string>();
@@ -126,6 +127,6 @@ export class QuestionCard {
   }
   protected submitText(event: Event): void {
     event.preventDefault(); const value = this.text.value.trim();
-    if (!this.busy() && value) this.textAnswered.emit(value);
+    if (!this.busy() && !this.readOnly() && value) this.textAnswered.emit(value);
   }
 }

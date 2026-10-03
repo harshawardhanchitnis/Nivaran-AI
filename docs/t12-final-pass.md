@@ -19,8 +19,10 @@ was absent from interpreted facts, plan prose, questions and the draft in that o
 
 ## Causes visible in saved audits
 
-- Clean PDFs were read by Flash Lite, including the receipt facts previously omitted by Qwen.
-  The original false order-ID conflict did not recur. No empty-read fallback was needed on these.
+- Clean PDFs were read by Flash Lite. E04 supplied the correct order ID but still omitted the
+  receipt fact, so clean-overdue's `refund_received` remains missing. Other text-PDF cases did
+  extract receipt facts. The original false order-ID conflict did not recur. No empty-read fallback
+  was needed on these clean PDFs; this does not imply complete extraction.
 - Clean and injection runs repeatedly searched for the same required checked guidance with
   different query strings. The tool set still offered `search_guidance` after it had loaded the
   required row; the repeat guard compares inputs, so these different strings evaded it.

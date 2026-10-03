@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +8,8 @@ import { EvidenceTag } from '../../shared/ui/evidence-tag';
 import { CasesService, CaseUploadError } from '../../core/cases.service';
 import { UploadDropzone } from '../../shared/ui/upload-dropzone';
 import { checkFiles, formatBytes } from './file-rules';
+import { sampleCase } from '@shared/samples';
+import { SamplesService } from '../../core/samples.service';
 
 /**
  * New case: privacy notice with consent, then documents.
@@ -24,12 +26,13 @@ import { checkFiles, formatBytes } from './file-rules';
         <p class="eyebrow">New case</p>
         <h1>Add your documents</h1>
         <p class="muted">Whatever you have about the order and the refund. Screenshots are fine.</p>
+        @if (sampleTitle()) { <p role="note">{{ sampleTitle() }}: these preselected documents are fictional. Continue creates your own live case and uses today's date in India.</p> }
       </header>
 
       <section class="notice surface" aria-labelledby="privacy-title">
         <h2 id="privacy-title"><mat-icon aria-hidden="true">shield</mat-icon> Before you upload</h2>
         <ul>
-          <li>Your documents are sent to Google’s Gemini model to be read. Images may also be sent to Groq if the primary reading fails.</li>
+          <li>Your documents and extracted facts may be sent to Google Gemini or Groq’s Qwen model for reading, investigation and drafting.</li>
           <li>On the free tier, Google may use that content to improve its products.</li>
           <li>Hide card numbers and anything you do not want to share before uploading.</li>
           <li>You can delete your case, files and records at any time.</li>
@@ -175,6 +178,15 @@ export class CaseNew {
   protected readonly saving = signal(false);
   protected readonly createdCaseId = signal<string | null>(null);
   protected readonly partialCaseId = signal<string | null>(null);
+  protected readonly sampleTitle = signal('');
+  constructor() {
+    const selected = sampleCase(inject(ActivatedRoute).snapshot.queryParamMap.get('sample'));
+    const samples = inject(SamplesService);
+    if (selected) {
+      this.sampleTitle.set(selected.title);
+      void samples.files(selected.id).then(files => { this.files.set(files); }).catch(() => this.problems.set(['Could not load the sample files. You can add your own documents after giving consent.']));
+    }
+  }
   protected readonly canContinue = computed(() => this.consent() && this.files().length > 0 && !this.saving());
 
   protected async continue(): Promise<void> {

@@ -67,7 +67,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
         <div class="split" role="tabpanel" id="case-panel-facts" aria-labelledby="case-tab-facts">
           <div class="stack">
             @if (question(); as open) {
-              <app-question-card [question]="open" [busy]="answerBusy()" (answered)="answered.emit($event)" (textAnswered)="textAnswered.emit($event)" />
+              <app-question-card [question]="open" [readOnly]="readOnly()" [busy]="answerBusy()" (answered)="answered.emit($event)" (textAnswered)="textAnswered.emit($event)" />
             }
             <app-fact-list [facts]="facts()" [selected]="selectedField()" (factSelected)="openSource($event)" />
           </div>
@@ -98,7 +98,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
       @case ('plan') {
         <div role="tabpanel" id="case-panel-plan" aria-labelledby="case-tab-plan">
           @if (plan(); as current) {
-            <app-plan-panel [plan]="current" [approved]="approved()" [busy]="reviewBusy()" (approve)="approve.emit()" (decline)="decline.emit()" (edit)="edit.emit()" />
+            <app-plan-panel [plan]="current" [readOnly]="readOnly()" [approved]="approved()" [busy]="reviewBusy()" (approve)="approve.emit()" (decline)="decline.emit()" (edit)="edit.emit()" />
           } @else {
             <div class="empty surface">
               <mat-icon aria-hidden="true">hourglass_empty</mat-icon>
@@ -331,6 +331,7 @@ export class CaseWorkspaceView {
   readonly facts = input.required<readonly FactView[]>();
   readonly activity = input.required<readonly ActivityView[]>();
   readonly busy = input(false);
+  readonly readOnly = input(false);
   readonly question = input<QuestionView | null>(null);
   readonly answerBusy = input(false);
   readonly plan = input<PlanView | null>(null);

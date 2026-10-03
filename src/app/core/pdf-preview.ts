@@ -13,8 +13,13 @@ export async function pdfPagePreviews(url: string, pages: readonly number[], ori
   if (!signed) throw new Error('This document link is not available. Retry opening it.');
   const response = await fetch(signed);
   if (!response.ok) throw new Error('Could not open this PDF. Retry opening the document.');
+  return renderPdfPagePreviews(await response.arrayBuffer(), pages);
+}
+
+/** Shared local renderer; callers separately validate private or static sample URLs. */
+export async function renderPdfPagePreviews(bytes: ArrayBuffer, pages: readonly number[]): Promise<Record<number, string>> {
   const { getDocumentProxy, renderPageAsImage } = await import('unpdf');
-  const pdf = await getDocumentProxy(new Uint8Array(await response.arrayBuffer()));
+  const pdf = await getDocumentProxy(new Uint8Array(bytes));
   const images: Record<number, string> = {};
   try {
     for (const page of new Set(pages)) {

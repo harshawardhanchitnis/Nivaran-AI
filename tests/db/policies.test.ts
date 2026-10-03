@@ -22,6 +22,7 @@ const planReviewMigration = readFileSync(path.join(here, '..', '..', 'supabase',
 const draftMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0008_draft_claims.sql'), 'utf8');
 const sentMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0009_mark_sent.sql'), 'utf8');
 const outcomeMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0010_case_outcomes.sql'), 'utf8');
+const budgetMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0011_model_budget_status.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -76,6 +77,7 @@ beforeAll(async () => {
   await db.exec(draftMigration);
   await db.exec(sentMigration);
   await db.exec(outcomeMigration);
+  await db.exec(budgetMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -597,5 +599,31 @@ describe('abuse bounds', () => {
       await createCase(BOB, `Case ${i}`);
     }
     await expect(createCase(BOB, 'One too many')).rejects.toThrow(/at most 10 cases/);
+  });
+});
+
+describe('read-only model budget advice', () => {
+  it('uses the India day and caller usage without creating or changing counters', async () => {
+    await db.exec('begin');
+    try {
+      await db.exec(`update public.app_settings set value='{"per_user_daily_model_calls":15,"global_daily_model_calls":15}' where key='limits';
+        delete from public.model_usage; delete from public.model_usage_global;`);
+      await db.query(`insert into public.model_usage(user_id,day,calls) values($1,(now() at time zone 'Asia/Kolkata')::date,4),($2,(now() at time zone 'Asia/Kolkata')::date,14)`,[ALICE,BOB]);
+      await db.exec(`insert into public.model_usage_global(day,calls) values((now() at time zone 'Asia/Kolkata')::date,7)`);
+      const before=await db.query('select * from public.model_usage order by user_id');
+      const first=await asUser(ALICE,()=>db.query<{budget:{remaining:number;day:string;reset_at:string}}>('select public.model_budget_status() as budget'));
+      const second=await asUser(BOB,()=>db.query<{budget:{remaining:number}}>('select public.model_budget_status() as budget'));
+      const day=await db.query<{day:string}>(`select ((now() at time zone 'Asia/Kolkata')::date)::text as day`);
+      expect(first.rows[0]!.budget.remaining).toBe(8);
+      expect(second.rows[0]!.budget.remaining).toBe(1);
+      expect(first.rows[0]!.budget.day).toBe(day.rows[0]!.day);
+      expect(first.rows[0]!.budget.reset_at).toBeTruthy();
+      expect((await db.query('select * from public.model_usage order by user_id')).rows).toEqual(before.rows);
+      expect((await db.query<{calls:number}>('select calls from public.model_usage_global')).rows[0]!.calls).toBe(7);
+    } finally {await db.exec('rollback');}
+  });
+  it('denies visitors and cannot be called with another user ID', async () => {
+    await expect(asVisitor(()=>db.query('select public.model_budget_status()'))).rejects.toThrow(/permission denied/);
+    await expect(asUser(ALICE,()=>db.query('select public.model_budget_status($1::uuid)',[BOB]))).rejects.toThrow(/does not exist/);
   });
 });
