@@ -357,13 +357,33 @@ server/database tests (52 policy/seed tests), 90 Angular tests and production bu
 calls were made; usage remained at fifteen. Refusal reading and helpline drafting with real
 models remain unverified. See `docs/t11-checks.md`.
 
+On 2–3 October 2026, before the event, Codex prepared T12's twelve-case synthetic corpus and
+29 documents using a committed Python generator with ReportLab/Pillow. Expected facts, ladder
+outcomes, pauses and simulated answers were authored separately from model output. All text-PDF
+source lines were checked after unpdf extraction; the rendered documents were visually inspected.
+The blurred image is intentionally unreadable. No real consumers or transactions are represented.
+
+Codex added an evaluation runner using the production reader, quote checker, investigation loop,
+ladder, caller-scoped Supabase transactions and draft generator, with fixed evaluation dates,
+checkpointed progress, actual model labels, call budgets and scoped synthetic-case cleanup.
+Optional asynchronous instrumentation counts successful logical charges and SDK provider attempts;
+it does not replace or bypass database quota charging. A local budget stop cannot mark a provider
+exhausted. Fake-operation tests cover pauses, canonical answers, fixed dates, draft resumption,
+cooldown stops and cleanup boundaries. The dry run used no database or provider calls. The report
+currently records zero of thirty-six live runs, with product metrics explicitly pending. Three
+deterministic linter probes passed. The full live run awaits the owner's approval and temporary
+dashboard caps; no live evaluation results are claimed.
+The full preparation check passed both server type-checks, 371 server/database tests, 90 Angular
+tests and the production build. Details and the remaining acceptance gate are in
+`docs/t12-preparation.md`.
+
 ## AI tools used
 
 | Tool | Used for |
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation and checks, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2 October 2026. |
+| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation and T12 corpus/runner preparation, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2–3 October 2026. |
 | Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; new routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October 2026. These are manual fixture checks. |
 | Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing checks on 2 October 2026. The selected ladder tool remained unavailable. These are manual fixture checks, not product evaluation results. |
 

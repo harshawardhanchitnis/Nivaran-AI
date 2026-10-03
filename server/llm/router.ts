@@ -160,6 +160,8 @@ export async function routeModelCall<T>(
         provider: model.provider,
       };
     } catch (error) {
+      // Application limits are not provider failures and must not create model cooldowns.
+      if (error instanceof HttpError) throw error;
       const cooldown = providerCooldown(error, model.provider, deps.now());
       if (!cooldown) throw error;
       await deps.exhaust(model, cooldown.until, cooldown.reason);

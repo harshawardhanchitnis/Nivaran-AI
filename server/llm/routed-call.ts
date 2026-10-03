@@ -5,6 +5,7 @@ import { chargeModelCall } from '../usage.js';
 import { cooldownStore } from './cooldowns.js';
 import { getModelById, type ModelHandle } from './provider.js';
 import { modelLineup, routeModelCall, type ModelTask } from './router.js';
+import { currentModelCallObserver } from './observer.js';
 
 export function createRoutedModelCall(client: SupabaseClient, options: { deadline?: number } = {}) {
   return async <T>(
@@ -31,9 +32,17 @@ export function createRoutedModelCall(client: SupabaseClient, options: { deadlin
       now: Date.now,
       timeoutMs: env.modelAttemptTimeoutMs,
       deadline: options.deadline,
-      charge: () => chargeModelCall(client),
+      charge: async () => {
+        currentModelCallObserver()?.beforeCharge();
+        await chargeModelCall(client);
+        currentModelCallObserver()?.charged();
+      },
       ...cooldownStore(client, env.modelCooldownSigningSecret),
-      attempt: (model, signal) => attempt(getModelById(model.provider, model.modelId, env), signal),
+      attempt: (model, signal) => {
+        const handle = getModelById(model.provider, model.modelId, env);
+        currentModelCallObserver()?.beforeAttempt(model.modelId);
+        return attempt(handle, signal);
+      },
     });
   };
 }

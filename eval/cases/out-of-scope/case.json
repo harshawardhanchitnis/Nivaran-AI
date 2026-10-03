@@ -1,0 +1,33 @@
+{
+  "id": "out-of-scope",
+  "title": "Bank transfer dispute",
+  "today": "2026-10-02",
+  "documents": [
+    {
+      "file": "transfer.pdf",
+      "title": "Request about a transfer",
+      "lines": [
+        "Item: UPI transfer dispute",
+        "This is a transfer between bank accounts, not an online purchase.",
+        "No merchant, order, cancellation or accepted refund is involved."
+      ],
+      "format": "pdf"
+    }
+  ],
+  "expected": {
+    "facts": {
+      "item_description": {
+        "status": "document",
+        "value": {
+          "kind": "text",
+          "value": "upi transfer dispute"
+        }
+      }
+    },
+    "outcome": "out_of_scope",
+    "step": null,
+    "pauses": [],
+    "draftKind": null
+  },
+  "answers": {}
+}

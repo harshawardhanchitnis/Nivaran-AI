@@ -1,0 +1,30 @@
+{
+  "id": "unreadable-image",
+  "title": "Unreadable screenshot",
+  "today": "2026-10-02",
+  "documents": [
+    {
+      "file": "blurred.png",
+      "title": "Unreadable source",
+      "lines": [
+        "Meridian Mart",
+        "Order ID: MM260901",
+        "Refund amount: INR 9,999.00"
+      ],
+      "format": "blurred"
+    }
+  ],
+  "expected": {
+    "facts": {},
+    "outcome": "needs_input",
+    "step": null,
+    "pauses": [
+      {
+        "kind": "document_request",
+        "field": null
+      }
+    ],
+    "draftKind": null
+  },
+  "answers": {}
+}

@@ -37,6 +37,12 @@ The six guidance rows were checked by the owner on 2 October 2026; review detail
 [docs/guidance-review.md](docs/guidance-review.md). Complaint response dates use the recorded sent
 date; rule 4(5) counts from receipt, so the plan explicitly says to adjust for later receipt.
 
+The reproducible [evaluation corpus and runner](eval/README.md) now cover twelve fictional cases
+and 29 generated documents. [The report](eval/report.md) currently records **0/36 live evaluation
+runs**; product accuracy and consistency remain unmeasured. The separate deterministic linter
+probe caught **3/3** seeded amount, date and ID errors. These are local checks, not model scores.
+The live batch awaits the owner's call-budget approval and temporary database caps.
+
 ## Documents
 
 | File | What it is |

@@ -1,0 +1,14 @@
+[
+  "clean-overdue",
+  "conflicting-amounts",
+  "not-yet-due",
+  "already-complained",
+  "out-of-scope",
+  "missing-order-id",
+  "unreadable-image",
+  "injected-instruction",
+  "mixed-amount-formats",
+  "two-refund-dates",
+  "written-refusal",
+  "bank-reference"
+]

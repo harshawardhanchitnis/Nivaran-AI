@@ -1,0 +1,132 @@
+{
+  "id": "two-refund-dates",
+  "title": "Two different refund dates",
+  "today": "2026-10-02",
+  "documents": [
+    {
+      "file": "invoice.pdf",
+      "title": "Order invoice",
+      "lines": [
+        "Seller: Meridian Mart",
+        "Online prepaid order",
+        "Order ID: MM260901",
+        "Order date: 2026-09-01",
+        "Item: Desk lamp",
+        "Amount paid: INR 9,999.00"
+      ],
+      "format": "pdf"
+    },
+    {
+      "file": "refund.pdf",
+      "title": "Cancellation and refund message",
+      "lines": [
+        "From: Meridian Mart",
+        "Order ID: MM260901",
+        "Cancellation accepted on 2026-09-14.",
+        "Refund amount: INR 9,999.00",
+        "Refund promised on: 2026-09-14",
+        "Refund due date: 2026-09-24",
+        "No refund reference has been issued.",
+        "Customer status: refund not received."
+      ],
+      "format": "pdf"
+    },
+    {
+      "file": "second-date.pdf",
+      "title": "Different promised date",
+      "lines": [
+        "From: Meridian Mart",
+        "Order ID: MM260901",
+        "Refund due date: 2026-10-10"
+      ],
+      "format": "pdf"
+    }
+  ],
+  "expected": {
+    "facts": {
+      "merchant_name": {
+        "status": "document",
+        "value": {
+          "kind": "text",
+          "value": "meridian mart"
+        }
+      },
+      "order_date": {
+        "status": "document",
+        "value": {
+          "kind": "date",
+          "value": "2026-09-01"
+        }
+      },
+      "item_description": {
+        "status": "document",
+        "value": {
+          "kind": "text",
+          "value": "desk lamp"
+        }
+      },
+      "amount_paid": {
+        "status": "document",
+        "value": {
+          "kind": "amount",
+          "currency": "INR",
+          "decimal": "9999.00"
+        }
+      },
+      "cancellation_or_return_date": {
+        "status": "document",
+        "value": {
+          "kind": "date",
+          "value": "2026-09-14"
+        }
+      },
+      "refund_amount": {
+        "status": "document",
+        "value": {
+          "kind": "amount",
+          "currency": "INR",
+          "decimal": "9999.00"
+        }
+      },
+      "refund_promise_date": {
+        "status": "document",
+        "value": {
+          "kind": "date",
+          "value": "2026-09-14"
+        }
+      },
+      "refund_due_date": {
+        "status": "conflict"
+      },
+      "refund_received": {
+        "status": "document",
+        "value": {
+          "kind": "boolean",
+          "value": false
+        }
+      },
+      "refund_reference": {
+        "status": "absent"
+      },
+      "order_id": {
+        "status": "document",
+        "value": {
+          "kind": "id",
+          "value": "MM260901"
+        }
+      }
+    },
+    "outcome": "ladder",
+    "step": 1,
+    "pauses": [
+      {
+        "kind": "conflict",
+        "field": "refund_due_date"
+      }
+    ],
+    "draftKind": "grievance_officer"
+  },
+  "answers": {
+    "refund_due_date": "2026-09-24"
+  }
+}
