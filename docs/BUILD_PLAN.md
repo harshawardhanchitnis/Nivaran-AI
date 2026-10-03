@@ -274,3 +274,9 @@ Checks: after deletion nothing remains in Storage or any table for that case.
 - `docs/ai-disclosure.md` and `docs/problem-evidence.md` complete and true.
 - Final demo video following SPEC section 11.
 - Submit by 13:00. Do not touch the deployment after submitting.
+
+On 4 October the final authorised repetition-one pass stopped at seventy logical charges / 75
+provider attempts: eight finished, one interrupted at the budget, three unstarted. Outcomes were
+7/8 and exact pauses 5/8; no three-run consistency is available. See docs/t12-final-pass.md.
+The owner explicitly directed proceeding through T13–T17 and deployment, with no further evaluation.
+T12 acceptance remains incomplete; later guards will not be credited with unmeasured accuracy.

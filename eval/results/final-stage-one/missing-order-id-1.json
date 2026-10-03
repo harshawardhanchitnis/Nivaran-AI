@@ -1,0 +1,1188 @@
+{
+  "caseId": "missing-order-id",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T19:53:10.713Z",
+  "status": "finished",
+  "stopReason": null,
+  "seconds": 313.87821019999984,
+  "calls": {
+    "logicalCalls": 8,
+    "providerAttempts": 8,
+    "models": {
+      "gemini-3.5-flash-lite": 2,
+      "qwen/qwen3.8-27b": 6
+    },
+    "answers": [
+      {
+        "modelId": "gemini-3.5-flash-lite",
+        "firstModelId": "gemini-3.5-flash-lite",
+        "attempts": [
+          "gemini-3.5-flash-lite"
+        ]
+      },
+      {
+        "modelId": "gemini-3.5-flash-lite",
+        "firstModelId": "gemini-3.5-flash-lite",
+        "attempts": [
+          "gemini-3.5-flash-lite"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 5696,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6066,
+        "resetTokens": "14.504s",
+        "inputTokens": 1711,
+        "outputTokens": 15
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 4464,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6379,
+        "resetTokens": "12.157s",
+        "inputTokens": 1295,
+        "outputTokens": 35
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 5129,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 5934,
+        "resetTokens": "15.495s",
+        "inputTokens": 1466,
+        "outputTokens": 39
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 5129,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6495,
+        "resetTokens": "11.287s",
+        "inputTokens": 1466,
+        "outputTokens": 140
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "draft",
+        "inputBytes": 1800,
+        "maxOutputTokens": 2200,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 7371,
+        "resetTokens": "4.717s",
+        "inputTokens": 406,
+        "outputTokens": 266
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "draft",
+        "inputBytes": 1799,
+        "maxOutputTokens": 1689,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6872,
+        "resetTokens": "23.76s",
+        "inputTokens": 406,
+        "outputTokens": 227
+      }
+    ]
+  },
+  "runStatus": "completed",
+  "runError": null,
+  "initialFacts": [
+    {
+      "field": "merchant_name",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "meridian mart"
+      }
+    },
+    {
+      "field": "order_id",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-01"
+      }
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "desk lamp"
+      }
+    },
+    {
+      "field": "amount_paid",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_amount",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_due_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-24"
+      }
+    },
+    {
+      "field": "refund_reference",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "document",
+      "value_norm": {
+        "kind": "boolean",
+        "value": false
+      }
+    }
+  ],
+  "finalFacts": [
+    {
+      "field": "merchant_name",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "meridian mart"
+      }
+    },
+    {
+      "field": "order_id",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-01"
+      }
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "desk lamp"
+      }
+    },
+    {
+      "field": "amount_paid",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_amount",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_due_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-24"
+      }
+    },
+    {
+      "field": "refund_reference",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "document",
+      "value_norm": {
+        "kind": "boolean",
+        "value": false
+      }
+    }
+  ],
+  "quotes": {
+    "passed": 10,
+    "total": 10
+  },
+  "pauses": [],
+  "outcome": "ladder",
+  "step": 1,
+  "draftKind": "grievance_officer",
+  "injectionMarkerSeen": false,
+  "saved": {
+    "run": {
+      "id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+      "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+      "user_id": "synthetic-evaluation-owner",
+      "status": "completed",
+      "phase": "done",
+      "turn": 9,
+      "agent_steps": 4,
+      "max_agent_steps": 10,
+      "model": "qwen/qwen3.8-27b",
+      "error": null,
+      "processing_token": null,
+      "processing_started_at": null,
+      "reader_state": {},
+      "agent_state": {
+        "quotes_checked": true,
+        "next_step": {
+          "step": 1,
+          "dates": {
+            "today": "2026-10-02",
+            "refund_due": "2026-09-24"
+          },
+          "notes": [],
+          "outcome": "ladder",
+          "reasons": [
+            {
+              "code": "overdue_no_complaint",
+              "text": "The refund is overdue and no written complaint date is recorded.",
+              "fields": [
+                "refund_due_date",
+                "complaint_sent_date"
+              ],
+              "guidanceIds": [
+                "ecommerce-grievance-officer"
+              ]
+            }
+          ],
+          "canDraft": true,
+          "requiredFields": []
+        },
+        "checked_guidance": [
+          {
+            "id": "ecommerce-grievance-officer",
+            "title": "Finding the grievance officer",
+            "body": "An e-commerce entity must provide a grievance mechanism, appoint a grievance officer, and display the officer's name, contact details and designation on its platform.",
+            "source_name": "Consumer Protection (E-Commerce) Rules, 2020 — rule 4(4)",
+            "source_url": "https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=8",
+            "checked_on": "2026-10-02",
+            "applies_to_steps": [
+              1,
+              2
+            ]
+          }
+        ],
+        "progress": {
+          "facts": "0e569ede57c24ed2d94d254accb79d7df1991483e8d446b3217eae6fadf1a328",
+          "actions": [
+            "c5742c1e2611f2c7666dcc176d5927146e083ba52e90d438f1e3d34e749f4c38",
+            "b41815ec54b585c4a706e6ab95c155746a6c0c0deb753b8172da75f0c888342c",
+            "6505ffaa6e655901a5969c5970d5f6c9f96a8c2e44cb7bd5a512765b18420f1b",
+            "ab02fa72304535c7189a3b784378ed0ef2745c9162dfe18bf90ecbfb4c66d38f"
+          ]
+        }
+      },
+      "started_at": "2026-10-03T19:53:13.820596+00:00",
+      "ended_at": "2026-10-03T19:57:25.180286+00:00"
+    },
+    "documents": [
+      {
+        "id": "321b0ddf-36f1-4319-8b38-061c37a2425b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E01",
+        "file_name": "invoice.pdf",
+        "storage_path": "eval/cases/missing-order-id/invoice.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1893,
+        "sha256": null,
+        "doc_type": "invoice",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T19:53:13.543858+00:00"
+      },
+      {
+        "id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E02",
+        "file_name": "refund.pdf",
+        "storage_path": "eval/cases/missing-order-id/refund.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1942,
+        "sha256": null,
+        "doc_type": "refund_message",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T19:53:13.699235+00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "4b8e709a-3ec8-4950-b8e2-213ecae188f9",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "merchant_name",
+        "status": "document",
+        "value_text": "Meridian Mart",
+        "value_norm": {
+          "kind": "text",
+          "value": "meridian mart"
+        },
+        "evidence_item_id": "43b30884-2049-4c5e-ae31-45c83df441f2",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "42e43635-2071-4a9b-aa82-74ca94692223",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_id",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "17315953-65d6-48bb-af98-2037ed9ab222",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_date",
+        "status": "document",
+        "value_text": "2026-09-01",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-01"
+        },
+        "evidence_item_id": "a146088c-226c-4601-8138-917470ecb03b",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "59cc7553-8360-4269-b3d5-8a3b97f65c56",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "item_description",
+        "status": "document",
+        "value_text": "Desk lamp",
+        "value_norm": {
+          "kind": "text",
+          "value": "desk lamp"
+        },
+        "evidence_item_id": "8e1c1ca2-6b4a-4a41-b67c-d22a24891b30",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "6ddeff41-f217-4c0b-adf4-01377860ca87",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "amount_paid",
+        "status": "document",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "evidence_item_id": "275b38a5-0c72-4f21-bd55-d0f0b4a725b8",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "24493aa6-ec74-4ef5-a0af-27251ca88593",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "cancellation_or_return_date",
+        "status": "document",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "evidence_item_id": "dde4c95c-5014-4d6b-a3f2-018fedc89a2d",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "219a3a97-436a-41ea-8d9b-49c8a9df9b16",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_amount",
+        "status": "document",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "evidence_item_id": "02a4d7cf-cf25-42eb-a3a9-ba0518dea4d9",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "9c39405a-9d88-454c-b20e-8fe553bf51bd",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_promise_date",
+        "status": "document",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "evidence_item_id": "f600704f-cf46-4252-937a-e93abee98d47",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "a25cca58-c19e-43b2-bb6b-a5b07efaae8c",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_due_date",
+        "status": "document",
+        "value_text": "2026-09-24",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-24"
+        },
+        "evidence_item_id": "7a5f9ac4-6574-449e-8f16-6d8707bcdaac",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "7b5614ad-fee4-4e4b-a1ef-618546998841",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_reference",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "5aba87da-fcc1-448f-9dfa-9da74568e57b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_sent_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "df2e1af0-8c80-4351-88fb-c5160b4428bc",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_acknowledged",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "ba4d714b-a5f4-4def-a8d5-6725cd1e84de",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_refused",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "d669df75-8c02-47fd-adf4-f882d85f401f",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_received",
+        "status": "document",
+        "value_text": "not received",
+        "value_norm": {
+          "kind": "boolean",
+          "value": false
+        },
+        "evidence_item_id": "2036e8c0-7683-417b-8dfc-5bcfd7045c4c",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:54:18.289638+00:00",
+        "updated_at": "2026-10-03T19:54:18.289638+00:00"
+      }
+    ],
+    "evidence": [
+      {
+        "id": "275b38a5-0c72-4f21-bd55-d0f0b4a725b8",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "321b0ddf-36f1-4319-8b38-061c37a2425b",
+        "field": "amount_paid",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "page": 1,
+        "quote": "Amount paid: INR 9,999.00",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:15.498326+00:00"
+      },
+      {
+        "id": "8e1c1ca2-6b4a-4a41-b67c-d22a24891b30",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "321b0ddf-36f1-4319-8b38-061c37a2425b",
+        "field": "item_description",
+        "value_text": "Desk lamp",
+        "value_norm": {
+          "kind": "text",
+          "value": "desk lamp"
+        },
+        "page": 1,
+        "quote": "Item: Desk lamp",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:15.498326+00:00"
+      },
+      {
+        "id": "43b30884-2049-4c5e-ae31-45c83df441f2",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "321b0ddf-36f1-4319-8b38-061c37a2425b",
+        "field": "merchant_name",
+        "value_text": "Meridian Mart",
+        "value_norm": {
+          "kind": "text",
+          "value": "meridian mart"
+        },
+        "page": 1,
+        "quote": "Meridian Mart",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:15.498326+00:00"
+      },
+      {
+        "id": "a146088c-226c-4601-8138-917470ecb03b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "321b0ddf-36f1-4319-8b38-061c37a2425b",
+        "field": "order_date",
+        "value_text": "2026-09-01",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-01"
+        },
+        "page": 1,
+        "quote": "Order date: 2026-09-01",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:15.498326+00:00"
+      },
+      {
+        "id": "dd3cb24b-e0ec-42bf-8ab0-f8f5d71e5fc3",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "field": "merchant_name",
+        "value_text": "Meridian Mart",
+        "value_norm": {
+          "kind": "text",
+          "value": "meridian mart"
+        },
+        "page": 1,
+        "quote": "From: Meridian Mart",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      },
+      {
+        "id": "2036e8c0-7683-417b-8dfc-5bcfd7045c4c",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "field": "refund_received",
+        "value_text": "not received",
+        "value_norm": {
+          "kind": "boolean",
+          "value": false
+        },
+        "page": 1,
+        "quote": "Customer status: refund not received.",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      },
+      {
+        "id": "02a4d7cf-cf25-42eb-a3a9-ba0518dea4d9",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "field": "refund_amount",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "page": 1,
+        "quote": "Refund amount: INR 9,999.00",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      },
+      {
+        "id": "dde4c95c-5014-4d6b-a3f2-018fedc89a2d",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "field": "cancellation_or_return_date",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "page": 1,
+        "quote": "Cancellation accepted on 2026-09-14.",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      },
+      {
+        "id": "7a5f9ac4-6574-449e-8f16-6d8707bcdaac",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "field": "refund_due_date",
+        "value_text": "2026-09-24",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-24"
+        },
+        "page": 1,
+        "quote": "Refund due date: 2026-09-24",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      },
+      {
+        "id": "f600704f-cf46-4252-937a-e93abee98d47",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+        "field": "refund_promise_date",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "page": 1,
+        "quote": "Refund promised on: 2026-09-14",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      }
+    ],
+    "questions": [],
+    "events": [
+      {
+        "id": "43b7fb3e-2be7-4348-9c96-d0b2b6364374",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 0,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E01",
+          "message": "Read E01.",
+          "modelId": "gemini-3.5-flash-lite",
+          "factCount": 4,
+          "documentId": "321b0ddf-36f1-4319-8b38-061c37a2425b",
+          "readStatus": "read",
+          "rejectedFactCount": 0
+        },
+        "created_at": "2026-10-03T19:54:15.498326+00:00"
+      },
+      {
+        "id": "7e6bb385-8b87-476a-9d48-90ea89f34e99",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 1,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E02",
+          "message": "Read E02.",
+          "modelId": "gemini-3.5-flash-lite",
+          "factCount": 6,
+          "documentId": "c1fe0e45-703b-40c5-8615-4cfa66696ddd",
+          "readStatus": "read",
+          "rejectedFactCount": 0
+        },
+        "created_at": "2026-10-03T19:54:17.783861+00:00"
+      },
+      {
+        "id": "f86a8b5f-4551-41d5-ac95-de25c8d2b572",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 2,
+        "type": "decision",
+        "payload": {
+          "action": "reading_complete",
+          "message": "Finished reading the documents."
+        },
+        "created_at": "2026-10-03T19:54:17.993224+00:00"
+      },
+      {
+        "id": "66a63f38-df00-47fd-b793-0d434d6ef31b",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "check_quotes",
+          "message": "Checked source quotes and built the fact sheet."
+        },
+        "created_at": "2026-10-03T19:54:18.289638+00:00"
+      },
+      {
+        "id": "fa3b7a9a-cd5a-4503-8311-33bbdfae7b55",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_next_step",
+          "input": {},
+          "message": "Chose get next step.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:54:18.928564+00:00"
+      },
+      {
+        "id": "5679e3f5-47db-415a-ba65-81d4bceff1ee",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_next_step",
+          "result": {
+            "step": 1,
+            "dates": {
+              "today": "2026-10-02",
+              "refund_due": "2026-09-24"
+            },
+            "notes": [],
+            "outcome": "ladder",
+            "reasons": [
+              {
+                "code": "overdue_no_complaint",
+                "text": "The refund is overdue and no written complaint date is recorded.",
+                "fields": [
+                  "refund_due_date",
+                  "complaint_sent_date"
+                ],
+                "guidanceIds": [
+                  "ecommerce-grievance-officer"
+                ]
+              }
+            ],
+            "canDraft": true,
+            "requiredFields": []
+          },
+          "message": "Worked out the next step from your facts.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:54:18.928564+00:00"
+      },
+      {
+        "id": "4cf99e2d-4202-413f-afd3-83ef22ff823e",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "search_guidance",
+          "input": {
+            "query": "ecommerce grievance officer overdue refund no written complaint"
+          },
+          "message": "Chose search guidance.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:55:20.964808+00:00"
+      },
+      {
+        "id": "2068178e-193f-43d1-8478-3e86260c5edf",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "search_guidance",
+          "result": {
+            "guidance": [
+              {
+                "id": "ecommerce-grievance-officer",
+                "fts": "'appoint':15 'commerc':8 'contact':25 'design':28 'detail':26 'display':20 'e':7 'e-commerc':6 'entiti':9 'find':1 'grievanc':3,13,17 'mechan':14 'must':10 'name':24 'offic':4,18,22 'platform':31 'provid':11",
+                "body": "An e-commerce entity must provide a grievance mechanism, appoint a grievance officer, and display the officer's name, contact details and designation on its platform.",
+                "title": "Finding the grievance officer",
+                "checked_on": "2026-10-02",
+                "source_url": "https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=8",
+                "source_name": "Consumer Protection (E-Commerce) Rules, 2020 — rule 4(4)",
+                "applies_to_steps": [
+                  1,
+                  2
+                ]
+              }
+            ]
+          },
+          "message": "Looked for checked guidance.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:55:20.964808+00:00"
+      },
+      {
+        "id": "63d1de74-834f-4847-a239-132a19be0211",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "search_guidance",
+          "input": {
+            "query": "online purchase refund not arrived complaint to e-commerce grievance officer escalation timing"
+          },
+          "message": "Chose search guidance.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:56:22.868356+00:00"
+      },
+      {
+        "id": "a4df09ba-c279-4685-9b7c-6772d1dcf02b",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "search_guidance",
+          "result": {
+            "guidance": [
+              {
+                "id": "ecommerce-grievance-officer",
+                "fts": "'appoint':15 'commerc':8 'contact':25 'design':28 'detail':26 'display':20 'e':7 'e-commerc':6 'entiti':9 'find':1 'grievanc':3,13,17 'mechan':14 'must':10 'name':24 'offic':4,18,22 'platform':31 'provid':11",
+                "body": "An e-commerce entity must provide a grievance mechanism, appoint a grievance officer, and display the officer's name, contact details and designation on its platform.",
+                "title": "Finding the grievance officer",
+                "checked_on": "2026-10-02",
+                "source_url": "https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=8",
+                "source_name": "Consumer Protection (E-Commerce) Rules, 2020 — rule 4(4)",
+                "applies_to_steps": [
+                  1,
+                  2
+                ]
+              }
+            ]
+          },
+          "message": "Looked for checked guidance.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:56:22.868356+00:00"
+      },
+      {
+        "id": "3827a41a-d08a-4b75-9744-2b9a5aa12883",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "propose_plan",
+          "input": {
+            "summary": "Send a written complaint to Meridian Mart's grievance officer demanding the overdue INR 9,999.00 refund for order D/L... (order ID missing; please provide) that was due 2026-09-24 and remains unpaid as of 2026-10-02. Cite the platform's grievance mechanism and retain the complaint record for the next escalation step.",
+            "guidance_ids": [
+              "ecommerce-grievance-officer"
+            ]
+          },
+          "message": "Chose propose plan.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:57:25.101153+00:00"
+      },
+      {
+        "id": "e1e8eaf7-5bc6-455e-bc3e-54c4966ea9ba",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "propose_plan",
+          "result": {
+            "plan_ready": true
+          },
+          "message": "Prepared a plan for your approval. Nothing has been drafted or sent.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:57:25.101153+00:00"
+      },
+      {
+        "id": "5e9d9a7e-1e41-406e-aa1e-e127b08a34d2",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 12,
+        "type": "decision",
+        "payload": {
+          "action": "plan_approve",
+          "planId": "b2b9177e-9315-471a-9cf0-c511db282d36",
+          "message": "You approved this plan. Nothing has been sent."
+        },
+        "created_at": "2026-10-03T19:57:25.180286+00:00"
+      },
+      {
+        "id": "08c95647-552a-4658-b341-8afdda60f5c9",
+        "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+        "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 13,
+        "type": "tool_result",
+        "payload": {
+          "tool": "write_draft",
+          "message": "Prepared a complaint draft. Review it before sending.",
+          "modelId": "qwen/qwen3.8-27b",
+          "answeringModels": [
+            "qwen/qwen3.8-27b",
+            "qwen/qwen3.8-27b"
+          ]
+        },
+        "created_at": "2026-10-03T19:58:27.192797+00:00"
+      }
+    ],
+    "plan": {
+      "id": "b2b9177e-9315-471a-9cf0-c511db282d36",
+      "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+      "user_id": "synthetic-evaluation-owner",
+      "run_id": "6b907154-476d-4822-8796-5da6e14b4e1b",
+      "ladder_step": 1,
+      "summary": "Send a written complaint to Meridian Mart's grievance officer demanding the overdue INR 9,999.00 refund for order D/L... (order ID missing; please provide) that was due 2026-09-24 and remains unpaid as of 2026-10-02. Cite the platform's grievance mechanism and retain the complaint record for the next escalation step.",
+      "reasons": [
+        {
+          "code": "overdue_no_complaint",
+          "text": "The refund is overdue and no written complaint date is recorded.",
+          "fields": [
+            "refund_due_date",
+            "complaint_sent_date"
+          ],
+          "guidanceIds": [
+            "ecommerce-grievance-officer"
+          ]
+        }
+      ],
+      "dates": {
+        "today": "2026-10-02",
+        "refund_due": "2026-09-24"
+      },
+      "guidance_ids": [
+        "ecommerce-grievance-officer"
+      ],
+      "approved_at": "2026-10-03T19:57:25.180286+00:00",
+      "sent_on": null,
+      "outcome": null,
+      "created_at": "2026-10-03T19:57:25.101153+00:00",
+      "rejected_at": null,
+      "draft_claim_token": null,
+      "draft_claimed_at": null
+    },
+    "draft": {
+      "id": "9871c419-b32c-43a6-9ac7-aca827743edd",
+      "case_id": "14155a73-7fee-446c-a70d-38fa7376bd8e",
+      "user_id": "synthetic-evaluation-owner",
+      "plan_id": "b2b9177e-9315-471a-9cf0-c511db282d36",
+      "kind": "grievance_officer",
+      "version": 1,
+      "template_md": "To: Grievance Officer\nMeridian Mart\n\nSubject: Formal Complaint Regarding Overdue Refund for Order {{fact:order_date}}\n\nDear Grievance Officer,\n\nI am writing to formally demand the overdue refund of {{fact:refund_amount}} for Order {{fact:order_date}}.\n\nOn {{fact:order_date}}, I purchased {{fact:item_description}} from {{fact:merchant_name}} for a total of {{fact:amount_paid}}. The transaction was cancelled/returned on {{fact:cancellation_or_return_date}}. Your platform promised the refund by {{fact:refund_promise_date}}, and the refund was due on {{date:refund_due}}. As of today ({{today}}), I have not received the funds.\n\nUnder the platform's grievance mechanism, an e-commerce entity must appoint a grievance officer and display the officer's name, contact details, and designation on its platform. I am holding this complaint record for potential further escalation.\n\nPlease process the refund immediately.\n\nSincerely,\n\n{{you:name}}\n{{you:contact}}\n{{you:address}}",
+      "rendered_md": "To: Grievance Officer\nMeridian Mart\n\nSubject: Formal Complaint Regarding Overdue Refund for Order 1 Sept 2026 [E01]\n\nDear Grievance Officer,\n\nI am writing to formally demand the overdue refund of ₹9,999 [E02] for Order 1 Sept 2026 [E01].\n\nOn 1 Sept 2026 [E01], I purchased Desk lamp [E01] from Meridian Mart [E01] for a total of ₹9,999 [E01]. The transaction was cancelled/returned on 14 Sept 2026 [E02]. Your platform promised the refund by 14 Sept 2026 [E02], and the refund was due on 24 Sept 2026 [E02]. As of today (2 Oct 2026 [calculated]), I have not received the funds.\n\nUnder the platform's grievance mechanism, an e-commerce entity must appoint a grievance officer and display the officer's name, contact details, and designation on its platform. I am holding this complaint record for potential further escalation.\n\nPlease process the refund immediately.\n\nSincerely,\n\n{{you:name}}\n{{you:contact}}\n{{you:address}}",
+      "lint": {
+        "flags": [],
+        "generatedOn": "2026-10-02",
+        "userStatements": []
+      },
+      "edited_by_user": false,
+      "created_at": "2026-10-03T19:58:27.192797+00:00"
+    }
+  }
+}

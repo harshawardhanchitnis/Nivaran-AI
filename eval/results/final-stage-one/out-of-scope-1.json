@@ -1,0 +1,565 @@
+{
+  "caseId": "out-of-scope",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T19:50:49.761Z",
+  "status": "finished",
+  "stopReason": null,
+  "seconds": 140.34203729999996,
+  "calls": {
+    "logicalCalls": 2,
+    "providerAttempts": 7,
+    "models": {
+      "gemini-3.5-flash-lite": 1,
+      "gemini-3.6-flash": 1,
+      "qwen/qwen3.8-27b": 2,
+      "gemini-3.5-flash": 1,
+      "gemini-3.8-flash": 1,
+      "gemini-3.7-flash": 1
+    },
+    "answers": [
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "gemini-3.5-flash-lite",
+        "attempts": [
+          "gemini-3.5-flash-lite",
+          "gemini-3.5-flash",
+          "gemini-3.6-flash",
+          "gemini-3.8-flash",
+          "gemini-3.7-flash",
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "reading",
+        "inputBytes": 2177,
+        "maxOutputTokens": 5567,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 7547,
+        "resetTokens": "3.397s",
+        "inputTokens": 230,
+        "outputTokens": 61
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "kind": "tool_choice",
+        "inputBytes": 5166,
+        "maxOutputTokens": 600,
+        "status": 200,
+        "tokenLimit": 8000,
+        "remainingTokens": 6286,
+        "resetTokens": "12.855s",
+        "inputTokens": 1491,
+        "outputTokens": 61
+      }
+    ]
+  },
+  "runStatus": "out_of_scope",
+  "runError": null,
+  "initialFacts": [
+    {
+      "field": "amount_paid",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "transfer between bank accounts"
+      }
+    },
+    {
+      "field": "merchant_name",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_id",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_amount",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_due_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_reference",
+      "status": "missing",
+      "value_norm": null
+    }
+  ],
+  "finalFacts": [
+    {
+      "field": "amount_paid",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "transfer between bank accounts"
+      }
+    },
+    {
+      "field": "merchant_name",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "order_id",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_amount",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_due_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_reference",
+      "status": "missing",
+      "value_norm": null
+    }
+  ],
+  "quotes": {
+    "passed": 1,
+    "total": 1
+  },
+  "pauses": [],
+  "outcome": "out_of_scope",
+  "step": null,
+  "draftKind": null,
+  "injectionMarkerSeen": false,
+  "saved": {
+    "run": {
+      "id": "9c4a194b-af53-44a6-9105-b46e1731fa17",
+      "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+      "user_id": "synthetic-evaluation-owner",
+      "status": "out_of_scope",
+      "phase": "done",
+      "turn": 4,
+      "agent_steps": 1,
+      "max_agent_steps": 10,
+      "model": "qwen/qwen3.8-27b",
+      "error": null,
+      "processing_token": null,
+      "processing_started_at": null,
+      "reader_state": {},
+      "agent_state": {
+        "quotes_checked": true,
+        "progress": {
+          "facts": "fa469725b65be8b3df2062fc5a20f16d3d642db9132032985c6c4587eec0cd18",
+          "actions": [
+            "baef069f71b726a299bb3bec83f1641d8228b264d13ca422d37571ba03c264de"
+          ]
+        }
+      },
+      "started_at": "2026-10-03T19:50:52.739944+00:00",
+      "ended_at": "2026-10-03T19:53:12.692847+00:00"
+    },
+    "documents": [
+      {
+        "id": "f5b7f979-c566-46a8-9c82-1f27643a93ed",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E01",
+        "file_name": "transfer.pdf",
+        "storage_path": "eval/cases/out-of-scope/transfer.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1894,
+        "sha256": null,
+        "doc_type": "refund_message",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T19:50:52.618182+00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "fc0d3528-9222-4d85-b08e-90b73ced07ef",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "amount_paid",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "60f441d2-ce79-4a05-90b9-eb362d085f44",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "cancellation_or_return_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "7414c7b1-8996-41a9-b5d8-7f7be5ded6fd",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_acknowledged",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "d3449f9c-4a62-4cd3-83b4-7558640eebac",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_refused",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "4f2d6f40-9231-4d22-bed6-f624f67925ed",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_sent_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "8e1b05cc-09a8-49db-92d4-1bac272f14cb",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "item_description",
+        "status": "document",
+        "value_text": "Transfer between bank accounts",
+        "value_norm": {
+          "kind": "text",
+          "value": "transfer between bank accounts"
+        },
+        "evidence_item_id": "40906831-066d-45e9-8f4b-bcb81c529a9f",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "8f9f27dd-4f0b-4a31-9c3c-ba146d07e7be",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "merchant_name",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "d7d31156-55a3-436f-a1c3-f3b4d6bbb361",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "54d59c61-384e-4b10-bf43-41d1c69164ea",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_id",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "b4280880-033f-40f2-b67a-07c945736771",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_amount",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "403f8d2b-d728-4642-a1e5-30d097164545",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_due_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "2fab421e-44e8-438a-b38d-ea59bacc1a32",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_promise_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "e27ef4c4-a1a7-49f4-b545-4330814cde62",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_received",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "4b2fbcd6-f402-4092-95d5-e17b0429b107",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_reference",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T19:52:11.461901+00:00",
+        "updated_at": "2026-10-03T19:52:11.461901+00:00"
+      }
+    ],
+    "evidence": [
+      {
+        "id": "40906831-066d-45e9-8f4b-bcb81c529a9f",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "f5b7f979-c566-46a8-9c82-1f27643a93ed",
+        "field": "item_description",
+        "value_text": "Transfer between bank accounts",
+        "value_norm": {
+          "kind": "text",
+          "value": "transfer between bank accounts"
+        },
+        "page": 1,
+        "quote": "This is a transfer between bank accounts, not an online purchase.",
+        "quote_verified": true,
+        "created_at": "2026-10-03T19:52:10.510245+00:00"
+      }
+    ],
+    "questions": [],
+    "events": [
+      {
+        "id": "2564cf44-0b5a-4afc-8f04-7f77c53aa7dc",
+        "run_id": "9c4a194b-af53-44a6-9105-b46e1731fa17",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 0,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E01",
+          "message": "Read E01.",
+          "modelId": "qwen/qwen3.8-27b",
+          "factCount": 1,
+          "documentId": "f5b7f979-c566-46a8-9c82-1f27643a93ed",
+          "readStatus": "read",
+          "rejectedFactCount": 0
+        },
+        "created_at": "2026-10-03T19:52:10.510245+00:00"
+      },
+      {
+        "id": "6544362c-4ab7-4687-8af0-3188e706d8b1",
+        "run_id": "9c4a194b-af53-44a6-9105-b46e1731fa17",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 1,
+        "type": "decision",
+        "payload": {
+          "action": "reading_complete",
+          "message": "Finished reading the documents."
+        },
+        "created_at": "2026-10-03T19:52:11.226928+00:00"
+      },
+      {
+        "id": "68484de4-4f4d-4d63-b246-1d5b558bc4d7",
+        "run_id": "9c4a194b-af53-44a6-9105-b46e1731fa17",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 2,
+        "type": "tool_result",
+        "payload": {
+          "tool": "check_quotes",
+          "message": "Checked source quotes and built the fact sheet."
+        },
+        "created_at": "2026-10-03T19:52:11.461901+00:00"
+      },
+      {
+        "id": "a7f4c749-0d52-401d-b2b1-c8899f9f316e",
+        "run_id": "9c4a194b-af53-44a6-9105-b46e1731fa17",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 3,
+        "type": "tool_call",
+        "payload": {
+          "tool": "mark_out_of_scope",
+          "input": {
+            "reason": "The order item is described as \"Transfer between bank accounts,\" not an online order for goods or services, so the case falls outside the online owed-refund scope."
+          },
+          "message": "Chose mark out of scope.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:53:12.692847+00:00"
+      },
+      {
+        "id": "e257bbd7-03e4-4569-befa-6864623fa887",
+        "run_id": "9c4a194b-af53-44a6-9105-b46e1731fa17",
+        "case_id": "d7b6b558-182e-490f-86b4-919bdeda8e9b",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 4,
+        "type": "tool_result",
+        "payload": {
+          "tool": "mark_out_of_scope",
+          "result": {
+            "reason": "The order item is described as \"Transfer between bank accounts,\" not an online order for goods or services, so the case falls outside the online owed-refund scope."
+          },
+          "message": "This case is outside Nivaran’s refund scope. You can contact the National Consumer Helpline on 1915.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T19:53:12.692847+00:00"
+      }
+    ],
+    "plan": null,
+    "draft": null
+  }
+}

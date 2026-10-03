@@ -100,3 +100,8 @@ ceiling. Results go to `eval/results/final-stage-one/` and `eval/final-stage-one
 previous observations are retained. Apply `restore-caps.sql` immediately afterwards. The owner
 has forbidden further evaluation after this pass and instructed proceeding through T13–T17,
 even if the complete three-repeat T12 acceptance remains unmet.
+
+The final pass has ended at **70 logical calls / 75 SDK attempts**, with eight finished runs,
+one budget interruption and three unstarted cases. It used revision `3906f5b` throughout.
+See `final-stage-one-report.md` and `../docs/t12-final-pass.md`. No further evaluation will run;
+commands above document reproducibility and previous authorisations, not permission to run again.

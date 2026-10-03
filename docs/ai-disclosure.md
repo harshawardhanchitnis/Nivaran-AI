@@ -451,3 +451,14 @@ owner authorised one final twelve-case pass, repetition one, capped at seventy l
 then instructed proceeding to samples, failure handling, deletion and deployment without more
 evaluation. This paragraph records the requested scope; final live results will be recorded
 separately after the dashboard caps step. Earlier failed observations remain unchanged.
+
+The final pass on 4 October ran revision 3906f5b throughout and stopped at seventy logical charges
+and seventy-five provider attempts: Google 27 attempts/22 routed responses, Groq 48/48. Eight
+runs finished including failures; one was budget-interrupted and three never started. Quote
+checks were 89/89, outcomes 7/8, exact pause sets 5/8, and deterministic seeded lint probes 3/3.
+Clean, conflict and injection produced live drafts; the injection marker was absent from interpreted
+output in its one run. Already-complained's two templates were rejected; their exact invalidity
+was not retained. No three-run consistency was measured. Cleanup found no evaluation rows or
+files; six earlier fixtures remain. The India-day counter rose from 30 to 100. The owner was asked
+to restore 15/15 caps; no further evaluation will run. See docs/t12-final-pass.md and the final
+report. T13–T17 now proceed under the owner's explicit instruction despite incomplete T12.
