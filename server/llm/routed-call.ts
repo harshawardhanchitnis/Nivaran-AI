@@ -28,7 +28,7 @@ export function createRoutedModelCall(client: SupabaseClient, options: { deadlin
         'model_not_configured',
         'No suitable model is configured for this task.',
       );
-    return routeModelCall(models, {
+    const result = await routeModelCall(models, {
       now: Date.now,
       timeoutMs: env.modelAttemptTimeoutMs,
       deadline: options.deadline,
@@ -44,5 +44,7 @@ export function createRoutedModelCall(client: SupabaseClient, options: { deadlin
         return attempt(handle, signal);
       },
     });
+    currentModelCallObserver()?.answered?.(result.modelId, models[0]!.modelId);
+    return result;
   };
 }

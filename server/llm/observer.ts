@@ -5,6 +5,7 @@ export interface ModelCallObserver {
   beforeCharge(): void;
   charged(): void;
   beforeAttempt(modelId: string): void;
+  answered?(modelId: string, firstModelId: string): void;
 }
 const observers = new AsyncLocalStorage<ModelCallObserver>();
 export const currentModelCallObserver = () => observers.getStore();

@@ -379,6 +379,13 @@ tests and the production build. Details and the remaining acceptance gate are in
 
 ## AI tools used
 
+On 3 October, the owner approved T12's live evaluation in two stages and confirmed temporary caps
+SQL succeeded. At the owner's request following a Claude review, Codex corrected the dashboard
+budget SQL to use India dates, matching the existing database usage counter. Codex added explicit
+answering-model/fallback telemetry and repetition selection so interrupted first-stage results
+remain available. The approved total is 300 logical charges across both providers and 450 SDK
+attempts; stage two requires a further owner reply. Live results will be recorded after execution.
+
 | Tool | Used for |
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |

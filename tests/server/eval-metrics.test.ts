@@ -4,6 +4,13 @@ import type {EvalCase,EvaluationObservation} from '../../eval/types.js';
 const spec:EvalCase={id:'case',title:'Case',today:'2026-10-02',documents:[],answers:{},expected:{facts:{refund_amount:{status:'document',value:{kind:'amount',decimal:'9999.00',currency:'INR'}}},outcome:'ladder',step:1,pauses:[],draftKind:'grievance_officer'}};
 function observed():EvaluationObservation {return {caseId:'case',repetition:1,mode:'live',datasetHash:'hash',startedAt:'now',status:'finished',stopReason:null,seconds:2,calls:{logicalCalls:4,providerAttempts:5,models:{}},runStatus:'completed',runError:null,initialFacts:[{field:'refund_amount',status:'document',value_norm:{kind:'amount',currency:'INR',decimal:'9999.00'}}],finalFacts:[],quotes:{passed:2,total:3},pauses:[],outcome:'ladder',step:1,draftKind:'grievance_officer',injectionMarkerSeen:false,saved:null};}
 describe('honest evaluation metrics',()=>{
+  it('lists actual responses and fallback separately from attempted models',()=>{
+    const result=observed();result.calls.models={failed:1,fallback:1};
+    result.calls.answers=[{modelId:'fallback',firstModelId:'failed',attempts:['failed','fallback']}];
+    const report=reportMarkdown([spec],[result],'hash');
+    expect(report).toContain('| fallback: 1 | 1/1 | failed: 1; fallback: 1 |');
+    expect(report).toContain('4 logical charges / 5 provider attempts');
+  });
   it('does not count a failed agent with an earlier code decision as a successful ladder result',()=>{
     const result=observed();result.runStatus='failed';result.runError='Step limit reached';
     expect(scoreRun(spec,result).stepCorrect).toBe(false);

@@ -40,6 +40,20 @@ the token or put it directly in arguments. From the repository root:
 npx tsx eval/run-eval.ts --live --session-file tmp/t2/session.json --max-logical-calls 300 --max-provider-attempts 450 --cleanup-completed
 ```
 
+The owner approved a staged batch on 3 October: stage one is exactly repetition 1 of each case.
+Stop and report before repetitions 2 and 3; those require a further owner reply. Use:
+
+```sh
+npx tsx eval/run-eval.ts --live --session-file tmp/t2/session.json --max-logical-calls 300 --max-provider-attempts 450 --repetitions 1 --continue-on-stop --cleanup-completed
+```
+
+`--continue-on-stop` records an interruption and tries the next case once, without sleeping or
+retrying the interrupted case. A local budget stop still ends the batch. After the owner approves
+stage two, select `--repetitions 2,3` using the same checkpoint and total budgets; this preserves
+interrupted first-stage observations. The 300 charges cover both providers, not 300 Gemini calls.
+The dashboard budget SQL uses India dates, matching `charge_model_call()`. Reports distinguish
+models that actually answered from attempted models and label fallback responses explicitly.
+
 The cleanup flag removes **only completed synthetic cases created by this evaluation checkpoint**,
 after saving their audit, with files first. Ownership, title and every path are checked. It never
 deletes existing user cases. Without the flag, synthetic hosted cases remain for inspection.

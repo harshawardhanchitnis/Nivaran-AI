@@ -23,7 +23,14 @@ not complete until the thirty-six live runs and their measured report have been 
 - The full check passed both server type-checks, 371 server/database tests, 90 Angular tests and
   the production build. No new database schema or provider settings are needed.
 
-Next: the owner approves a batch budget and applies `eval/raise-caps.sql` in Supabase SQL Editor.
+On 3 October the owner approved the budget and confirmed applying corrected India-date caps SQL.
+Stage one runs repetition 1 of all twelve cases, then stops for a report and the owner's reply.
+Stage two (repetitions 2 and 3) is not authorised until that reply. Both stages share the same
+300-logical-call / 450-provider-attempt checkpoint budget. Actual answering models and fallback
+responses are recorded separately from attempted models. An interrupted case is retained and
+the runner can try the next case once without waiting or retrying it.
+
+The original proposal was:
 The proposed limit is 300 logical charges and 450 provider attempts, with an estimate of 230–290
 logical calls. The runner can stop before all repetitions finish and resume after cooldown or
 quota recovery without repeating saved work. Caps must return to 15/15 with

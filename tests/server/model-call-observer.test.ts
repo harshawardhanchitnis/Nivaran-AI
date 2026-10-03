@@ -4,6 +4,17 @@ import { EvaluationBudget } from '../../eval/budget.js';
 import { routeModelCall } from '../../server/llm/router.js';
 import { HttpError } from '../../server/http.js';
 describe('bounded evaluation calls', () => {
+  it('records successful answering models separately from attempts, including a skipped primary',()=>{
+    const budget=new EvaluationBudget(3,4);
+    budget.charged();budget.beforeAttempt('primary');budget.beforeAttempt('fallback');budget.answered('fallback','primary');
+    budget.charged();budget.beforeAttempt('fallback');budget.answered('fallback','primary');
+    budget.charged();budget.beforeAttempt('failed');
+    expect(budget.snapshot().answers).toEqual([
+      {modelId:'fallback',firstModelId:'primary',attempts:['primary','fallback']},
+      {modelId:'fallback',firstModelId:'primary',attempts:['fallback']},
+    ]);
+    expect(budget.snapshot().providerAttempts).toBe(4);
+  });
   it('permits a zero-remaining budget for audit recovery but refuses every new call',()=>{
     const budget=new EvaluationBudget(0,0);
     expect(()=>budget.beforeCharge()).toThrow(/budget/);expect(()=>budget.beforeAttempt('first')).toThrow(/budget/);

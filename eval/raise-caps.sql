@@ -4,8 +4,8 @@
 begin;
 update public.app_settings
 set value = jsonb_build_object(
-  'per_user_daily_model_calls', coalesce((select calls from public.model_usage_global where day=current_date),0)+300,
-  'global_daily_model_calls', coalesce((select calls from public.model_usage_global where day=current_date),0)+300
+  'per_user_daily_model_calls', coalesce((select calls from public.model_usage_global where day=(now() at time zone 'Asia/Kolkata')::date),0)+300,
+  'global_daily_model_calls', coalesce((select calls from public.model_usage_global where day=(now() at time zone 'Asia/Kolkata')::date),0)+300
 )
 where key='limits';
 select value from public.app_settings where key='limits';

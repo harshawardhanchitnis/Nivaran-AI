@@ -13,7 +13,8 @@ import {reportMarkdown} from './metrics.js';
 import {cleanupLiveCase,newCheckpoint,observeLiveCase,runLiveCase,type EvalCheckpoint} from './live-run.js';
 import type {EvaluationObservation} from './types.js';
 
-const countsSchema=z.object({logicalCalls:z.number().int().nonnegative(),providerAttempts:z.number().int().nonnegative(),models:z.record(z.string(),z.number().int().nonnegative())});
+const countsSchema=z.object({logicalCalls:z.number().int().nonnegative(),providerAttempts:z.number().int().nonnegative(),models:z.record(z.string(),z.number().int().nonnegative()),
+  answers:z.array(z.object({modelId:z.string(),firstModelId:z.string(),attempts:z.array(z.string())})).optional()});
 const checkpointSchema=z.object({caseId:z.uuid(),title:z.string().startsWith('Evaluation '),runId:z.uuid().nullable(),uploaded:z.boolean(),paths:z.array(z.string()),
   initialFacts:z.array(z.object({field:z.string(),status:z.enum(['document','user','conflict','missing','needs_check']),value_norm:z.record(z.string(),z.unknown()).nullable()})),
   startedAt:z.string(),seconds:z.number().nonnegative(),calls:countsSchema,finished:z.boolean(),cleaned:z.boolean(),failureCode:z.string().nullable().default(null)});
@@ -32,13 +33,14 @@ function args(argv:string[]) {
   const flags=new Set<string>();
   for(let i=0;i<argv.length;i++) {
     const arg=argv[i]!;
-    if(['--live','--dry-run','--report','--cleanup-completed'].includes(arg)) flags.add(arg);
-    else if(['--session-file','--max-logical-calls','--max-provider-attempts','--case','--rounds'].includes(arg)) {
+    if(['--live','--dry-run','--report','--cleanup-completed','--continue-on-stop'].includes(arg)) flags.add(arg);
+    else if(['--session-file','--max-logical-calls','--max-provider-attempts','--case','--rounds','--repetitions'].includes(arg)) {
       const value=argv[++i];if(!value||value.startsWith('--'))throw new Error(`Missing value for ${arg}`);options.set(arg,value);
     } else throw new Error(`Unknown option ${arg}`);
   }
   if(['--live','--dry-run','--report'].filter(mode=>flags.has(mode)).length>1)
     throw new Error('Choose exactly one mode: live, dry-run or report.');
+  if(options.has('--rounds')&&options.has('--repetitions'))throw new Error('Choose rounds or explicit repetitions, not both.');
   return {options,flags};
 }
 async function observations():Promise<EvaluationObservation[]> {
@@ -48,11 +50,13 @@ async function observations():Promise<EvaluationObservation[]> {
 }
 function addCounts(a:CallCounts,b:CallCounts):CallCounts {
   const models={...a.models};for(const [id,n]of Object.entries(b.models))models[id]=(models[id]??0)+n;
-  return {logicalCalls:a.logicalCalls+b.logicalCalls,providerAttempts:a.providerAttempts+b.providerAttempts,models};
+  const answers=[...(a.answers??[]),...(b.answers??[])];
+  return {logicalCalls:a.logicalCalls+b.logicalCalls,providerAttempts:a.providerAttempts+b.providerAttempts,models,...(answers.length?{answers}:{})};
 }
 function difference(after:CallCounts,before:CallCounts):CallCounts {
   return {logicalCalls:after.logicalCalls-before.logicalCalls,providerAttempts:after.providerAttempts-before.providerAttempts,
-    models:Object.fromEntries(Object.entries(after.models).map(([id,n])=>[id,n-(before.models[id]??0)]).filter(([,n])=>Number(n)>0))};
+    models:Object.fromEntries(Object.entries(after.models).map(([id,n])=>[id,n-(before.models[id]??0)]).filter(([,n])=>Number(n)>0)),
+    ...(after.answers?.length?{answers:after.answers.slice(before.answers?.length??0)}:{})};
 }
 export async function main(argv=process.argv.slice(2)):Promise<void> {
   const {options,flags}=args(argv),corpus=await loadCorpus();
@@ -65,6 +69,8 @@ export async function main(argv=process.argv.slice(2)):Promise<void> {
   const logicalLimit=positive(options.get('--max-logical-calls'),'--max-logical-calls');
   const attemptLimit=positive(options.get('--max-provider-attempts'),'--max-provider-attempts');
   const rounds=positive(options.get('--rounds')??'3','--rounds');if(rounds>3)throw new Error('At most three repetitions per case.');
+  const repetitions=options.has('--repetitions')?options.get('--repetitions')!.split(',').map(n=>positive(n,'--repetitions')):Array.from({length:rounds},(_,i)=>i+1);
+  if(repetitions.some(n=>n>3)||new Set(repetitions).size!==repetitions.length)throw new Error('Repetitions must be distinct values from 1 to 3.');
   const sessionPath=options.get('--session-file');if(!sessionPath)throw new Error('Supply an ignored session file; never put an access token on the command line.');
   try{process.loadEnvFile('.env.local');}catch(error){if(!error||typeof error!=='object'||!('code'in error)||error.code!=='ENOENT')throw error;}
   const session=z.object({token:z.string().min(1)}).parse(JSON.parse(await readFile(sessionPath,'utf8')));
@@ -86,7 +92,7 @@ export async function main(argv=process.argv.slice(2)):Promise<void> {
   if(subset?.some(id=>!corpus.cases.some(c=>c.id===id)))throw new Error('Unknown evaluation case ID.');
   await persist();
   for(const spec of corpus.cases.filter(c=>!subset||subset.includes(c.id))) {
-    for(let repetition=1;repetition<=rounds;repetition++) {
+    for(const repetition of repetitions) {
       const key=`${spec.id}-${repetition}`,state=batch.entries[key]??newCheckpoint(batch.batch,spec,repetition);
       batch.entries[key]=state;
       if(state.finished) {
@@ -136,7 +142,12 @@ export async function main(argv=process.argv.slice(2)):Promise<void> {
         console.log('Could not fetch the run audit. The ignored checkpoint and hosted case retain progress.');interrupted=true;
       }
       console.log(`${key}: ${state.finished?'finished':'interrupted'}; charged ${state.calls.logicalCalls}, attempted ${state.calls.providerAttempts}, ${state.seconds.toFixed(2)} active seconds${stopReason?`; ${stopReason}`:''}.`);
-      if(interrupted) {process.exitCode=2;return;}
+      if(interrupted) {
+        process.exitCode=2;
+        if(!flags.has('--continue-on-stop')||stopReason==='evaluation_budget')return;
+        // One pass only: retain this interruption, then try the next case without retry or sleep.
+        continue;
+      }
       if(flags.has('--cleanup-completed')) {await cleanupLiveCase(client,owner,state);await persist();}
     }
   }

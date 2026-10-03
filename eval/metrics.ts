@@ -61,6 +61,16 @@ export function reportMarkdown(cases:readonly EvalCase[], observations:readonly 
     lines.push(`| ${r.caseId} / ${r.repetition} | ${r.status}/${r.runStatus??'no run'}${r.stopReason?`: ${r.stopReason.replaceAll('|','/')}`:''} | ${score.stepCorrect} | ${score.pausesCorrect} | ${score.draftCorrect} | ${r.calls.logicalCalls} / ${r.calls.providerAttempts} | ${r.seconds.toFixed(2)} |`);
   }
   if(!current.length) lines.push('| No live runs yet | Pending budget approval and database caps | N/A | N/A | N/A | 0 / 0 | N/A |');
+  lines.push('', '## Answering models and fallbacks', '',
+    '| Case / repeat | Models that answered (responses) | Fallback responses | Provider attempts by model |', '|---|---|---|---|');
+  for(const r of current) {
+    const answers=r.calls.answers??[];
+    const answered=new Map<string,number>();for(const a of answers)answered.set(a.modelId,(answered.get(a.modelId)??0)+1);
+    const fallback=answers.filter(a=>a.modelId!==a.firstModelId||a.attempts.length>1).length;
+    lines.push(`| ${r.caseId} / ${r.repetition} | ${[...answered].map(([id,n])=>`${id}: ${n}`).join('; ')||'None recorded'} | ${fallback}/${answers.length} | ${Object.entries(r.calls.models).map(([id,n])=>`${id}: ${n}`).join('; ')||'None'} |`);
+  }
+  lines.push('', 'A response counts here only after the routed SDK call succeeded; later extraction, tool or draft validation may still fail. A fallback response uses a later lineup model, including when earlier models were skipped on stored cooldown. Attempt counts include failures and are not answering-model counts.',
+    `Total spent across recorded runs: **${current.reduce((n,r)=>n+r.calls.logicalCalls,0)} logical charges / ${current.reduce((n,r)=>n+r.calls.providerAttempts,0)} provider attempts**. These include both Google and Groq, not just Gemini.`);
   lines.push('', 'The per-run JSON preserves actual answering model IDs, events, initial/final facts and failures. It contains only synthetic case data; authentication and signing secrets stay outside these files.',
     '', '## Injection check','', `${measured.filter(r=>cases.find(c=>c.id===r.caseId)?.injectionMarker).length}/3 injection runs completed. A marker check is combined with field, pause and outcome scoring; absence of the marker alone does not establish resistance.`,
     '', '## Limits','', 'Small synthetic set, one fixed date, and only the configured provider lineups. PDF quote matching checks literal source text; image confirmation is a weaker second model pass. No survey results or real consumer outcomes are measured here.', '');

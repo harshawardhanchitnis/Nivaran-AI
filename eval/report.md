@@ -44,6 +44,14 @@ Input documents are synthetic. Expected facts and scripted answers are never inc
 |---|---|---|---|---|---|---|
 | No live runs yet | Pending budget approval and database caps | N/A | N/A | N/A | 0 / 0 | N/A |
 
+## Answering models and fallbacks
+
+| Case / repeat | Models that answered (responses) | Fallback responses | Provider attempts by model |
+|---|---|---|---|
+
+A response counts here only after the routed SDK call succeeded; later extraction, tool or draft validation may still fail. A fallback response uses a later lineup model, including when earlier models were skipped on stored cooldown. Attempt counts include failures and are not answering-model counts.
+Total spent across recorded runs: **0 logical charges / 0 provider attempts**. These include both Google and Groq, not just Gemini.
+
 The per-run JSON preserves actual answering model IDs, events, initial/final facts and failures. It contains only synthetic case data; authentication and signing secrets stay outside these files.
 
 ## Injection check
