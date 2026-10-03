@@ -39,3 +39,8 @@ quota recovery without repeating saved work. Caps must return to 15/15 with
 This approval is required by the owner's handover, which says to estimate and wait before using
 more than about thirty model calls in one go. Deployment and the owner's deferred calendar
 preview remain separate pending checks.
+
+Stage one was attempted on 3 October. The saved report has two finished failures and ten
+interruptions, including six cases that could not be created after retained interrupted cases
+filled the ten-case account limit. It used 36 logical charges and 44 SDK attempts. Details are in
+`docs/t12-stage-one.md`. T12 remains incomplete and stage two is awaiting the owner's reply.

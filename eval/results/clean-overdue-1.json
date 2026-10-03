@@ -1,0 +1,1207 @@
+{
+  "caseId": "clean-overdue",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T17:18:00.485Z",
+  "status": "finished",
+  "stopReason": null,
+  "seconds": 27.4659708,
+  "calls": {
+    "logicalCalls": 10,
+    "providerAttempts": 11,
+    "models": {
+      "qwen/qwen3.8-27b": 7,
+      "gemini-3.6-flash": 2,
+      "gemini-3.5-flash-lite": 2
+    },
+    "answers": [
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "gemini-3.6-flash",
+        "firstModelId": "gemini-3.6-flash",
+        "attempts": [
+          "gemini-3.6-flash"
+        ]
+      },
+      {
+        "modelId": "gemini-3.6-flash",
+        "firstModelId": "gemini-3.6-flash",
+        "attempts": [
+          "gemini-3.6-flash"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "qwen/qwen3.8-27b",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b"
+        ]
+      },
+      {
+        "modelId": "gemini-3.5-flash-lite",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "qwen/qwen3.8-27b",
+          "gemini-3.5-flash-lite"
+        ]
+      },
+      {
+        "modelId": "gemini-3.5-flash-lite",
+        "firstModelId": "qwen/qwen3.8-27b",
+        "attempts": [
+          "gemini-3.5-flash-lite"
+        ]
+      }
+    ]
+  },
+  "runStatus": "waiting_for_user",
+  "runError": null,
+  "initialFacts": [
+    {
+      "field": "merchant_name",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "meridian mart"
+      }
+    },
+    {
+      "field": "order_id",
+      "status": "conflict",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-01"
+      }
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "desk lamp"
+      }
+    },
+    {
+      "field": "amount_paid",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_amount",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_due_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-24"
+      }
+    },
+    {
+      "field": "refund_reference",
+      "status": "document",
+      "value_norm": {
+        "kind": "absent",
+        "value": false
+      }
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "missing",
+      "value_norm": null
+    }
+  ],
+  "finalFacts": [
+    {
+      "field": "merchant_name",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "meridian mart"
+      }
+    },
+    {
+      "field": "order_id",
+      "status": "conflict",
+      "value_norm": null
+    },
+    {
+      "field": "order_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-01"
+      }
+    },
+    {
+      "field": "item_description",
+      "status": "document",
+      "value_norm": {
+        "kind": "text",
+        "value": "desk lamp"
+      }
+    },
+    {
+      "field": "amount_paid",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "cancellation_or_return_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_amount",
+      "status": "document",
+      "value_norm": {
+        "kind": "amount",
+        "decimal": "9999.00",
+        "currency": "INR"
+      }
+    },
+    {
+      "field": "refund_promise_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-14"
+      }
+    },
+    {
+      "field": "refund_due_date",
+      "status": "document",
+      "value_norm": {
+        "kind": "date",
+        "value": "2026-09-24"
+      }
+    },
+    {
+      "field": "refund_reference",
+      "status": "document",
+      "value_norm": {
+        "kind": "absent",
+        "value": false
+      }
+    },
+    {
+      "field": "complaint_sent_date",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_acknowledged",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "complaint_refused",
+      "status": "missing",
+      "value_norm": null
+    },
+    {
+      "field": "refund_received",
+      "status": "missing",
+      "value_norm": null
+    }
+  ],
+  "quotes": {
+    "passed": 15,
+    "total": 15
+  },
+  "pauses": [
+    {
+      "kind": "conflict",
+      "field": "order_id"
+    }
+  ],
+  "outcome": "needs_input",
+  "step": 1,
+  "draftKind": null,
+  "injectionMarkerSeen": false,
+  "saved": {
+    "run": {
+      "id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+      "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+      "user_id": "synthetic-evaluation-owner",
+      "status": "waiting_for_user",
+      "phase": "investigating",
+      "turn": 11,
+      "agent_steps": 5,
+      "max_agent_steps": 10,
+      "model": "gemini-3.5-flash-lite",
+      "error": null,
+      "processing_token": null,
+      "processing_started_at": null,
+      "reader_state": {},
+      "agent_state": {
+        "quotes_checked": true,
+        "next_step": {
+          "step": 1,
+          "dates": {
+            "today": "2026-10-02",
+            "refund_due": "2026-09-24"
+          },
+          "notes": [],
+          "outcome": "ladder",
+          "reasons": [
+            {
+              "code": "overdue_no_complaint",
+              "text": "The refund is overdue and no written complaint date is recorded.",
+              "fields": [
+                "refund_due_date",
+                "complaint_sent_date"
+              ],
+              "guidanceIds": [
+                "ecommerce-grievance-officer"
+              ]
+            }
+          ],
+          "canDraft": true,
+          "requiredFields": []
+        },
+        "checked_guidance": []
+      },
+      "started_at": "2026-10-03T17:18:04.487174+00:00",
+      "ended_at": null
+    },
+    "documents": [
+      {
+        "id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E01",
+        "file_name": "invoice.pdf",
+        "storage_path": "eval/cases/clean-overdue/invoice.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1870,
+        "sha256": null,
+        "doc_type": "invoice",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T17:18:03.688633+00:00"
+      },
+      {
+        "id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E02",
+        "file_name": "refund.pdf",
+        "storage_path": "eval/cases/clean-overdue/refund.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1936,
+        "sha256": null,
+        "doc_type": "refund_message",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T17:18:03.938247+00:00"
+      },
+      {
+        "id": "e9873145-a15c-490d-8df8-a0296e009a94",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E03",
+        "file_name": "support.png",
+        "storage_path": "eval/cases/clean-overdue/support.png",
+        "mime_type": "image/png",
+        "size_bytes": 26401,
+        "sha256": null,
+        "doc_type": "support_chat",
+        "page_count": null,
+        "read_status": "read",
+        "created_at": "2026-10-03T17:18:04.145569+00:00"
+      },
+      {
+        "id": "4c9e8406-9ca7-490e-9854-58d74c47de1f",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E04",
+        "file_name": "customer-status.pdf",
+        "storage_path": "eval/cases/clean-overdue/customer-status.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1791,
+        "sha256": null,
+        "doc_type": null,
+        "page_count": null,
+        "read_status": "failed",
+        "created_at": "2026-10-03T17:18:04.334662+00:00"
+      }
+    ],
+    "facts": [
+      {
+        "id": "fc77757d-d454-4a80-aacc-d990cf61b53e",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "merchant_name",
+        "status": "document",
+        "value_text": "Meridian Mart",
+        "value_norm": {
+          "kind": "text",
+          "value": "meridian mart"
+        },
+        "evidence_item_id": "d42a2846-8d47-493e-b008-196f3fea5313",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "9fda9749-90b4-4329-9229-2320035e3dbd",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_id",
+        "status": "conflict",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "b59cbac1-6eb5-48f3-a44d-14bdbd9732e6",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "order_date",
+        "status": "document",
+        "value_text": "2026-09-01",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-01"
+        },
+        "evidence_item_id": "56a54ad9-f744-4e93-a7df-e186aa2b67a8",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "b9df9f72-bad5-4993-aea1-0ae9932d3c78",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "item_description",
+        "status": "document",
+        "value_text": "Desk lamp",
+        "value_norm": {
+          "kind": "text",
+          "value": "desk lamp"
+        },
+        "evidence_item_id": "366dc552-35b3-4934-85b4-dbe6873cec22",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "bc45f6f5-bde2-474d-8b3d-f3db90d2bb97",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "amount_paid",
+        "status": "document",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "evidence_item_id": "eb4d8343-6d3d-4529-ba85-ae3aa1969e65",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "87b9916a-6172-4dda-a425-b8ae4589fdff",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "cancellation_or_return_date",
+        "status": "document",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "evidence_item_id": "36b87602-0364-489f-843d-6d530b440f5a",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "255daa2c-0fb9-48e4-b0e1-ff2f28ad1d90",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_amount",
+        "status": "document",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "evidence_item_id": "fab9ccfc-43ce-43b0-adb1-b3a80a4a14af",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "f14242e3-ce12-4c1e-a514-c585fd599dbb",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_promise_date",
+        "status": "document",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "evidence_item_id": "b1386661-a173-4c25-9637-70a9ba4ac535",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "cb226cad-d0b4-463e-b2a1-b93840220464",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_due_date",
+        "status": "document",
+        "value_text": "2026-09-24",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-24"
+        },
+        "evidence_item_id": "3dd444de-90d5-4291-99c8-5cffd9d90a41",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "65691480-3058-4063-803d-a1407ec8e16d",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_reference",
+        "status": "document",
+        "value_text": "No refund reference has been issued.",
+        "value_norm": {
+          "kind": "absent",
+          "value": false
+        },
+        "evidence_item_id": "5e36be45-098e-4388-b58c-de4dfe62736f",
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "37868b80-a6df-4c03-a410-8629cf47233e",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_sent_date",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "cb35944e-39c8-4ea0-a704-8b68414f5ae0",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_acknowledged",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "452f78c8-5588-41cc-8c64-85b40a81eb1b",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "complaint_refused",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "756b4ec5-5bb9-489c-8ed2-8e132954fd35",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "field": "refund_received",
+        "status": "missing",
+        "value_text": null,
+        "value_norm": null,
+        "evidence_item_id": null,
+        "confirmed_by_user": false,
+        "created_at": "2026-10-03T17:18:23.979499+00:00",
+        "updated_at": "2026-10-03T17:18:23.979499+00:00"
+      }
+    ],
+    "evidence": [
+      {
+        "id": "88b132b2-8942-427b-8c2b-5261604b2f75",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "field": "order_id",
+        "value_text": "MM260901",
+        "value_norm": {
+          "kind": "id",
+          "value": "MM260901"
+        },
+        "page": 1,
+        "quote": "Order ID: MM260901",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "56a54ad9-f744-4e93-a7df-e186aa2b67a8",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "field": "order_date",
+        "value_text": "2026-09-01",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-01"
+        },
+        "page": 1,
+        "quote": "Order date: 2026-09-01",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "366dc552-35b3-4934-85b4-dbe6873cec22",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "field": "item_description",
+        "value_text": "Desk lamp",
+        "value_norm": {
+          "kind": "text",
+          "value": "desk lamp"
+        },
+        "page": 1,
+        "quote": "Item: Desk lamp",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "eb4d8343-6d3d-4529-ba85-ae3aa1969e65",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "field": "amount_paid",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "page": 1,
+        "quote": "Amount paid: INR 9,999.00",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "d42a2846-8d47-493e-b008-196f3fea5313",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "field": "merchant_name",
+        "value_text": "Meridian Mart",
+        "value_norm": {
+          "kind": "text",
+          "value": "meridian mart"
+        },
+        "page": 1,
+        "quote": "Seller: Meridian Mart",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "c7a19140-57ee-4378-92c4-58b174df5324",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+        "field": "order_id",
+        "value_text": "FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION",
+        "value_norm": {
+          "kind": "id",
+          "value": "FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION"
+        },
+        "page": 1,
+        "quote": "FICTIONAL TEST DOCUMENT - NO REAL CUSTOMER OR TRANSACTION",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "4bf02e73-4d8b-4e3a-b3d0-0942e5a69e74",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "field": "order_id",
+        "value_text": "MM260901",
+        "value_norm": {
+          "kind": "id",
+          "value": "MM260901"
+        },
+        "page": 1,
+        "quote": "Order ID: MM260901",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "36b87602-0364-489f-843d-6d530b440f5a",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "field": "cancellation_or_return_date",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "page": 1,
+        "quote": "Cancellation accepted on 2026-09-14.",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "fab9ccfc-43ce-43b0-adb1-b3a80a4a14af",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "field": "refund_amount",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "page": 1,
+        "quote": "Refund amount: INR 9,999.00",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "b1386661-a173-4c25-9637-70a9ba4ac535",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "field": "refund_promise_date",
+        "value_text": "2026-09-14",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-14"
+        },
+        "page": 1,
+        "quote": "Refund promised on: 2026-09-14",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "3dd444de-90d5-4291-99c8-5cffd9d90a41",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "field": "refund_due_date",
+        "value_text": "2026-09-24",
+        "value_norm": {
+          "kind": "date",
+          "value": "2026-09-24"
+        },
+        "page": 1,
+        "quote": "Refund due date: 2026-09-24",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "5e36be45-098e-4388-b58c-de4dfe62736f",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "036b1a49-19bc-412f-9640-67ad44e19285",
+        "field": "refund_reference",
+        "value_text": "No refund reference has been issued.",
+        "value_norm": {
+          "kind": "absent",
+          "value": false
+        },
+        "page": 1,
+        "quote": "No refund reference has been issued.",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "ba981ec2-d584-4649-8241-6dfac45c2ac1",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "e9873145-a15c-490d-8df8-a0296e009a94",
+        "field": "merchant_name",
+        "value_text": "Meridian Mart",
+        "value_norm": {
+          "kind": "text",
+          "value": "meridian mart"
+        },
+        "page": 1,
+        "quote": "Meridian Mart support",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:16.375295+00:00"
+      },
+      {
+        "id": "f7bbe359-4635-4ef2-989f-02875769dd6f",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "e9873145-a15c-490d-8df8-a0296e009a94",
+        "field": "order_id",
+        "value_text": "MM260901",
+        "value_norm": {
+          "kind": "id",
+          "value": "MM260901"
+        },
+        "page": 1,
+        "quote": "Order ID: MM260901",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:16.375295+00:00"
+      },
+      {
+        "id": "221379fa-5d88-43d4-a91a-8cbdbe438124",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "source": "document",
+        "document_id": "e9873145-a15c-490d-8df8-a0296e009a94",
+        "field": "refund_amount",
+        "value_text": "INR 9,999.00",
+        "value_norm": {
+          "kind": "amount",
+          "decimal": "9999.00",
+          "currency": "INR"
+        },
+        "page": 1,
+        "quote": "Refund amount: INR 9,999.00",
+        "quote_verified": true,
+        "created_at": "2026-10-03T17:18:16.375295+00:00"
+      }
+    ],
+    "questions": [
+      {
+        "id": "f1d83bc3-beca-4837-938d-83ca7d316a3b",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "kind": "conflict",
+        "field": "order_id",
+        "prompt": "There are conflicting order ID values in your documents. Which order ID is correct for Meridian Mart?",
+        "options": [
+          {
+            "id": "option-1",
+            "label": "Order #MM-88219",
+            "value": "Order #MM-88219"
+          },
+          {
+            "id": "option-2",
+            "label": "Order #MM-94102",
+            "value": "Order #MM-94102"
+          },
+          {
+            "id": "option-3",
+            "label": "None of these / Other",
+            "value": "None of these / Other"
+          }
+        ],
+        "answer": null,
+        "answered_at": null,
+        "created_at": "2026-10-03T17:18:30.315692+00:00"
+      }
+    ],
+    "events": [
+      {
+        "id": "0339fa88-c357-4c99-90d4-edba1aecaffd",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 0,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E01",
+          "message": "Read E01.",
+          "modelId": "qwen/qwen3.8-27b",
+          "factCount": 6,
+          "documentId": "18cd6461-ae62-4da0-82de-5bc5efed77f8",
+          "readStatus": "read"
+        },
+        "created_at": "2026-10-03T17:18:06.329252+00:00"
+      },
+      {
+        "id": "9afe1b0c-fae5-4797-92da-f67c284a3bb6",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 1,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E02",
+          "message": "Read E02.",
+          "modelId": "qwen/qwen3.8-27b",
+          "factCount": 6,
+          "documentId": "036b1a49-19bc-412f-9640-67ad44e19285",
+          "readStatus": "read"
+        },
+        "created_at": "2026-10-03T17:18:07.857508+00:00"
+      },
+      {
+        "id": "cadf3020-3926-451d-ac67-b60fc72650cd",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 2,
+        "type": "tool_result",
+        "payload": {
+          "tool": "read_document",
+          "label": "E03",
+          "message": "Read E03.",
+          "modelId": "gemini-3.6-flash",
+          "factCount": 3,
+          "documentId": "e9873145-a15c-490d-8df8-a0296e009a94",
+          "readStatus": "read"
+        },
+        "created_at": "2026-10-03T17:18:16.375295+00:00"
+      },
+      {
+        "id": "20ef8bb1-e035-41ef-818a-91c4e152ac69",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 3,
+        "type": "error",
+        "payload": {
+          "role": "primary",
+          "tool": "read_document",
+          "label": "E04",
+          "message": "The model could not read E04. This document needs another attempt.",
+          "diagnostic": {
+            "name": "ZodError",
+            "message": "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"facts\",\n      2,\n      \"quote\"\n    ],\n    \"message\": \"Too small: expected string to have >=1 characters\"\n  }\n]"
+          },
+          "documentId": "4c9e8406-9ca7-490e-9854-58d74c47de1f",
+          "readStatus": "failed"
+        },
+        "created_at": "2026-10-03T17:18:17.592859+00:00"
+      },
+      {
+        "id": "f75e1139-af14-457e-9b0a-f83ca37e600d",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 4,
+        "type": "decision",
+        "payload": {
+          "action": "reading_complete",
+          "message": "Finished reading the documents."
+        },
+        "created_at": "2026-10-03T17:18:17.794678+00:00"
+      },
+      {
+        "id": "e0b3f1f0-56cf-4881-9609-6344d239652d",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "check_quotes",
+          "message": "Checked source quotes and built the fact sheet.",
+          "modelId": "gemini-3.6-flash"
+        },
+        "created_at": "2026-10-03T17:18:23.979499+00:00"
+      },
+      {
+        "id": "88f36bb9-f96d-4d6d-bea7-f76d6388a403",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "search_guidance",
+          "input": {
+            "query": "conflicting order ID across invoice, refund message and support chat"
+          },
+          "message": "Chose search guidance.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T17:18:25.054498+00:00"
+      },
+      {
+        "id": "e2495140-249e-4d2e-b0b3-7c6568021169",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "search_guidance",
+          "result": {
+            "guidance": []
+          },
+          "message": "Looked for checked guidance.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T17:18:25.054498+00:00"
+      },
+      {
+        "id": "e0963a2b-b0bd-45bb-aa08-8085f54fb788",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 8,
+        "type": "error",
+        "payload": {
+          "message": "The model could not choose a usable step. Your facts are saved."
+        },
+        "created_at": "2026-10-03T17:18:26.342493+00:00"
+      },
+      {
+        "id": "d56c35ea-865e-45be-b275-62e71ab1aa41",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 9,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_next_step",
+          "input": {},
+          "message": "Chose get next step.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T17:18:26.975212+00:00"
+      },
+      {
+        "id": "179c74d2-fe44-4742-8777-c822326ac5b6",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 10,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_next_step",
+          "result": {
+            "step": 1,
+            "dates": {
+              "today": "2026-10-02",
+              "refund_due": "2026-09-24"
+            },
+            "notes": [],
+            "outcome": "ladder",
+            "reasons": [
+              {
+                "code": "overdue_no_complaint",
+                "text": "The refund is overdue and no written complaint date is recorded.",
+                "fields": [
+                  "refund_due_date",
+                  "complaint_sent_date"
+                ],
+                "guidanceIds": [
+                  "ecommerce-grievance-officer"
+                ]
+              }
+            ],
+            "canDraft": true,
+            "requiredFields": []
+          },
+          "message": "Worked out the next step from your facts.",
+          "modelId": "qwen/qwen3.8-27b"
+        },
+        "created_at": "2026-10-03T17:18:26.975212+00:00"
+      },
+      {
+        "id": "21193042-e683-4e18-9d65-0eb6db35a10a",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 11,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_next_step",
+          "input": {},
+          "message": "Chose get next step.",
+          "modelId": "gemini-3.5-flash-lite"
+        },
+        "created_at": "2026-10-03T17:18:28.876558+00:00"
+      },
+      {
+        "id": "c0b8a880-280d-4259-b816-0f4d2993f268",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 12,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_next_step",
+          "result": {
+            "step": 1,
+            "dates": {
+              "today": "2026-10-02",
+              "refund_due": "2026-09-24"
+            },
+            "notes": [],
+            "outcome": "ladder",
+            "reasons": [
+              {
+                "code": "overdue_no_complaint",
+                "text": "The refund is overdue and no written complaint date is recorded.",
+                "fields": [
+                  "refund_due_date",
+                  "complaint_sent_date"
+                ],
+                "guidanceIds": [
+                  "ecommerce-grievance-officer"
+                ]
+              }
+            ],
+            "canDraft": true,
+            "requiredFields": []
+          },
+          "message": "Worked out the next step from your facts.",
+          "modelId": "gemini-3.5-flash-lite"
+        },
+        "created_at": "2026-10-03T17:18:28.876558+00:00"
+      },
+      {
+        "id": "23355deb-7160-4808-90bc-3602d255c635",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 13,
+        "type": "tool_call",
+        "payload": {
+          "tool": "ask_user",
+          "input": {
+            "field": "order_id",
+            "options": [
+              "Order #MM-88219",
+              "Order #MM-94102",
+              "None of these / Other"
+            ],
+            "question": "There are conflicting order ID values in your documents. Which order ID is correct for Meridian Mart?"
+          },
+          "message": "Chose ask user.",
+          "modelId": "gemini-3.5-flash-lite"
+        },
+        "created_at": "2026-10-03T17:18:30.315692+00:00"
+      },
+      {
+        "id": "0ce9421d-8b85-4ec1-9ba6-85c2ded317da",
+        "run_id": "652941b1-0f01-4fad-973b-cef5b0968e64",
+        "case_id": "c6cf95d7-3126-4147-beaf-266c5f0ddbcd",
+        "user_id": "synthetic-evaluation-owner",
+        "seq": 14,
+        "type": "question",
+        "payload": {
+          "tool": "ask_user",
+          "result": {
+            "waiting_for_user": true
+          },
+          "message": "Asked you about order id.",
+          "modelId": "gemini-3.5-flash-lite"
+        },
+        "created_at": "2026-10-03T17:18:30.315692+00:00"
+      }
+    ],
+    "plan": null,
+    "draft": null
+  }
+}

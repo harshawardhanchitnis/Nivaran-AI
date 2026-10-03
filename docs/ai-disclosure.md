@@ -370,29 +370,42 @@ Optional asynchronous instrumentation counts successful logical charges and SDK 
 it does not replace or bypass database quota charging. A local budget stop cannot mark a provider
 exhausted. Fake-operation tests cover pauses, canonical answers, fixed dates, draft resumption,
 cooldown stops and cleanup boundaries. The dry run used no database or provider calls. The report
-currently records zero of thirty-six live runs, with product metrics explicitly pending. Three
-deterministic linter probes passed. The full live run awaits the owner's approval and temporary
+at preparation recorded zero of thirty-six live runs, with product metrics explicitly pending. Three
+deterministic linter probes passed. The full live run awaited the owner's approval and temporary
 dashboard caps; no live evaluation results are claimed.
 The full preparation check passed both server type-checks, 371 server/database tests, 90 Angular
 tests and the production build. Details and the remaining acceptance gate are in
 `docs/t12-preparation.md`.
-
-## AI tools used
 
 On 3 October, the owner approved T12's live evaluation in two stages and confirmed temporary caps
 SQL succeeded. At the owner's request following a Claude review, Codex corrected the dashboard
 budget SQL to use India dates, matching the existing database usage counter. Codex added explicit
 answering-model/fallback telemetry and repetition selection so interrupted first-stage results
 remain available. The approved total is 300 logical charges across both providers and 450 SDK
-attempts; stage two requires a further owner reply. Live results will be recorded after execution.
+attempts; stage two requires a further owner reply.
+
+Stage one ran on 3 October with the production operations and real providers. It used 36 logical
+charges and 44 SDK attempts: Google 24 attempts/19 successful routed responses, Groq 20 attempts/12
+responses. Seventeen of 31 successful responses used a fallback model, including stored-cooldown
+skips. The caller's India-day database counter increased from no row to 36, matching the checkpoint.
+Two runs finished but failed acceptance: the clean case acquired a false order-ID conflict after
+the reader classified the fictional-document footer as an ID, and the conflicting-amount case
+repeated rereads until its ten-choice ceiling. Four further cases stopped on model cooldowns,
+two without a provider attempt. Six could not start because retained interrupted cases brought
+the account to its ten-case limit. No live draft or complete injection run was produced.
+All twelve first-stage outcomes, answering models, fallbacks, failures and spent calls are saved;
+interrupted outcomes are not scored as successes. Stage two was not run. Full consistency and
+product-evaluation acceptance remain pending. See `docs/t12-stage-one.md` and `eval/report.md`.
+
+## AI tools used
 
 | Tool | Used for |
 |---|---|
-| Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. |
+| Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. The owner also supplied its evaluation-budget review on 3 October. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation and T12 corpus/runner preparation, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2–3 October 2026. |
-| Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; new routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October 2026. These are manual fixture checks. |
-| Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing checks on 2 October 2026. The selected ladder tool remained unavailable. These are manual fixture checks, not product evaluation results. |
+| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation, T12 corpus/runner and stage-one evaluation, model routing with signed cooldowns, browser checks through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2–3 October 2026. |
+| Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October. Stage-one product evaluation on 3 October used 24 attempts, with 19 successful routed responses; the incomplete evaluation failures are reported above. |
+| Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing fixture checks on 2 October. Stage-one product evaluation on 3 October used 20 attempts, with 12 successful routed responses; the incomplete evaluation failures are reported above. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->

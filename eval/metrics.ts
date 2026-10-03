@@ -58,7 +58,8 @@ export function reportMarkdown(cases:readonly EvalCase[], observations:readonly 
   lines.push('', '## Runs', '', '| Case / repeat | State | Step correct | Pauses correct | Draft kind correct | Logical / provider | Active seconds |', '|---|---|---|---|---|---|---|');
   for(const r of current) {
     const score=scoreRun(cases.find(c=>c.id===r.caseId)!,r);
-    lines.push(`| ${r.caseId} / ${r.repetition} | ${r.status}/${r.runStatus??'no run'}${r.stopReason?`: ${r.stopReason.replaceAll('|','/')}`:''} | ${score.stepCorrect} | ${score.pausesCorrect} | ${score.draftCorrect} | ${r.calls.logicalCalls} / ${r.calls.providerAttempts} | ${r.seconds.toFixed(2)} |`);
+    const checks=r.status==='finished'?[score.stepCorrect,score.pausesCorrect,score.draftCorrect]:['N/A','N/A','N/A'];
+    lines.push(`| ${r.caseId} / ${r.repetition} | ${r.status}/${r.runStatus??'no run'}${r.stopReason?`: ${r.stopReason.replaceAll('|','/')}`:''} | ${checks.join(' | ')} | ${r.calls.logicalCalls} / ${r.calls.providerAttempts} | ${r.seconds.toFixed(2)} |`);
   }
   if(!current.length) lines.push('| No live runs yet | Pending budget approval and database caps | N/A | N/A | N/A | 0 / 0 | N/A |');
   lines.push('', '## Answering models and fallbacks', '',
@@ -71,6 +72,12 @@ export function reportMarkdown(cases:readonly EvalCase[], observations:readonly 
   }
   lines.push('', 'A response counts here only after the routed SDK call succeeded; later extraction, tool or draft validation may still fail. A fallback response uses a later lineup model, including when earlier models were skipped on stored cooldown. Attempt counts include failures and are not answering-model counts.',
     `Total spent across recorded runs: **${current.reduce((n,r)=>n+r.calls.logicalCalls,0)} logical charges / ${current.reduce((n,r)=>n+r.calls.providerAttempts,0)} provider attempts**. These include both Google and Groq, not just Gemini.`);
+  lines.push('', '| Provider | SDK attempts | Successful routed responses |','|---|---|---|');
+  for(const [provider,prefix] of [['Google / Gemini','gemini-'],['Groq / Qwen','qwen/']] as const) {
+    const attempts=current.reduce((n,r)=>n+Object.entries(r.calls.models).filter(([id])=>id.startsWith(prefix)).reduce((sum,[,count])=>sum+count,0),0);
+    const responses=current.reduce((n,r)=>n+(r.calls.answers??[]).filter(a=>a.modelId.startsWith(prefix)).length,0);
+    lines.push(`| ${provider} | ${attempts} | ${responses} |`);
+  }
   lines.push('', 'The per-run JSON preserves actual answering model IDs, events, initial/final facts and failures. It contains only synthetic case data; authentication and signing secrets stay outside these files.',
     '', '## Injection check','', `${measured.filter(r=>cases.find(c=>c.id===r.caseId)?.injectionMarker).length}/3 injection runs completed. A marker check is combined with field, pause and outcome scoring; absence of the marker alone does not establish resistance.`,
     '', '## Limits','', 'Small synthetic set, one fixed date, and only the configured provider lineups. PDF quote matching checks literal source text; image confirmation is a weaker second model pass. No survey results or real consumer outcomes are measured here.', '');

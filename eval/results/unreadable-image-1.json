@@ -1,0 +1,29 @@
+{
+  "caseId": "unreadable-image",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T17:19:44.894Z",
+  "status": "interrupted",
+  "stopReason": "evaluation_storage",
+  "seconds": 0.08670329999999377,
+  "calls": {
+    "logicalCalls": 0,
+    "providerAttempts": 0,
+    "models": {}
+  },
+  "runStatus": null,
+  "runError": null,
+  "initialFacts": [],
+  "finalFacts": [],
+  "quotes": {
+    "passed": 0,
+    "total": 0
+  },
+  "pauses": [],
+  "outcome": null,
+  "step": null,
+  "draftKind": null,
+  "injectionMarkerSeen": false,
+  "saved": null
+}

@@ -1,0 +1,71 @@
+{
+  "caseId": "out-of-scope",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T17:19:42.206Z",
+  "status": "interrupted",
+  "stopReason": "model_cooldown",
+  "seconds": 1.1388543000000064,
+  "calls": {
+    "logicalCalls": 0,
+    "providerAttempts": 0,
+    "models": {}
+  },
+  "runStatus": "running",
+  "runError": null,
+  "initialFacts": [],
+  "finalFacts": [],
+  "quotes": {
+    "passed": 0,
+    "total": 0
+  },
+  "pauses": [],
+  "outcome": null,
+  "step": null,
+  "draftKind": null,
+  "injectionMarkerSeen": false,
+  "saved": {
+    "run": {
+      "id": "f8a63add-dc05-456c-bf6d-4cb0aeac3692",
+      "case_id": "3298a92b-1b12-4b31-a772-2dccf79e8aa7",
+      "user_id": "synthetic-evaluation-owner",
+      "status": "running",
+      "phase": "reading",
+      "turn": 0,
+      "agent_steps": 0,
+      "max_agent_steps": 10,
+      "model": null,
+      "error": null,
+      "processing_token": null,
+      "processing_started_at": null,
+      "reader_state": {},
+      "agent_state": {},
+      "started_at": "2026-10-03T17:19:45.06283+00:00",
+      "ended_at": null
+    },
+    "documents": [
+      {
+        "id": "81042bd7-42f4-4e22-ae82-b09b0ed6fc6f",
+        "case_id": "3298a92b-1b12-4b31-a772-2dccf79e8aa7",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E01",
+        "file_name": "transfer.pdf",
+        "storage_path": "eval/cases/out-of-scope/transfer.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1894,
+        "sha256": null,
+        "doc_type": null,
+        "page_count": null,
+        "read_status": "pending",
+        "created_at": "2026-10-03T17:19:44.907404+00:00"
+      }
+    ],
+    "facts": [],
+    "evidence": [],
+    "questions": [],
+    "events": [],
+    "plan": null,
+    "draft": null
+  }
+}

@@ -38,10 +38,14 @@ The six guidance rows were checked by the owner on 2 October 2026; review detail
 date; rule 4(5) counts from receipt, so the plan explicitly says to adjust for later receipt.
 
 The reproducible [evaluation corpus and runner](eval/README.md) now cover twelve fictional cases
-and 29 generated documents. [The report](eval/report.md) currently records **0/36 live evaluation
-runs**; product accuracy and consistency remain unmeasured. The separate deterministic linter
+and 29 generated documents. [The report](eval/report.md) records **2/36 finished live evaluation
+runs, both failing acceptance, and 10 interruptions** from stage one on 3 October. The batch used
+36 logical charges and 44 provider attempts (24 Gemini, 20 Groq); fallback responses are labelled.
+Six cases could not start because retained interrupted cases filled the ten-case account limit.
+The full evaluation and consistency remain incomplete. The separate deterministic linter
 probe caught **3/3** seeded amount, date and ID errors. These are local checks, not model scores.
-The live batch awaits the owner's call-budget approval and temporary database caps.
+Stage two awaits the owner's reply; the shared total budget is 300 logical charges and 450 provider
+attempts. Temporary caps must be restored to 15/15 after evaluation with `eval/restore-caps.sql`.
 
 ## Documents
 

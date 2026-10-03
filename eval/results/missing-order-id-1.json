@@ -1,0 +1,86 @@
+{
+  "caseId": "missing-order-id",
+  "repetition": 1,
+  "mode": "live",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "startedAt": "2026-10-03T17:19:43.490Z",
+  "status": "interrupted",
+  "stopReason": "model_cooldown",
+  "seconds": 1.1981742999999987,
+  "calls": {
+    "logicalCalls": 0,
+    "providerAttempts": 0,
+    "models": {}
+  },
+  "runStatus": "running",
+  "runError": null,
+  "initialFacts": [],
+  "finalFacts": [],
+  "quotes": {
+    "passed": 0,
+    "total": 0
+  },
+  "pauses": [],
+  "outcome": null,
+  "step": null,
+  "draftKind": null,
+  "injectionMarkerSeen": false,
+  "saved": {
+    "run": {
+      "id": "e3a98a80-fc11-4abf-919b-c5adb4373603",
+      "case_id": "1cb5d682-a192-4f76-9b23-22aa796541e9",
+      "user_id": "synthetic-evaluation-owner",
+      "status": "running",
+      "phase": "reading",
+      "turn": 0,
+      "agent_steps": 0,
+      "max_agent_steps": 10,
+      "model": null,
+      "error": null,
+      "processing_token": null,
+      "processing_started_at": null,
+      "reader_state": {},
+      "agent_state": {},
+      "started_at": "2026-10-03T17:19:46.552168+00:00",
+      "ended_at": null
+    },
+    "documents": [
+      {
+        "id": "d5907929-603e-4717-b397-805841bb6fe1",
+        "case_id": "1cb5d682-a192-4f76-9b23-22aa796541e9",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E01",
+        "file_name": "invoice.pdf",
+        "storage_path": "eval/cases/missing-order-id/invoice.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1893,
+        "sha256": null,
+        "doc_type": null,
+        "page_count": null,
+        "read_status": "pending",
+        "created_at": "2026-10-03T17:19:46.179511+00:00"
+      },
+      {
+        "id": "e2ac5fcb-6aea-4a55-a131-482f935427f6",
+        "case_id": "1cb5d682-a192-4f76-9b23-22aa796541e9",
+        "user_id": "synthetic-evaluation-owner",
+        "label": "E02",
+        "file_name": "refund.pdf",
+        "storage_path": "eval/cases/missing-order-id/refund.pdf",
+        "mime_type": "application/pdf",
+        "size_bytes": 1942,
+        "sha256": null,
+        "doc_type": null,
+        "page_count": null,
+        "read_status": "pending",
+        "created_at": "2026-10-03T17:19:46.380438+00:00"
+      }
+    ],
+    "facts": [],
+    "evidence": [],
+    "questions": [],
+    "events": [],
+    "plan": null,
+    "draft": null
+  }
+}
