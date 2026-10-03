@@ -78,3 +78,25 @@ is N/A. Offline serialization in `tool-request-size.json` measures bytes, not to
 observations of the current corpus are eligible. Empty results are explicitly pending. The three
 seeded-linter probes are deterministic checks, not model accuracy. See `docs/t12-fixes.md` for
 the evidence behind the fixes and the remaining rerun gate.
+
+## Final authorised pass (4 October)
+
+The owner requested a separate Gemini-first text-PDF reading lineup and one final pass of all
+12 cases. `LLM_PDF_TEXT_READING_LINEUP` defaults to Flash Lite, Flash 3.5, 3.6, 3.8, 3.7, then Qwen.
+Tool choice and drafting keep their Qwen-first text lineup; vision is unchanged. A text-layer PDF
+that returns unreadable or zero accepted facts tries each next reader once within the same
+logical charge. Empty reads do not write provider-wide cooldowns. If none extract facts, reading
+fails clearly; no facts are filled in. Fake-provider tests cover these paths.
+
+After the owner applies `eval/raise-final-caps.sql` (70 more calls on the India date):
+
+```sh
+npx tsx eval/run-eval.ts --live --batch final-stage-one --session-file tmp/t2/session.json --max-logical-calls 70 --max-provider-attempts 350 --repetitions 1 --continue-on-stop
+```
+
+The final named batch rejects subsets, repetitions other than one, or more than 70 logical calls.
+Its 350 SDK-attempt ceiling plus the earlier 85 attempts remains below the previous 450-attempt
+ceiling. Results go to `eval/results/final-stage-one/` and `eval/final-stage-one-report.md`;
+previous observations are retained. Apply `restore-caps.sql` immediately afterwards. The owner
+has forbidden further evaluation after this pass and instructed proceeding through T13–T17,
+even if the complete three-repeat T12 acceptance remains unmet.

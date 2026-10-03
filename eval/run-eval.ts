@@ -83,6 +83,7 @@ export async function main(argv=process.argv.slice(2)):Promise<void> {
   const repetitions=options.has('--repetitions')?options.get('--repetitions')!.split(',').map(n=>positive(n,'--repetitions')):Array.from({length:rounds},(_,i)=>i+1);
   if(repetitions.some(n=>n>3)||new Set(repetitions).size!==repetitions.length)throw new Error('Repetitions must be distinct values from 1 to 3.');
   if(!cleaning&&batchName==='rerun-stage-one'&&(logicalLimit>40||repetitions.length!==1||repetitions[0]!==1))throw new Error('The stage-one rerun is limited to repetition 1 and at most 40 logical calls.');
+  if(!cleaning&&batchName==='final-stage-one'&&(logicalLimit>70||repetitions.length!==1||repetitions[0]!==1||options.has('--case')))throw new Error('The final pass must cover all 12 cases, repetition 1 only, with at most 70 logical calls.');
   const sessionPath=options.get('--session-file');if(!sessionPath)throw new Error('Supply an ignored session file; never put an access token on the command line.');
   try{process.loadEnvFile('.env.local');}catch(error){if(!error||typeof error!=='object'||!('code'in error)||error.code!=='ENOENT')throw error;}
   const session=z.object({token:z.string().min(1)}).parse(JSON.parse(await readFile(sessionPath,'utf8')));

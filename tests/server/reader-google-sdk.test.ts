@@ -10,6 +10,7 @@ beforeEach(()=>vi.stubEnv('MODEL_COOLDOWN_SIGNING_SECRET','test-secret-with-at-l
 describe('reader through the real SDK with a fake HTTP transport', () => {
   it('sends a text-layer PDF through the real Groq SDK as page text with no tools', async ()=> {
     vi.stubEnv('GROQ_API_KEY','fake-key');
+    vi.stubEnv('LLM_PDF_TEXT_READING_LINEUP','qwen/qwen3.8-27b');
     const extraction={doc_type:'invoice',readable:true,facts:[{field:'order_id',value_text:'MM-123456',quote:'Order MM-123456',page:1}]};
     const http=vi.fn(async (_input:Parameters<typeof fetch>[0],_init?:RequestInit)=>new Response(JSON.stringify({
       id:'fake',object:'chat.completion',created:1,model:'qwen/qwen3.8-27b',choices:[{index:0,message:{role:'assistant',content:JSON.stringify(extraction)},finish_reason:'stop'}],usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2}

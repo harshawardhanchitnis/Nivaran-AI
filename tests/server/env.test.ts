@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_TEXT_LINEUP, DEFAULT_VISION_LINEUP, readEnv } from '../../server/env.js';
+import { DEFAULT_TEXT_LINEUP, DEFAULT_VISION_LINEUP, DEFAULT_PDF_TEXT_READING_LINEUP, readEnv } from '../../server/env.js';
 import { getModelById } from '../../server/llm/provider.js';
 
 describe('readEnv', () => {
@@ -10,12 +10,14 @@ describe('readEnv', () => {
     expect(env.googleApiKey).toBeUndefined();
     expect(env.visionLineup).toEqual(DEFAULT_VISION_LINEUP);
     expect(env.textLineup).toEqual(DEFAULT_TEXT_LINEUP);
+    expect(env.pdfTextReadingLineup).toEqual(DEFAULT_PDF_TEXT_READING_LINEUP);
     expect(env.llmCheckEnabled).toBe(false);
   });
 
   it('reads overrides', () => {
-    const env = readEnv({ LLM_TEXT_LINEUP: 'gemini-3.5-flash-lite', ENABLE_LLM_CHECK: 'TRUE' });
+    const env = readEnv({ LLM_TEXT_LINEUP: 'gemini-3.5-flash-lite', LLM_PDF_TEXT_READING_LINEUP:' gemini-3.5-flash, qwen/qwen3.8-27b,gemini-3.5-flash ', ENABLE_LLM_CHECK: 'TRUE' });
     expect(env.textLineup).toEqual(['gemini-3.5-flash-lite']);
+    expect(env.pdfTextReadingLineup).toEqual(['gemini-3.5-flash','qwen/qwen3.8-27b']);
     expect(env.llmCheckEnabled).toBe(true);
   });
 });

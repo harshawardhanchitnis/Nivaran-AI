@@ -28,7 +28,7 @@ beforeEach(() => {
   fake.rpc.mockResolvedValue({ data: { allowed: true }, error: null });
   fake.from.mockReturnValue({ download: fake.download });
   fake.download.mockResolvedValue({ data: new Blob(['pdf']), error: null });
-  fake.generateText.mockResolvedValue({ output: { doc_type: 'invoice', readable: true, facts: [] } });
+  fake.generateText.mockResolvedValue({ output: { doc_type: 'invoice', readable: true, facts: [{field:'order_id',value_text:'MM-001',quote:'Order MM-001',page:1}] } });
   fake.pdfText.mockResolvedValue(['Order MM-001']);
   vi.stubEnv('GOOGLE_GENERATIVE_AI_API_KEY','fake'); vi.stubEnv('GROQ_API_KEY','fake');
   vi.stubEnv('MODEL_COOLDOWN_SIGNING_SECRET','test-secret-with-at-least-32-characters');
@@ -43,7 +43,7 @@ describe('reader SDK adapter (no real calls)', () => {
 
   it.each(['application/pdf', 'image/png'] as const)('sends %s bytes without tools or retries, after charging', async (mime_type) => {
     const result = await createDocumentReader(client)({ ...doc, mime_type }, 'primary');
-    expect(result.modelId).toBe(mime_type==='application/pdf'?'qwen/qwen3.8-27b':'gemini-3.6-flash');
+    expect(result.modelId).toBe(mime_type==='application/pdf'?'gemini-3.5-flash-lite':'gemini-3.6-flash');
     expect(fake.from).toHaveBeenCalledWith('evidence');
     expect(fake.download).toHaveBeenCalledWith(doc.storage_path);
     expect(fake.rpc).toHaveBeenCalledExactlyOnceWith('charge_model_call');
@@ -57,10 +57,36 @@ describe('reader SDK adapter (no real calls)', () => {
     expect(options.output).toBeDefined();
   });
 
-  it('routes text PDFs to Qwen with extracted page text and never PDF file bytes', async () => {
+  it('routes text PDFs to the reading lineup with extracted page text and never PDF file bytes', async () => {
     await createDocumentReader(client)(doc);
-    expect(fake.getModel.mock.calls[0]?.slice(0,2)).toEqual(['groq','qwen/qwen3.8-27b']);
+    expect(fake.getModel.mock.calls[0]?.slice(0,2)).toEqual(['google','gemini-3.5-flash-lite']);
     expect(fake.generateText.mock.calls[0]![0].messages[0].content[0]).toMatchObject({type:'text'});
+  });
+  it.each([true,false])('tries the next reader on an empty text PDF (readable=%s), with one charge and no cooldown', async readable => {
+    fake.generateText.mockResolvedValueOnce({output:{doc_type:'invoice',readable,facts:[]}});
+    const result=await createDocumentReader(client)(doc);
+    expect(result.modelId).toBe('gemini-3.5-flash');
+    expect(result.facts).toHaveLength(1);
+    expect(fake.generateText).toHaveBeenCalledTimes(2);
+    expect(fake.rpc).toHaveBeenCalledExactlyOnceWith('charge_model_call');
+    for(const [options] of fake.generateText.mock.calls) {
+      expect(options.maxRetries).toBe(0);
+      expect(options.tools).toBeUndefined();
+    }
+  });
+  it('tries each reader only once and fails clearly if all return zero facts', async()=>{
+    fake.generateText.mockResolvedValue({output:{doc_type:'invoice',readable:true,facts:[]}});
+    await expect(createDocumentReader(client)(doc)).rejects.toThrow(/could not extract facts/);
+    expect(fake.getModel.mock.calls.map(call=>call[1])).toEqual([
+      'gemini-3.5-flash-lite','gemini-3.5-flash','gemini-3.6-flash','gemini-3.8-flash','gemini-3.7-flash','qwen/qwen3.8-27b']);
+    expect(fake.generateText).toHaveBeenCalledTimes(6);
+    expect(fake.rpc).toHaveBeenCalledExactlyOnceWith('charge_model_call');
+  });
+  it('keeps an unreadable image as a single completed reading attempt',async()=>{
+    fake.generateText.mockResolvedValue({output:{doc_type:'other',readable:false,facts:[]}});
+    const result=await createDocumentReader(client)({...doc,mime_type:'image/png'});
+    expect(result.readable).toBe(false);
+    expect(fake.generateText).toHaveBeenCalledTimes(1);
   });
   it('routes a PDF without a text layer to Gemini vision, never to Qwen PDF input', async () => {
     fake.pdfText.mockResolvedValue(null);

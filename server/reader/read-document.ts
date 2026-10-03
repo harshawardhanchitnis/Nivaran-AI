@@ -7,6 +7,7 @@ import { normaliseFact } from '../../shared/normalise.js';
 import { HttpError } from '../http.js';
 import type { ModelRole } from '../llm/provider.js';
 import { createRoutedModelCall } from '../llm/routed-call.js';
+import { EmptyTextReadError } from '../llm/router.js';
 import { pdfTextPages } from './pdf-text.js';
 import { downloadDocument } from './download-document.js';
 
@@ -85,7 +86,7 @@ export function createDocumentReader(supabase: SupabaseClient) {
     const bytes=await downloadDocument(supabase,document);
     const pages=document.mime_type==='application/pdf' ? await pdfTextPages(bytes) : null;
     if(pages && pages.join('').length>200000) throw new HttpError(413,'document_text_too_large','This PDF has too much text. Please upload the relevant pages.');
-    const task=pages?'text':document.mime_type==='application/pdf'?'vision_pdf':'vision_image';
+    const task=pages?'pdf_text_reading':document.mime_type==='application/pdf'?'vision_pdf':'vision_image';
     const result=await route(task,async (selected,signal)=>{
         const content = pages ? { type:'text' as const, text:JSON.stringify({document:document.file_name,pages:pages.map((text,index)=>({page:index+1,text}))}) }
           : { type: 'file' as const, data: { type: 'data' as const, data: bytes }, mediaType:document.mime_type, filename:document.file_name };
@@ -99,7 +100,9 @@ export function createDocumentReader(supabase: SupabaseClient) {
           maxOutputTokens: 8000,
           abortSignal: signal,
         });
-        return parseDocumentExtraction(response.output);
+        const extraction = parseDocumentExtraction(response.output);
+        if (pages && (!extraction.readable || !extraction.facts.length)) throw new EmptyTextReadError();
+        return extraction;
     });
     return { ...result.value,modelId:result.modelId };
   };

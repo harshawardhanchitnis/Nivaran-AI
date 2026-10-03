@@ -103,7 +103,7 @@ export async function runLiveCase(client:SupabaseClient,userId:string,spec:EvalC
     const document=run.phase==='reading'?await reading.pendingDocument(run.case_id,run.reader_state.fallback_document_id):
       snapshot.documents?.find(d=>d.id===run.agent_state.pending_reread?.document_id);
     let task:ModelTask='text';
-    if(document)task=document.mime_type==='application/pdf'?(await pdfTextPages(await downloadDocument(client,document))?'text':'vision_pdf'):'vision_image';
+    if(document)task=document.mime_type==='application/pdf'?(await pdfTextPages(await downloadDocument(client,document))?'pdf_text_reading':'vision_pdf'):'vision_image';
     else if(!run.agent_state.quotes_checked&&snapshot.evidence?.some(e=>e.quote_verified===null&&snapshot.documents.some(d=>d.id===e.document_id&&d.mime_type!=='application/pdf')))task='vision_image';
     const needsModel=run.phase==='reading'?!!document:!!document||run.agent_state.quotes_checked||task==='vision_image';
     if(needsModel)await pacing?.beforeStep();

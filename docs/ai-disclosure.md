@@ -442,3 +442,12 @@ See `docs/t12-fixes.md` and `eval/rerun-stage-one-report.md`.
 
 <!-- Team: list interviews, the survey, and the primary sources read for the guidance snippets,
      with dates. The rules allow research before the event; state it anyway. -->
+
+On 4 October, the owner requested a third, env-configurable lineup for text extracted from PDFs:
+Gemini 3.5 Flash Lite first, then 3.5, 3.6, 3.8, 3.7 and Qwen last. Qwen remains first for tool
+choice and drafting, and vision ordering is unchanged. Codex added document-specific empty-read
+fallback with one charge and no provider-wide quality cooldown, plus fake-provider tests. The
+owner authorised one final twelve-case pass, repetition one, capped at seventy logical calls,
+then instructed proceeding to samples, failure handling, deletion and deployment without more
+evaluation. This paragraph records the requested scope; final live results will be recorded
+separately after the dashboard caps step. Earlier failed observations remain unchanged.

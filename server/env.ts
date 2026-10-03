@@ -9,6 +9,7 @@ export interface ServerEnv {
   llmCheckEnabled: boolean;
   visionLineup: string[];
   textLineup: string[];
+  pdfTextReadingLineup: string[];
   modelAttemptTimeoutMs: number;
   modelCooldownSigningSecret: string | undefined;
   evaluationGroqTpm:number;
@@ -17,6 +18,7 @@ export interface ServerEnv {
 
 export const DEFAULT_VISION_LINEUP = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'qwen/qwen3.8-27b'];
 export const DEFAULT_TEXT_LINEUP = ['qwen/qwen3.8-27b', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.7-flash'];
+export const DEFAULT_PDF_TEXT_READING_LINEUP = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'qwen/qwen3.8-27b'];
 
 function clean(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
@@ -33,6 +35,7 @@ export function readEnv(source: Record<string, string | undefined> = process.env
     groqApiKey: clean(source['GROQ_API_KEY']),
     llmCheckEnabled: clean(source['ENABLE_LLM_CHECK'])?.toLowerCase() === 'true',
     visionLineup: list('LLM_VISION_LINEUP', DEFAULT_VISION_LINEUP), textLineup: list('LLM_TEXT_LINEUP', DEFAULT_TEXT_LINEUP),
+    pdfTextReadingLineup: list('LLM_PDF_TEXT_READING_LINEUP', DEFAULT_PDF_TEXT_READING_LINEUP),
     modelAttemptTimeoutMs: Number.isInteger(timeout) && timeout >= 1000 && timeout <= 8000 ? timeout : 8000,
     modelCooldownSigningSecret: clean(source['MODEL_COOLDOWN_SIGNING_SECRET']),
     evaluationGroqTpm:Number(source['EVAL_GROQ_TPM']??8000),

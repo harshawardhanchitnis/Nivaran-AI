@@ -1,6 +1,12 @@
 import type { ServerEnv } from '../env.js';
 import { HttpError } from '../http.js';
-export type ModelTask = 'vision_image' | 'vision_pdf' | 'text';
+export type ModelTask = 'vision_image' | 'vision_pdf' | 'pdf_text_reading' | 'text';
+/** A document-specific empty read is not evidence of a provider-wide quota cooldown. */
+export class EmptyTextReadError extends Error {
+  constructor() {
+    super('The available readers could not extract facts from this PDF text. Please upload a clearer copy or the relevant pages.');
+  }
+}
 export interface RoutedModel {
   key: string;
   provider: 'google' | 'groq';
@@ -17,7 +23,7 @@ export class ModelsUnavailableError extends Error {
   }
 }
 export function modelLineup(task: ModelTask, env: ServerEnv): RoutedModel[] {
-  const list = task === 'text' ? env.textLineup : env.visionLineup;
+  const list = task === 'text' ? env.textLineup : task === 'pdf_text_reading' ? env.pdfTextReadingLineup : env.visionLineup;
   if (!list.length || list.length > 6)
     throw new HttpError(503, 'model_lineup_invalid', 'Configure one to six models per lineup.');
   return list
@@ -142,6 +148,7 @@ export async function routeModelCall<T>(
   const rows = await deps.available();
   const blocked = new Map(rows.map((row) => [row.model_key, Date.parse(row.usable_after)]));
   let charged = false;
+  let emptyRead: EmptyTextReadError | undefined;
   const deadline = Math.min(deps.now() + 48000, deps.deadline ?? Infinity);
   for (const model of models) {
     if ((blocked.get(model.key) ?? 0) > deps.now()) continue;
@@ -160,6 +167,10 @@ export async function routeModelCall<T>(
         provider: model.provider,
       };
     } catch (error) {
+      if (error instanceof EmptyTextReadError) {
+        emptyRead = error;
+        continue;
+      }
       // Application limits are not provider failures and must not create model cooldowns.
       if (error instanceof HttpError) throw error;
       const cooldown = providerCooldown(error, model.provider, deps.now());
@@ -168,6 +179,7 @@ export async function routeModelCall<T>(
       blocked.set(model.key, cooldown.until);
     }
   }
+  if (emptyRead) throw emptyRead;
   const next = models.map((model) => blocked.get(model.key) ?? deps.now() + 60000);
   throw new ModelsUnavailableError(Math.max(1000, Math.min(...next) - deps.now()));
 }

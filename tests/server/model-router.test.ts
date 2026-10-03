@@ -15,6 +15,8 @@ function deps() {
 describe('task-routed logical model calls', () => {
   it('uses the requested default orders and excludes Groq from vision PDFs even with an override', () => {
     const env = readEnv({});
+    expect(modelLineup('pdf_text_reading',env).map(m=>m.modelId)).toEqual([
+      'gemini-3.5-flash-lite','gemini-3.5-flash','gemini-3.6-flash','gemini-3.8-flash','gemini-3.7-flash','qwen/qwen3.8-27b']);
     expect(modelLineup('vision_image', env).map((m) => m.modelId)).toEqual([
       'gemini-3.6-flash',
       'gemini-3.8-flash',
