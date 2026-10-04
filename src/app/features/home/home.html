@@ -1,0 +1,222 @@
+<!-- Hero -->
+<section class="hero">
+  <div class="copy">
+    <p class="badge"><mat-icon aria-hidden="true">auto_awesome</mat-icon> Agentic AI for consumer refunds in India</p>
+    <h1>Refund promised.<br />Money <em>not</em> received?</h1>
+    <p class="lede">
+      Nivaran AI reads your order and refund documents, builds a fact sheet you can check line by
+      line against the originals, works out the right next step and its deadlines, and prepares a
+      complaint for you to review and send yourself.
+    </p>
+    <div class="row actions">
+      <a mat-flat-button routerLink="/cases/new"><mat-icon aria-hidden="true">add</mat-icon>Start a case</a>
+      <a mat-stroked-button routerLink="/saved-runs"><mat-icon aria-hidden="true">play_circle</mat-icon>See saved runs</a>
+    </div>
+    <ul class="trust" aria-label="Promises">
+      @for (item of trust; track item.text) {
+        <li><mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>{{ item.text }}</li>
+      }
+    </ul>
+  </div>
+
+  <!-- A still of the fact sheet, built from the real components. Decorative. -->
+  <div class="preview" aria-hidden="true">
+    <div class="sheet surface">
+      <p class="eyebrow">Fact sheet</p>
+      <div class="line">
+        <div><span class="k">Amount paid</span><span class="v">₹9,999</span></div>
+        <span class="tags"><app-status-chip status="document" /><app-evidence-tag label="E01" /></span>
+      </div>
+      <div class="line">
+        <div><span class="k">Refund amount</span><span class="v">₹9,999 or ₹8,999</span></div>
+        <span class="tags"><app-status-chip status="conflict" /></span>
+      </div>
+      <div class="line">
+        <div><span class="k">Refund received</span><span class="v">No</span></div>
+        <span class="tags"><app-status-chip status="user" /></span>
+      </div>
+      <div class="next">
+        <mat-icon>alt_route</mat-icon>
+        <span><strong>Next step:</strong> write to the grievance officer</span>
+      </div>
+    </div>
+    <div class="quote surface">
+      <app-evidence-tag label="E02" />
+      <p>…a refund of <mark>₹9,999 will be credited</mark> within 7 working days.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Problem -->
+<section class="section" aria-labelledby="problem-title">
+  <div class="section-head">
+    <p class="eyebrow">The problem</p>
+    <h2 id="problem-title">A refund that never arrives is easy to give up on</h2>
+    <p>Not because people do not care, but because the next move is unclear and the paperwork is everywhere.</p>
+  </div>
+  <div class="card-grid">
+    @for (item of problems; track item.title) {
+      <article class="surface tile">
+        <span class="icon-tile alert"><mat-icon aria-hidden="true">{{ item.icon }}</mat-icon></span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- What it does -->
+<section class="section" aria-labelledby="features-title">
+  <div class="section-head">
+    <p class="eyebrow">What Nivaran AI does</p>
+    <h2 id="features-title">From a pile of screenshots to a complaint you can stand behind</h2>
+    <p>An AI agent that investigates your case step by step, with you in control at every point that matters.</p>
+  </div>
+  <div class="card-grid features">
+    @for (item of features; track item.title) {
+      <article class="surface tile">
+        <span class="icon-tile"><mat-icon aria-hidden="true">{{ item.icon }}</mat-icon></span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section" id="how" aria-labelledby="how-title">
+  <div class="section-head">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-title">Four steps, and you stay in charge of each</h2>
+  </div>
+  <ol class="steps">
+    @for (step of steps; track step.title; let i = $index) {
+      <li class="surface">
+        <span class="num">{{ i + 1 }}</span>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.text }}</p>
+      </li>
+    }
+  </ol>
+</section>
+
+<!-- Guardrails -->
+<section class="section" id="guardrails" aria-labelledby="guard-title">
+  <div class="section-head">
+    <p class="eyebrow">Agentic, with guardrails</p>
+    <h2 id="guard-title">The AI investigates. Code decides. You approve.</h2>
+    <p>The agent chooses its own next action from a small set of tools, but anything that could mislead you is handled by code or by you.</p>
+  </div>
+  <div class="guard">
+    <article class="surface tile">
+      <span class="icon-tile warm"><mat-icon aria-hidden="true">psychology</mat-icon></span>
+      <h3>What the AI does</h3>
+      <ul class="ticks">
+        <li><mat-icon>check</mat-icon>Reads documents and copies the exact quote for each fact</li>
+        <li><mat-icon>check</mat-icon>Chooses its next step: look again, ask you, search the rules, propose a plan</li>
+        <li><mat-icon>check</mat-icon>Writes the wording of the plan and the complaint</li>
+      </ul>
+    </article>
+    <article class="surface tile">
+      <span class="icon-tile"><mat-icon aria-hidden="true">rule</mat-icon></span>
+      <h3>What code decides</h3>
+      <ul class="ticks">
+        <li><mat-icon>check</mat-icon>Whether each quote really appears in the document</li>
+        <li><mat-icon>check</mat-icon>Conflicts, dates, deadlines and the escalation step</li>
+        <li><mat-icon>check</mat-icon>Every amount, date and ID in the complaint, inserted from your evidence</li>
+      </ul>
+    </article>
+    <article class="surface tile">
+      <span class="icon-tile alert"><mat-icon aria-hidden="true">block</mat-icon></span>
+      <h3>What it can never do</h3>
+      <ul class="ticks cross">
+        <li><mat-icon>close</mat-icon>Send, file, pay or delete anything</li>
+        <li><mat-icon>close</mat-icon>Cite a rule a person has not checked</li>
+        <li><mat-icon>close</mat-icon>See the name and contact details you type into the complaint</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- Escalation path -->
+<section class="section" aria-labelledby="ladder-title">
+  <div class="section-head">
+    <p class="eyebrow">The path Nivaran follows</p>
+    <h2 id="ladder-title">One step at a time, with the dates that matter</h2>
+    <p>Nivaran tells you which step you are on and why. The order is recommended practice, not a legal requirement.</p>
+  </div>
+  <ol class="ladder">
+    @for (item of ladder; track item.step) {
+      <li class="surface">
+        <span class="step-num">{{ item.step }}</span>
+        <p class="when">{{ item.when }}</p>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.detail }}</p>
+      </li>
+    }
+  </ol>
+</section>
+
+<!-- Saved runs -->
+<section class="section" aria-labelledby="samples-title">
+  <div class="section-head split">
+    <div>
+      <p class="eyebrow">Try it without uploading</p>
+      <h2 id="samples-title">Watch recorded runs</h2>
+      <p>Real recordings of the agent on fictional documents. Opening them makes no model calls, and failures are shown too.</p>
+    </div>
+    <a mat-stroked-button routerLink="/saved-runs">All saved runs</a>
+  </div>
+  <div class="card-grid">
+    @for (sample of samples; track sample.id) {
+      <app-sample-card [sample]="sample" />
+    }
+  </div>
+</section>
+
+<!-- Coverage -->
+<section class="section two" aria-label="What is covered">
+  <article class="surface tile">
+    <h2>What Nivaran covers</h2>
+    <ul class="ticks">
+      <li><mat-icon>check</mat-icon>An online order you paid for and then cancelled</li>
+      <li><mat-icon>check</mat-icon>A return the seller accepted or picked up</li>
+      <li><mat-icon>check</mat-icon>A refund the seller confirmed in writing</li>
+    </ul>
+  </article>
+  <article class="surface tile">
+    <h2>What it does not cover</h2>
+    <ul class="ticks cross">
+      <li><mat-icon>close</mat-icon>Bank or UPI transfer disputes</li>
+      <li><mat-icon>close</mat-icon>Arguments over whether a refund is owed at all</li>
+      <li><mat-icon>close</mat-icon>Compensation claims or legal advice</li>
+    </ul>
+    <p class="muted small">For these, call the National Consumer Helpline on 1915.</p>
+  </article>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq" aria-labelledby="faq-title">
+  <div class="section-head">
+    <p class="eyebrow">Questions</p>
+    <h2 id="faq-title">Before you start</h2>
+  </div>
+  <div class="faq">
+    @for (item of faqs; track item.q) {
+      <details class="surface">
+        <summary>{{ item.q }}<mat-icon aria-hidden="true">expand_more</mat-icon></summary>
+        <p>{{ item.a }}</p>
+      </details>
+    }
+  </div>
+</section>
+
+<!-- Final call to action -->
+<section class="section band">
+  <h2>Ready to chase that refund?</h2>
+  <p>Add your documents and get a fact sheet you can check against them. No sign-up, and nothing is sent without you.</p>
+  <div class="row center">
+    <a mat-flat-button class="light" routerLink="/cases/new">Start a case</a>
+    <a mat-stroked-button class="ghost" routerLink="/demo">Take the guided tour</a>
+  </div>
+</section>

@@ -547,3 +547,14 @@ pending. Codex traced a one-day My cases display error to Angular's local-midnig
 UTC formatting, fixed the presentation and added three timezone regression tests. The final
 check passed 430 server/database and 97 Angular tests, both type checks and production build.
 See docs/deployed-journey.md. Corpus evaluation results were not changed.
+
+## 4 October 2026: interface update by Claude
+
+At the owner's request, Claude reworked the presentation layer without changing product logic,
+model calls, data or measured results: a fuller landing page (problem, features, how it works,
+guardrails, escalation path, coverage, questions), a new navigation bar with a phone menu, a
+richer footer, a `/saved-runs` gallery of the five recorded samples and the guided tour, a clearer
+saved-run header with technical details moved into a "Run details for reviewers" section, and
+display-only tidying of fact values (ISO dates and rupee amounts) with each evidence label shown
+once. Stored values, quotes, drafts and the linter are unchanged. `npm run check` passed with
+430 server/database tests, 112 Angular tests, both type-checks and the production build.

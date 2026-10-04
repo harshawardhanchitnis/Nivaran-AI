@@ -169,7 +169,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
 
     .tabs {
       position: sticky;
-      top: 56px;
+      top: 60px;
       z-index: 4;
       display: flex;
       gap: 4px;
@@ -292,7 +292,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
       .source.open {
         position: sticky;
         inset: auto;
-        top: 124px;
+        top: 128px;
         display: block;
         z-index: auto;
       }

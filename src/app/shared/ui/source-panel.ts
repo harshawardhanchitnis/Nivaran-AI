@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { displayValue } from './display-value';
 import { EvidenceTag } from './evidence-tag';
 import type { FactView } from './models';
 import { StatusChip } from './status-chip';
@@ -27,7 +28,7 @@ import { StatusChip } from './status-chip';
       </header>
 
       <div class="summary">
-        <span class="value">{{ fact().value ?? 'Not found yet' }}</span>
+        <span class="value">{{ display(fact().value) ?? 'Not found yet' }}</span>
         <app-status-chip [status]="fact().status" />
       </div>
 
@@ -203,6 +204,7 @@ import { StatusChip } from './status-chip';
   `,
 })
 export class SourcePanel {
+  protected display(value: string | null): string | null { return displayValue(value); }
   readonly fact = input.required<FactView>();
   readonly closed = output<void>();
   readonly retry = output<string>();

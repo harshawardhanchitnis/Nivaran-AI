@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import type { FactField } from '@shared/facts';
 import type { SavedSample } from '@shared/samples';
 import { sampleDocumentPath } from '@shared/samples';
@@ -15,35 +16,46 @@ import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
 import type { QuestionView } from '../../shared/ui/models';
 
 @Component({
-  selector: 'app-saved-sample', imports: [RouterLink, MatButtonModule, CaseWorkspaceView], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-saved-sample', imports: [RouterLink, MatButtonModule, MatIconModule, CaseWorkspaceView], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (error()) { <section class="surface pad" role="alert"><h1>Saved run unavailable</h1><p>{{ error() }}</p><a routerLink="/">Back to samples</a></section> }
+    @if (error()) { <section class="surface pad" role="alert"><h1>Saved run unavailable</h1><p>{{ error() }}</p><a routerLink="/saved-runs">Back to saved runs</a></section> }
     @else if (sample(); as saved) {
       <app-case-workspace-view [heading]="saved.title" merchant="Synthetic consumer case" [documentCount]="saved.documents.length"
         [stage]="stage()" [facts]="facts()" [activity]="activity()" [question]="question()" [plan]="plan()"
         [approved]="!!saved.plan?.approved_at" [draft]="draft()" [readOnly]="true"
         (sourceRequested)="openSource($event)" (sourceRetry)="preview($event)">
-        <section banner class="surface pad stack" aria-label="Saved run information">
-          <p class="eyebrow">Saved run · fictional documents</p>
-          <p>Recorded {{ saved.recordedAt.slice(0, 10) }}. Decisions use {{ saved.today }} as the date in India.
-            Opening this record makes no model calls. {{ saved.logicalCalls }} logical calls / {{ saved.providerAttempts }} provider attempts were used in the recorded run.</p>
-          @if (saved.warning) { <p role="note">{{ saved.warning }}</p> }
-          <p class="muted small">{{ saved.provenance }}. Models attempted: {{ modelNames() }}.</p>
-          <div class="row">
-            <a routerLink="/">All samples</a>
-            @if (remaining() > 0) { <a mat-stroked-button routerLink="/cases/new" [queryParams]="{sample:saved.id}">Run it live</a> }
-            @else { <span role="status">{{ quotaMessage() }}</span> }
+        <section banner class="surface pad stack saved" aria-label="Saved run information">
+          <div class="saved-head">
+            <span class="icon-tile"><mat-icon aria-hidden="true">play_circle</mat-icon></span>
+            <div>
+              <p class="eyebrow">Saved run · fictional documents</p>
+              <p class="lead">A real recording of the agent working on this case. Opening this record makes no model calls, and nothing you do here changes it.</p>
+            </div>
           </div>
-          <details><summary>Documents in this saved run</summary><ul>
-            @for (document of saved.documents; track document.id) {
-              <li><a [href]="documentPath(document.id)" target="_blank" rel="noopener">{{ document.label }} · {{ document.file_name }}</a> · {{ document.read_status }}</li>
-            }
-          </ul></details>
+          <ul class="facts-row" aria-label="About this recording">
+            <li><mat-icon aria-hidden="true">event</mat-icon>Recorded {{ saved.recordedAt.slice(0, 10) }}</li>
+            <li><mat-icon aria-hidden="true">today</mat-icon>Decisions use {{ saved.today }} as today (India)</li>
+            <li><mat-icon aria-hidden="true">description</mat-icon>{{ saved.documents.length }} documents</li>
+          </ul>
+          @if (saved.warning) { <p class="warning" role="note"><mat-icon aria-hidden="true">info</mat-icon><span>{{ saved.warning }}</span></p> }
+          <div class="row">
+            <a mat-stroked-button routerLink="/saved-runs"><mat-icon aria-hidden="true">arrow_back</mat-icon>All saved runs</a>
+            @if (remaining() > 0) { <a mat-flat-button routerLink="/cases/new" [queryParams]="{sample:saved.id}">Run it live</a> }
+            @else { <span class="muted small" role="status">{{ quotaMessage() }}</span> }
+          </div>
+          <details><summary>Run details for reviewers</summary>
+            <p class="small">{{ saved.provenance }}. {{ saved.logicalCalls }} logical model calls / {{ saved.providerAttempts }} provider attempts. Models attempted: {{ modelNames() }}.</p>
+            <ul>
+              @for (document of saved.documents; track document.id) {
+                <li><a [href]="documentPath(document.id)" target="_blank" rel="noopener">{{ document.label }} · {{ document.file_name }}</a> · {{ document.read_status }}</li>
+              }
+            </ul>
+          </details>
         </section>
       </app-case-workspace-view>
     } @else { <p role="status">Opening the saved run…</p> }
   `,
-  styles: `.pad{padding:18px;margin-bottom:16px}.small{font-size:.85rem}li{overflow-wrap:anywhere}`,
+  styles: `.pad{padding:18px;margin-bottom:16px}.small{font-size:.85rem;margin:8px 0}li{overflow-wrap:anywhere}.saved-head{display:flex;gap:14px;align-items:flex-start}.saved-head .eyebrow{margin-bottom:2px}.lead{margin:0;color:var(--ink-2)}.facts-row{list-style:none;display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:0;font-size:.86rem;color:var(--ink-2)}.facts-row li{display:inline-flex;align-items:center;gap:6px}.facts-row mat-icon{width:18px;height:18px;font-size:18px;color:var(--brand)}.warning{display:grid;grid-template-columns:20px 1fr;gap:8px;margin:0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--st-needs_check-bg);color:var(--st-needs_check);font-size:.88rem}.warning mat-icon{width:18px;height:18px;font-size:18px}details summary{cursor:pointer;color:var(--ink-2);font-size:.88rem;font-weight:600}a mat-icon{width:18px;height:18px;font-size:18px}`,
 })
 export class SavedSampleView {
   private readonly samples = inject(SamplesService);

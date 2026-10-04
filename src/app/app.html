@@ -2,18 +2,34 @@
 
 <header class="app-bar no-print">
   <div class="bar-inner">
-    <a class="brand" routerLink="/" aria-label="Nivaran AI, home">
+    <a class="brand" routerLink="/" aria-label="Nivaran AI, home" (click)="menuOpen.set(false)">
       <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
         <rect width="32" height="32" rx="9" fill="#0b6b53" />
         <path d="M9 23V9h2.6l8.8 9.6V9H23v14h-2.6l-8.8-9.6V23z" fill="#fff" />
         <rect x="9" y="25" width="14" height="2" rx="1" fill="#ffe08a" />
       </svg>
-      <span>Nivaran</span>
+      <span>Nivaran<span class="ai">AI</span></span>
     </a>
-    <nav aria-label="Main">
-      <a routerLink="/samples/clean-overdue" routerLinkActive="active" ariaCurrentWhenActive="page">Sample</a>
-      <a routerLink="/cases" routerLinkActive="active" ariaCurrentWhenActive="page">My cases</a>
-      <a routerLink="/status" routerLinkActive="active" ariaCurrentWhenActive="page">Status</a>
+
+    <button
+      type="button"
+      class="menu-toggle"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="main-nav"
+      (click)="menuOpen.set(!menuOpen())"
+    >
+      <mat-icon aria-hidden="true">{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+      <span class="visually-hidden">{{ menuOpen() ? 'Close menu' : 'Open menu' }}</span>
+    </button>
+
+    <nav id="main-nav" aria-label="Main" [class.open]="menuOpen()">
+      <a routerLink="/" fragment="how" (click)="menuOpen.set(false)">How it works</a>
+      <a routerLink="/saved-runs" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="menuOpen.set(false)">Saved runs</a>
+      <a routerLink="/demo" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="menuOpen.set(false)">Guided tour</a>
+      <a routerLink="/cases" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: true }" (click)="menuOpen.set(false)">My cases</a>
+      <a class="cta" routerLink="/cases/new" (click)="menuOpen.set(false)">
+        <mat-icon aria-hidden="true">add</mat-icon>Start a case
+      </a>
     </nav>
   </div>
 </header>
@@ -23,8 +39,43 @@
 </main>
 
 <footer class="app-footer no-print">
-  <p>
+  <div class="footer-inner">
+    <div class="about">
+      <a class="brand small" routerLink="/">Nivaran<span class="ai">AI</span></a>
+      <p>
+        Turns scattered refund evidence into a source-linked fact sheet, a next step with dates, and
+        a complaint you review and send yourself.
+      </p>
+    </div>
+    <div>
+      <p class="col-title">Product</p>
+      <ul>
+        <li><a routerLink="/cases/new">Start a case</a></li>
+        <li><a routerLink="/cases">My cases</a></li>
+        <li><a routerLink="/saved-runs">Saved runs</a></li>
+        <li><a routerLink="/demo">Guided tour</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="col-title">Trust</p>
+      <ul>
+        <li><a routerLink="/" fragment="guardrails">What the AI may and may not do</a></li>
+        <li><a routerLink="/" fragment="faq">Questions</a></li>
+        <li><a routerLink="/status">System status</a></li>
+        <li><a href="https://github.com/harshawardhanchitnis/Nivaran-AI" target="_blank" rel="noopener">Source code</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="col-title">Help elsewhere</p>
+      <ul>
+        <li>National Consumer Helpline: <strong>1915</strong></li>
+        <li><a href="https://consumerhelpline.gov.in" target="_blank" rel="noopener">consumerhelpline.gov.in</a></li>
+        <li><a href="https://e-jagriti.gov.in" target="_blank" rel="noopener">e-Jagriti (Consumer Commissions)</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="legal">
     Nivaran helps you organise a refund complaint. It is not legal advice, and it never files or sends
-    anything for you.
+    anything for you. Built for WCC Launchpad 30, Track 1: Agentic AI.
   </p>
 </footer>

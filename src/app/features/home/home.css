@@ -1,0 +1,299 @@
+.hero {
+  display: grid;
+  gap: 32px;
+  padding: 8px 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge mat-icon,
+.actions mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+h1 {
+  font-size: clamp(2.3rem, 8vw, 3.7rem);
+  margin-bottom: 14px;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--brand);
+}
+
+.lede {
+  max-width: 58ch;
+  font-size: 1.08rem;
+  color: var(--ink-2);
+}
+
+.actions {
+  margin-top: 8px;
+}
+
+.trust {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px 16px;
+  margin: 22px 0 0;
+  padding: 0;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+}
+
+.trust li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trust mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: var(--brand);
+}
+
+.preview {
+  position: relative;
+  padding: 0 4px 96px 0;
+}
+
+.sheet {
+  padding: 16px 16px 12px;
+  box-shadow: var(--shadow-2);
+  transform: rotate(-1deg);
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.k {
+  display: block;
+  color: var(--ink-3);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.v {
+  font-weight: 600;
+}
+
+.tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.next {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: 0.88rem;
+}
+
+.quote {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: min(86%, 320px);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-2);
+  transform: rotate(1.5deg);
+}
+
+.quote p {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  line-height: 1.5;
+}
+
+.steps,
+.ladder {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.steps li,
+.ladder li {
+  padding: 20px;
+}
+
+.steps p,
+.ladder p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.num,
+.step-num {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.step-num {
+  background: var(--brand);
+}
+
+.when {
+  margin-bottom: 4px !important;
+  color: var(--brand-ink) !important;
+  font-size: 0.75rem !important;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ladder h3 {
+  margin-bottom: 6px;
+}
+
+.guard,
+.two {
+  display: grid;
+  gap: 14px;
+}
+
+.section-head.split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: none;
+}
+
+.section-head.split > div {
+  max-width: 640px;
+}
+
+.small {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+}
+
+.faq {
+  display: grid;
+  gap: 10px;
+  max-width: 860px;
+}
+
+details {
+  padding: 0 18px;
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary mat-icon {
+  flex: none;
+  color: var(--ink-3);
+  transition: transform 160ms ease;
+}
+
+details[open] summary mat-icon {
+  transform: rotate(180deg);
+}
+
+details p {
+  margin: 0 0 16px;
+  color: var(--ink-2);
+}
+
+.center {
+  justify-content: center;
+}
+
+.band .light {
+  --mdc-filled-button-container-color: #fff;
+  --mat-button-filled-container-color: #fff;
+  --mat-button-filled-label-text-color: var(--ink);
+  background: #fff;
+  color: var(--ink);
+}
+
+.band .ghost {
+  border-color: #6f7488;
+  color: #fff;
+}
+
+@media (min-width: 760px) {
+  .steps,
+  .ladder {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 960px) {
+  .hero {
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    gap: 48px;
+    padding-top: 28px;
+  }
+
+  .steps,
+  .ladder {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .guard {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

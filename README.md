@@ -30,7 +30,7 @@ and Continue are required. Saved dates belong to the recorded run, not today.
 | /samples/already-complained | The helpline plan; two rejected live draft templates and no saved draft. |
 | /samples/out-of-scope | The actual out-of-scope result with the failed document read disclosed. |
 
-/demo is the original **invented visual example**, not a measured model run.
+/saved-runs lists all five in one gallery for judges. /demo is the original **invented visual example**, not a measured model run.
 
 ## The problem and its evidence
 

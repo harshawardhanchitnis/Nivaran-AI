@@ -11,7 +11,7 @@ export const appConfig: ApplicationConfig = {
       routes,
       // Route params such as :caseId arrive as component inputs.
       withComponentInputBinding(),
-      withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
     ),
     // <mat-icon> uses the rounded icon font loaded in index.html.
     { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-icons-round' } },

@@ -5,6 +5,11 @@ import { signedInGuard } from './core/auth.guard';
 // Every screen is lazy-loaded. Case screens need a session (anonymous sign-in is enough).
 export const routes: Routes = [
   {
+    path: 'saved-runs',
+    title: 'Saved runs · Nivaran AI',
+    loadComponent: () => import('./features/samples/saved-runs').then((m) => m.SavedRuns),
+  },
+  {
     path: 'samples/:sampleId',
     title: 'Saved run · Nivaran AI',
     loadComponent: () => import('./features/samples/saved-sample').then(m => m.SavedSampleView),

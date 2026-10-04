@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { MatIconModule } from '@angular/material/icon';
 import type { FactField } from '@shared/facts';
 
+import { displayValue, uniqueEvidence } from './display-value';
 import { EvidenceTag } from './evidence-tag';
 import type { FactView } from './models';
 import { StatusChip } from './status-chip';
@@ -26,7 +27,7 @@ import { StatusChip } from './status-chip';
             <span class="main">
               <span class="eyebrow">{{ fact.label }}</span>
               @if (fact.value) {
-                <span class="value">{{ fact.value }}</span>
+                <span class="value">{{ display(fact.value) }}</span>
               } @else {
                 <span class="value empty">Not found yet</span>
               }
@@ -37,8 +38,8 @@ import { StatusChip } from './status-chip';
             <span class="meta">
               <app-status-chip [status]="fact.status" />
               <span class="tags">
-                @for (source of fact.sources; track source.id ?? source.evidence) {
-                  <app-evidence-tag [label]="source.evidence" />
+                @for (label of evidence(fact); track label) {
+                  <app-evidence-tag [label]="label" />
                 }
               </span>
             </span>
@@ -153,4 +154,6 @@ export class FactList {
   readonly facts = input.required<readonly FactView[]>();
   readonly selected = input<FactField | null>(null);
   readonly factSelected = output<FactField>();
+  protected display(value: string | null): string | null { return displayValue(value); }
+  protected evidence(fact: FactView): string[] { return uniqueEvidence(fact.sources); }
 }
