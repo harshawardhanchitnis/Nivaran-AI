@@ -659,3 +659,33 @@ describe('caller-owned missing-file resume',()=>{
     await expect(asVisitor(()=>db.query('select public.resume_document_reading($1::uuid,$2::uuid)',[ALICE,BOB]))).rejects.toThrow(/permission denied/);
   });
 });
+
+describe('case deletion cascade',()=>{
+  it('removes every caller-owned case child while preserving unrelated cases',async()=>{
+    await db.exec('begin');
+    try {
+      await db.query('delete from public.cases where user_id=$1',[ALICE]);
+      const caseId=await createCase(ALICE,'Delete all children');const keep=await createCase(ALICE,'Keep this case');
+      await asUser(ALICE,async()=>{
+        await addDocument(caseId,'E01',ALICE);
+        const document=await db.query<{id:string}>('select id from public.documents where case_id=$1',[caseId]);
+        const evidence=await db.query<{id:string}>(`insert into public.evidence_items(case_id,source,document_id,field,value_text) values($1,'document',$2,'order_id','SYNTHETIC1') returning id`,[caseId,document.rows[0]!.id]);
+        await db.query(`insert into public.case_facts(case_id,field,status,value_text,evidence_item_id) values($1,'order_id','document','SYNTHETIC1',$2)`,[caseId,evidence.rows[0]!.id]);
+        const run=await db.query<{id:string}>(`insert into public.agent_runs(case_id,status,phase) values($1,'completed','done') returning id`,[caseId]);
+        const runId=run.rows[0]!.id;
+        await db.query(`insert into public.agent_events(run_id,case_id,seq,type) values($1,$2,0,'decision')`,[runId,caseId]);
+        await db.query(`insert into public.questions(run_id,case_id,kind,field,prompt) values($1,$2,'missing','order_id','Synthetic question')`,[runId,caseId]);
+        const plan=await db.query<{id:string}>(`insert into public.plans(case_id,run_id,ladder_step) values($1,$2,1) returning id`,[caseId,runId]);
+        await db.query(`insert into public.drafts(case_id,plan_id,kind,template_md) values($1,$2,'grievance_officer','Synthetic fixture')`,[caseId,plan.rows[0]!.id]);
+        for(const table of ['cases','documents','evidence_items','case_facts','agent_runs','agent_events','questions','plans','drafts']) {
+          const key=table==='cases'?'id':'case_id';expect((await db.query(`select * from public.${table} where ${key}=$1`,[caseId])).rows).toHaveLength(1);
+        }
+        await db.query('delete from public.cases where id=$1',[caseId]);
+        for(const table of ['cases','documents','evidence_items','case_facts','agent_runs','agent_events','questions','plans','drafts']) {
+          const key=table==='cases'?'id':'case_id';expect((await db.query(`select * from public.${table} where ${key}=$1`,[caseId])).rows).toHaveLength(0);
+        }
+        expect((await db.query('select id from public.cases where id=$1',[keep])).rows).toHaveLength(1);
+      });
+    }finally{await db.exec('rollback');}
+  });
+});

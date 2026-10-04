@@ -25,6 +25,9 @@ approved plan available. Saved runs remain available while quota is exhausted.
 
 Local check: 419 server/database tests, 92 Angular tests, both type checks and production build.
 The owner applied the read-only quota migration 0011; replay correctly hides Run it live with
-today's exhausted quota. Hosted file recovery awaits the owner's migration 0012 step. The exact
+today's exhausted quota. The owner applied migration 0012. A hosted disposable fixture resumed
+reading through the actual RPC twice: turn one on both calls, the existing three agent steps
+retained, and no provider call. The fixture and files were then deleted through the T15 UI;
+see docs/t15-checks.md. The deployed upload-to-recovery journey remains pending. The exact
 invalid-template cause from the measured helpline run remains unknown because rejected output
 was not retained.

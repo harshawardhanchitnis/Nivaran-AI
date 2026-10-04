@@ -1,5 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, inject, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
+import { ConfirmDeleteCase } from '../../shared/ui/confirm-delete-case';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
@@ -15,11 +18,13 @@ import type { CaseSummaryView } from '../../shared/ui/models';
       <header class="row heading-row">
         <div>
           <p class="eyebrow">Your case files</p>
-          <h1>My cases</h1>
+          <h1 tabindex="-1">My cases</h1>
           <p class="muted">Your cases stay private to your sign-in in this browser.</p>
         </div>
         <a mat-flat-button routerLink="/cases/new">Add documents</a>
       </header>
+      @if (deleteProblem()) { <p role="alert">{{deleteProblem()}}</p> }
+      @if (deletedMessage()) { <p role="status">{{deletedMessage()}}</p> }
       @if (loading()) {
         <p role="status">Loading your cases…</p>
       } @else if (problem()) {
@@ -52,6 +57,9 @@ import type { CaseSummaryView } from '../../shared/ui/models';
                 } @else {
                   <p class="muted">No pending date yet.</p>
                 }
+                <button mat-button type="button" [disabled]="deleting() !== null" [attr.aria-label]="'Delete ' + item.title" (click)="confirmDelete(item)">
+                  {{ deleting() === item.id ? 'Deleting…' : 'Delete case' }}
+                </button>
               </article>
             </li>
           }
@@ -73,6 +81,23 @@ import type { CaseSummaryView } from '../../shared/ui/models';
 })
 export class MyCases {
   private readonly store = inject(CasesService);
+  private readonly dialog=inject(MatDialog);
+  private readonly element=inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector=inject(Injector);
+  protected readonly deleting=signal<string|null>(null);
+  protected readonly deleteProblem=signal('');protected readonly deletedMessage=signal('');
+  protected async confirmDelete(item:CaseSummaryView):Promise<void> {
+    if(this.deleting())return;
+    const confirmed=await firstValueFrom(this.dialog.open<ConfirmDeleteCase,{title:string},boolean>(ConfirmDeleteCase,{data:{title:item.title},autoFocus:'#delete-cancel',maxWidth:'calc(100vw - 32px)',restoreFocus:true}).afterClosed());
+    if(!confirmed||this.deleting())return;
+    this.deleting.set(item.id);this.deleteProblem.set('');this.deletedMessage.set('');
+    try {
+      await this.store.deleteCase(item.id);this.cases.update(items=>items.filter(row=>row.id!==item.id));
+      this.deletedMessage.set('The case, files and records were deleted.');
+      afterNextRender(()=>this.element.nativeElement.querySelector<HTMLElement>('h1')?.focus(),{injector:this.injector});
+    } catch(error) {this.deleteProblem.set(error instanceof Error?error.message:'Could not finish deleting. Retry Delete case.');}
+    finally {this.deleting.set(null);}
+  }
   protected readonly cases = signal<readonly CaseSummaryView[]>([]);
   protected readonly loading = signal(true);
   protected readonly problem = signal<string | null>(null);

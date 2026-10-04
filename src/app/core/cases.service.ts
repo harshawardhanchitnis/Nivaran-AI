@@ -5,6 +5,8 @@ import { checkFiles } from '../features/case-new/file-rules';
 import type { CaseSummaryView } from '../shared/ui/models';
 import { caseSummary } from './case-summary';
 import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
+import type { CaseDeleteResponse } from '@shared/api';
 
 export class CaseUploadError extends Error {
   constructor(message: string, readonly caseId: string | null = null) {
@@ -18,6 +20,13 @@ export interface CreatedCase { case: CaseRow; documents: DocumentRow[] }
 @Injectable({ providedIn: 'root' })
 export class CasesService {
   private readonly supabase = inject(SupabaseService);
+  private readonly api = inject(ApiService);
+
+  async deleteCase(caseId:string):Promise<void> {
+    await this.supabase.ensureSignedIn();
+    const result=await this.api.post<CaseDeleteResponse>('cases/delete',{caseId,confirmed:true});
+    if(!result?.deleted)throw new Error('Could not confirm deletion. Retry Delete case.');
+  }
 
   async modelBudget(): Promise<ModelBudgetStatus> {
     await this.supabase.ensureSignedIn();

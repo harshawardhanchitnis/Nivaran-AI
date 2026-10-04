@@ -475,5 +475,15 @@ T14 adds code-constrained useful tool choices, draft-readiness gaps, and consent
 recovery. Tests replay actual final-pass failure triggers with fake providers/data; no new live
 evaluation was run and measured accuracy is unchanged. Migration 0012 preserves the existing
 step count and makes the caller-owned resume replay-safe. Local checks passed 419 server/database
-and 92 Angular tests, both type checks and production build. Hosted migration application and
-file-recovery smoke checks remain pending. See docs/t14-checks.md.
+and 92 Angular tests, both type checks and production build. The owner applied migrations 0011
+and 0012. A hosted scripted fixture replayed the actual clearer-file resume RPC, preserving
+three agent steps without a provider call; the deployed upload journey remains pending.
+See docs/t14-checks.md.
+
+On 4 October Codex implemented T15's confirmed caller-owned deletion: private objects first,
+including orphan uploads, then the case row and its cascading children. No service-role key,
+model action or new migration was introduced. A disposable scripted recovery fixture was
+deleted through the real phone-width browser UI. Hosted checks found zero files and zero rows
+in all nine case tables, with six earlier fixtures retained and model usage unchanged at 100.
+Local validation passed 430 server/database tests, 94 Angular tests, both type checks and build.
+No new model output was generated. See docs/t15-checks.md.

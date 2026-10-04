@@ -59,6 +59,8 @@ export type AgentAnswerRequest = z.infer<typeof agentAnswerRequestSchema>;
 export interface AgentStartResponse {
   run: AgentRunRow;
 }
+export const caseDeleteRequestSchema = z.object({ caseId:z.uuid(), confirmed:z.literal(true) });
+export interface CaseDeleteResponse { deleted:true }
 export interface AgentAdvanceResponse {
   run: AgentRunRow;
   events: AgentEventRow[];
