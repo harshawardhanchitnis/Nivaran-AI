@@ -1,5 +1,9 @@
 # Evaluation report
 
+Historical original stage-one observations (3 October). The latest bounded pass is reported in
+[final-stage-one-report.md](final-stage-one-report.md), with its own revision, denominators and
+failures. Earlier observations below are retained unchanged and are not combined into its score.
+
 Dataset SHA-256: `c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468`. Fixed evaluation date: 2 October 2026 (India).
 
 **2/36 required live runs finished. 10 run(s) interrupted.**

@@ -1,5 +1,11 @@
 # Reproducible product evaluation
 
+**Submission status, 4 October:** the final authorised pass ended at 70 logical calls / 75
+attempts. The owner forbids further evaluation. The commands below document historical
+authorisations and reproducibility; do not run them again for this submission. The latest
+results are in [final-stage-one-report.md](final-stage-one-report.md); full T12 acceptance is
+incomplete. Restore caps through restore-caps.sql, retaining usage.
+
 The twelve fictional cases in `cases/` match SPEC section 10. Each folder contains its documents,
 their authored text, canonical expected facts, expected outcome/step, pauses, and predetermined
 answers. Fields omitted from expected facts must remain Missing. `absent` accepts either Missing

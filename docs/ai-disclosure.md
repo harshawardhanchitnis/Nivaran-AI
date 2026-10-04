@@ -9,6 +9,13 @@ The initial scaffold was prepared on 2 October 2026 as a starter template. Later
 is listed separately below; it must not be described as built during the event. The team confirmed
 that development may begin before the event, as recorded in `AGENTS.md`.
 
+The dated records below include later work as well. T1–T14, the routing updates, corpus and all
+three evaluation batches existed before 10:00 IST on 4 October. T13 and T14 commits were at
+01:54 and 02:03 IST. T15 implementation started before the event; its final hosted/browser
+checks and commit were completed after the start, at 12:19 IST. The README, deployment handoff
+and demo preparation are subsequent work. These dates must not be presented as all within the
+hackathon window.
+
 | Area | What existed |
 |---|---|
 | Project scaffold | Angular 21 app generated with the Angular CLI, Angular Material, routing with placeholder screens, build and test configuration. |
@@ -431,9 +438,9 @@ See `docs/t12-fixes.md` and `eval/rerun-stage-one-report.md`.
 |---|---|
 | Claude (Anthropic), via Claude Code | Reading the brief, comparing project options, writing the specification, building the starter template and visual design layer above. The owner also supplied its evaluation-budget review on 3 October. |
 | ChatGPT (OpenAI) | Independent review of the project options and the specification. |
-| Codex (OpenAI) | Pre-event handover review, T1–T11 implementation, T12 corpus/runner, stage-one evaluation and capped rerun fixes, model routing with signed cooldowns, browser checks and local session refresh through the computer-use plugin, and PDF-skill fixture preparation and print inspection on 2–4 October 2026. |
-| Google Gemini API | Setup, document reading, quote checks and the owner-supplied reading benchmark; routing verification had three timed-out vision attempts and one successful Flash Lite image read on 2 October. Original stage one used 24 attempts/19 routed responses. The capped rerun used 3 attempts/2 responses. Incomplete evaluation failures are reported above. |
-| Groq API | Setup, image reading and quote checking, the owner's supplied Qwen benchmark, and two successful Qwen text-routing fixture checks on 2 October. Original stage one used 20 attempts/12 routed responses. The capped rerun used 38 attempts/38 responses, including actual token metering. Incomplete evaluation failures are reported above. |
+| Codex (OpenAI) | Handover review, T1–T15 implementation, T12 corpus/runner and bounded evaluation, model routing with signed cooldowns, browser checks/session refresh through computer-use, PDF fixture/print checks, and T16 README/deployment documentation on 2–4 October 2026. Dated records distinguish pre-event work. |
+| Google Gemini API | Setup, document reading, quote checks and the owner-supplied benchmark. Original stage one: 24 attempts/19 routed responses; 40-call rerun: 3/2; final pass: 27/22. Failures remain disclosed. |
+| Groq API | Setup, reading/quote checks, owner-supplied Qwen benchmark and routing checks. Original stage one: 20 attempts/12 responses; 40-call rerun: 38/38; final pass: 48/48, with actual token metering. Failures remain disclosed. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->
@@ -442,6 +449,13 @@ See `docs/t12-fixes.md` and `eval/rerun-stage-one-report.md`.
 
 <!-- Team: list interviews, the survey, and the primary sources read for the guidance snippets,
      with dates. The rules allow research before the event; state it anyway. -->
+
+The owner checked six guidance snippets against the Gazette, NCH and e-Jagriti primary sources
+on 2 October, corrected the train-refund example and applied the seed. Interview/survey records
+and independent phone-user findings have not been supplied; no count or outcome is invented.
+See docs/problem-evidence.md.
+
+## Final routing, evaluation and finish (4 October)
 
 On 4 October, the owner requested a third, env-configurable lineup for text extracted from PDFs:
 Gemini 3.5 Flash Lite first, then 3.5, 3.6, 3.8, 3.7 and Qwen last. Qwen remains first for tool
@@ -487,3 +501,9 @@ deleted through the real phone-width browser UI. Hosted checks found zero files 
 in all nine case tables, with six earlier fixtures retained and model usage unchanged at 100.
 Local validation passed 430 server/database tests, 94 Angular tests, both type checks and build.
 No new model output was generated. See docs/t15-checks.md.
+
+T16 replaces the old progress README with the judges' explanation, six-criterion mapping,
+architecture/security, final-pass metrics and limitations. Earlier evaluations stay separate;
+later fake-tested guards receive no unmeasured accuracy credit. Problem evidence explicitly
+lists missing owner research. Deployment documentation names environment variables without
+values and sets out a bounded public journey check. No new model call was made.
