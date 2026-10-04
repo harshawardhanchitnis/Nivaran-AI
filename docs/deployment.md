@@ -1,15 +1,16 @@
 # Deployment handoff and submission gate
 
-Status on 4 October 2026: local implementation through T15 passes checks. No Git remote or
-public Vercel URL is configured in this checkout. Deployment acceptance has not passed.
+Status on 4 October 2026: local implementation through T17 passes checks. The owner supplied
+the GitHub destination [harshawardhanchitnis/Nivaran-AI](https://github.com/harshawardhanchitnis/Nivaran-AI),
+configured as origin with main as the initial branch. No public Vercel URL has been supplied.
+Deployment acceptance has not passed.
 The owner performs Vercel environment configuration and dashboard SQL under the handover.
 No further corpus evaluation is authorised.
 
 ## What the owner needs to provide
 
-1. The GitHub repository URL to receive this checkout, or confirmation that it has already
-   been pushed. The agent can push once the destination is supplied and credentials work.
-2. Import that repository into Vercel and configure the variables below, then send the
+1. Import the GitHub repository above into Vercel after its push succeeds.
+2. Configure the variables below, then send the
    public deployment URL. Keep API keys and the signing secret out of chat.
 3. Confirm the final evaluation caps have been restored using eval/restore-caps.sql.
 
