@@ -262,4 +262,4 @@ Development began before the event, as permitted by the team. [AI disclosure](do
 records dated work, Claude/ChatGPT/Codex contributions and actual Gemini/Groq usage; it does not
 present earlier work as built during the event. The [specification](docs/SPEC.md),
 [build plan](docs/BUILD_PLAN.md) and deployment gate provide the remaining submission checks.
-The timed recording script follows in T17.
+The [two-minute demo script](docs/demo-script.md) labels live and saved segments and keeps failures visible.

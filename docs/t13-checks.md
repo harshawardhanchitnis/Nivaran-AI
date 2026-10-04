@@ -16,4 +16,12 @@ Tests compare public facts/events/questions/drafts and document bytes against sa
 policy tests check caller isolation, India date, no counter writes and denied visitor execution.
 The phone source sheet at 360 px rendered the PDF locally, returned focus on close, had width
 360/scrollWidth 360 and zero axe WCAG 2/2.1 A/AA violations. Screenshot:
-`screenshots/t13-saved-source-phone.png`. Hosted quota display awaits the owner's migration step.
+`screenshots/t13-saved-source-phone.png`. The owner has since applied migration 0011, and the
+hosted quota advice correctly reports no remaining calls for the existing session.
+
+On 4 October after T17 preparation, all five Saved run routes were opened at a 360 px browser
+viewport. Each loaded its Saved run label, with scroll width 345, zero axe violations and no
+console warnings/errors. Four had no incomplete axe checks. The conflict question's three
+gradient-background contrast checks were inspected manually: minimum text contrast ratios were
+5.61:1 (eyebrow), 16.32:1 (heading), 8.17:1 (recorded answer). Opening replay did not change the
+call counter, which stayed at 100. This is local-browser evidence; deployed replay remains pending.

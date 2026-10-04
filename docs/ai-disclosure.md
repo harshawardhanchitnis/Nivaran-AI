@@ -507,3 +507,9 @@ architecture/security, final-pass metrics and limitations. Earlier evaluations s
 later fake-tested guards receive no unmeasured accuracy credit. Problem evidence explicitly
 lists missing owner research. Deployment documentation names environment variables without
 values and sets out a bounded public journey check. No new model call was made.
+
+T17 adds the two-minute recording script: eight timed segments and 219 spoken words, four existing
+fictional documents for the same order, explicit shortened-wait captions, live/Saved alternatives
+and the actual measured helpline-draft failure. An interview statistic is omitted because none
+was supplied. The script is not a claim that the owner recorded the video or submitted the app.
+It was written by Codex on 4 October after the event start, without a provider call.

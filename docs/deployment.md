@@ -81,13 +81,13 @@ the deployed journey as passed from a scripted local fixture or a Saved run.
 
 | Handover requirement | Current result | Evidence / remaining action |
 |---|---|---|
-| Full check green; clean working tree | Recheck at final handoff | Latest implementation check: 430 server/database + 94 Angular tests, both type checks, production build. |
+| Full check green; clean working tree | Local pass after T17 commit | 430 server/database + 94 Angular tests, both type checks, production build; inspect git status again before push. |
 | Deployed /status; bom1; diagnostic switch off | Pending | Owner must deploy and provide the URL; check then redeploy with ENABLE_LLM_CHECK=false. |
 | Real deployed phone journey through helpline text and delete | Pending | Follow the bounded journey above; local scripted checks are separate. |
 | Five saved samples, no model calls | Local pass; deployed pending | docs/t13-checks.md; static saved audits and documents. |
 | Quota failure remains usable | Local pass; deployed pending | Unit checks and the exhausted local Saved run; check the deployed message. |
 | 360 px, no console errors | Visited local views passed; deployed pending | docs/t13-checks.md, docs/t15-checks.md, earlier task checks; inspect all deployed journey screens. |
-| No secret in Git or browser bundle | Recheck before push | Generated environment contains only URL/publishable key; scan tracked files and dist without printing secrets. |
+| No secret in Git or browser bundle | Local pass; recheck before push | No tracked plausible key-prefix matches; exact server-secret scan found none in tracked files or 55 dist files. Browser environment contains only URL/publishable key. |
 | Report and exact README numbers | T16 local documentation | Final measured revision 3906f5b; full three-repeat evaluation incomplete. |
 | README, disclosure, problem evidence complete and truthful | Owner research missing | Missing interview/survey results are explicitly recorded; never invent them. |
 
