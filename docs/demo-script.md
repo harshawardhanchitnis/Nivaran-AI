@@ -72,3 +72,13 @@ repository, video and disclosure in the submission. Aim for 13:00 IST on 5 Octob
 14:00 deadline. Do not change the deployment after submitting.
 
 This file is a script, not evidence that a video, a deployment or a consumer recovery exists.
+
+On 4 October the single bounded deployed journey generated a real grievance draft and executed
+the fake-ID linter check, then reached the helpline plan but rejected both helpline templates.
+The disposable live case was deleted after saving audit/screenshots; do not start another live
+case merely to recreate footage. Use the captured screenshots with an explicit “Recorded
+production check — fictional documents” caption, then clearly switch to Saved replay. Relevant
+screenshots are deployed-conflict-phone.png, deployed-live-source-phone.png,
+deployed-plan-phone.png, deployed-linter-phone.png and deployed-helpline-failure-phone.png in
+docs/screenshots. See docs/deployed-journey.md for the failed/pending gates. The original
+two-minute spoken script and its measured closing numbers remain unchanged.

@@ -52,7 +52,7 @@ import type { CaseSummaryView } from '../../shared/ui/models';
                 @if (item.nextDate; as deadline) {
                   <p class="deadline">
                     <mat-icon aria-hidden="true">event</mat-icon>
-                    <span>{{ deadline.label }}: {{ deadline.date | date:'d MMM y':'UTC' }}{{ deadline.overdue ? ' · overdue' : '' }}</span>
+                    <span>{{ deadline.label }}: {{ (deadline.date + 'T00:00:00Z') | date:'d MMM y':'UTC' }}{{ deadline.overdue ? ' · overdue' : '' }}</span>
                   </p>
                 } @else {
                   <p class="muted">No pending date yet.</p>

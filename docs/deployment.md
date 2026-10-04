@@ -6,15 +6,18 @@ configured as origin with main as the initial branch. Main was pushed and deploy
 [nivaran-ai-green.vercel.app](https://nivaran-ai-green.vercel.app), from revision a3867f9.
 All six public infrastructure checks pass in bom1. Vision diagnostics answered with
 gemini-3.6-flash in 2,522 ms; text diagnostics answered with qwen/qwen3.8-27b in 599 ms.
-The caller-scoped usage counter confirms two logical calls. The full deployed journey and
-switching off diagnostics still need completion; deployment acceptance has not passed.
+After the owner redeployed, the diagnostic endpoint returned 403 / llm_check_disabled.
+The bounded journey spent thirteen logical calls including diagnostics. Grievance drafting,
+source preview, editing/copy, sent/outcome persistence and deletion passed; both helpline
+templates were rejected. Deployment acceptance has not passed. See [the report](deployed-journey.md).
 The owner performs Vercel environment configuration and dashboard SQL under the handover.
 No further corpus evaluation is authorised.
 
 ## What the owner needs to provide
 
-1. Set ENABLE_LLM_CHECK=false in Production and redeploy after the successful diagnostics.
-2. Restore caps using eval/restore-caps.sql immediately after the bounded deployed journey.
+1. Push the prepared local commits from the owner's authenticated terminal; the agent's
+   noninteractive GitHub authentication is unavailable. Publish the My cases date-display fix.
+2. Restore caps using eval/restore-caps.sql immediately after the stopped deployed journey.
    The owner confirmed the separate fifteen-call smoke-test budget on 4 October; no usage was reset.
 3. Complete the independent phone, calendar, research and video checks below.
 
@@ -86,12 +89,12 @@ the deployed journey as passed from a scripted local fixture or a Saved run.
 
 | Handover requirement | Current result | Evidence / remaining action |
 |---|---|---|
-| Full check green; clean working tree | Local pass after T17 commit | 430 server/database + 94 Angular tests, both type checks, production build; inspect git status again before push. |
-| Deployed /status; bom1; diagnostic switch off | Infrastructure and both model diagnostics pass; switch off pending | Public alias at a3867f9; owner asked to redeploy with ENABLE_LLM_CHECK=false. |
-| Real deployed phone journey through helpline text and delete | Pending | Follow the bounded journey above; local scripted checks are separate. |
+| Full check green; clean working tree | Local pass after date regression fix | 430 server/database + 97 Angular tests, both type checks, production build; inspect git status again before push. |
+| Deployed /status; bom1; diagnostic switch off | Pass | Public alias at a3867f9; owner redeployed with ENABLE_LLM_CHECK=false; endpoint returned 403 / llm_check_disabled. |
+| Real deployed phone journey through helpline text and delete | Partial; helpline draft failed | Real grievance draft, edit/copy, sent/outcome continuation and deletion pass. Both helpline templates rejected; native print dialog still needs manual confirmation. docs/deployed-journey.md. |
 | Five saved samples, no model calls | Local and deployed pass | All five opened at 360 px; historical failure labels retained; refund PDF page and quote displayed. |
 | Quota failure remains usable | Local pass; deployed pending | Unit checks and the exhausted local Saved run; check the deployed message. |
-| 360 px, no console errors | Public status and five saved views pass; live journey pending | Width 360, scroll width 345, no console warnings/errors or axe A/AA violations. Conflict gradient/source overlay have incomplete axe checks; earlier manual contrast and focus checks apply. |
+| 360 px, no console errors | Visited public status, saved and live views pass | No horizontal overflow, console warnings/errors or axe A/AA violations. Gradient/source overlay incomplete checks remain separately disclosed. Native print automation blocked and recovered by reopening. |
 | No secret in Git or browser bundle | Local pass; recheck before push | No tracked plausible key-prefix matches; exact server-secret scan found none in tracked files or 55 dist files. Browser environment contains only URL/publishable key. |
 | Report and exact README numbers | T16 local documentation | Final measured revision 3906f5b; full three-repeat evaluation incomplete. |
 | README, disclosure, problem evidence complete and truthful | Owner research missing | Missing interview/survey results are explicitly recorded; never invent them. |

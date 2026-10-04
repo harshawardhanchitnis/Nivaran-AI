@@ -526,3 +526,24 @@ checks are recorded separately from passed automated checks. The full deployed j
 pending, and the owner was asked to switch diagnostics off and redeploy before it starts.
 Codex also excluded a new untracked Vercel backup-code directory from Git without reading its
 contents or deleting the local copy. Credential/history/build scans found no exposed secrets.
+
+The owner then redeployed with diagnostics disabled, confirmed by a public 403 / llm_check_disabled
+response. Codex performed one production browser journey with four existing synthetic PDFs at
+360 px. It spent eleven further logical calls: four Gemini 3.5 Flash Lite reads, four Qwen tool
+choices, one Qwen grievance draft, and two invalid helpline templates whose answering models
+were not retained. Total caller usage was thirteen including diagnostics. Sixteen extracted
+PDF quotes matched; one real amount-conflict question was answered as a user statement. Saved
+progress, source pages, approval, actual edit linting, copy, synthetic sent dates, code-selected
+helpline continuation and deletion were checked. The grievance prose confused the promise date
+with its deadline; Codex corrected that wording in the synthetic editor. Helpline drafting failed,
+so the full deployment gate remains incomplete. Provider attempts were not measured here.
+
+The native print button blocked browser automation; Codex reopened saved state and separately
+exported and visually inspected the browser's two-page print PDF. Native print-dialog confirmation
+remains an owner check. The disposable case was deleted through the confirmed UI after audit
+capture; caller-scoped verification found zero objects and zero rows in all nine case tables.
+No further model calls followed. The owner was asked to restore 15/15 caps; confirmation remains
+pending. Codex traced a one-day My cases display error to Angular's local-midnight parsing with
+UTC formatting, fixed the presentation and added three timezone regression tests. The final
+check passed 430 server/database and 97 Angular tests, both type checks and production build.
+See docs/deployed-journey.md. Corpus evaluation results were not changed.

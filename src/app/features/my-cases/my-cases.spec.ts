@@ -26,3 +26,28 @@ describe('confirmed deletion in My cases',()=>{
     expect(page.querySelector('.case-list')).not.toBeNull();expect(page.querySelector('[role=alert]')?.textContent).toContain('retry');
   });
 });
+
+describe('calendar dates in My cases', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it.each(['Asia/Kolkata', 'America/Los_Angeles', 'UTC'])(
+    'keeps the stored 1 November deadline in %s', async (timezone) => {
+      vi.stubEnv('TZ', timezone);
+      TestBed.configureTestingModule({
+        imports: [MyCases],
+        providers: [provideRouter([]), {
+          provide: CasesService,
+          useValue: { list: async () => [{
+            id: 'case', title: 'Synthetic date regression', merchant: 'Meridian Mart',
+            status: 'Plan approved', documentCount: 4, step: 'National Consumer Helpline',
+            nextDate: { label: 'Resolution due', date: '2026-11-01', overdue: false },
+          }] },
+        }],
+      });
+      const fixture = TestBed.createComponent(MyCases);
+      await fixture.whenStable();
+      expect((fixture.nativeElement as HTMLElement).querySelector('.deadline')?.textContent)
+        .toContain('Resolution due: 1 Nov 2026');
+    },
+  );
+});

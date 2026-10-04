@@ -8,10 +8,12 @@ order, an accepted return or a written refund confirmation qualifies. Bank/UPI d
 disputes over whether a refund is owed are outside scope.
 
 **Current status, 4 October 2026:** the local journey, saved samples and deletion are implemented.
-The latest full check passed **430 server/database tests, 94 Angular tests, both server type
+The latest full check passed **430 server/database tests, 97 Angular tests, both server type
 checks and the production build**. The [public app](https://nivaran-ai-green.vercel.app) passes
 all six infrastructure checks in Mumbai and both model diagnostics. All five Saved runs work
-at phone width. Full deployed journey acceptance remains pending. See [the deployment gate](docs/deployment.md).
+at phone width. The bounded deployed journey produced a grievance draft, passed editing/copy,
+sent/outcome persistence and deletion, but helpline drafting failed validation. Diagnostics are
+now disabled. Full acceptance remains incomplete. See [the deployment report](docs/deployed-journey.md).
 
 ## Try it
 
@@ -248,7 +250,8 @@ fictional corpus and measured audits; docs/ design, checks, disclosure and demo 
   run still omitted receipt state, and some readers returned no usable facts.
 - Live helpline drafting failed in the measured already-complained case. Earlier successful
   hosted helpline checks used an explicitly labelled scripted provider. Live refusal reading
-  and the full deployed journey remain unverified.
+  remains unverified. The separate deployed journey also rejected both helpline templates;
+  no helpline draft was saved. Its grievance prose needed a manual promise-date wording correction.
 - The linter checks amounts/dates/IDs, not unsupported prose or every spelled-out number.
   Image quote checking is model-based; no OCR or independent truth verification is claimed.
 - Free-tier quotas and model availability can stop a live journey; Saved runs remain viewable.
