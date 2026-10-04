@@ -53,6 +53,7 @@ Thumbs.db
 # Local credentials and private key material (keep safe templates separately).
 .credentials/
 .secrets/
+/Vercel Authenticator Backup Codes/
 .git-credentials
 .netrc
 .npmrc

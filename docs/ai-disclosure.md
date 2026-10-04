@@ -513,3 +513,16 @@ fictional documents for the same order, explicit shortened-wait captions, live/S
 and the actual measured helpline-draft failure. An interview statistic is omitted because none
 was supplied. The script is not a claim that the owner recorded the video or submitted the app.
 It was written by Codex on 4 October after the event start, without a provider call.
+
+After the owner pushed main to GitHub and deployed revision a3867f9 on 4 October, Codex checked
+the public production alias: all six infrastructure checks passed in bom1, with six guidance
+rows. The owner applied the bounded deployment-smoke budget. One vision diagnostic answered
+with gemini-3.6-flash (2,522 ms), and one text diagnostic with qwen/qwen3.8-27b (599 ms).
+The caller-scoped usage counter confirmed two logical calls, leaving thirteen. These are setup
+diagnostics, not additional corpus evaluation or measured extraction results. Five public Saved
+runs opened at 360 px without model calls, horizontal overflow, console warnings/errors or axe
+A/AA violations. A saved refund PDF page and quote displayed; source/gradient incomplete axe
+checks are recorded separately from passed automated checks. The full deployed journey remains
+pending, and the owner was asked to switch diagnostics off and redeploy before it starts.
+Codex also excluded a new untracked Vercel backup-code directory from Git without reading its
+contents or deleting the local copy. Credential/history/build scans found no exposed secrets.

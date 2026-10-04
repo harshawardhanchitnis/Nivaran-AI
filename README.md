@@ -9,12 +9,13 @@ disputes over whether a refund is owed are outside scope.
 
 **Current status, 4 October 2026:** the local journey, saved samples and deletion are implemented.
 The latest full check passed **430 server/database tests, 94 Angular tests, both server type
-checks and the production build**. The public deployment and its end-to-end phone journey are
-pending; this README does not claim they passed. See [the deployment gate](docs/deployment.md).
+checks and the production build**. The [public app](https://nivaran-ai-green.vercel.app) passes
+all six infrastructure checks in Mumbai and both model diagnostics. All five Saved runs work
+at phone width. Full deployed journey acceptance remains pending. See [the deployment gate](docs/deployment.md).
 
 ## Try it
 
-Run locally, then open the home page. Five cards open **Saved runs** of fictional cases with
+Open [Nivaran AI](https://nivaran-ai-green.vercel.app), or run locally. Five cards open **Saved runs** of fictional cases with
 their recorded facts, activity, sources, decisions, answering models and failures. Replay makes
 no model calls. A live run is offered only while quota advice shows capacity; upload consent
 and Continue are required. Saved dates belong to the recorded run, not today.
@@ -27,8 +28,7 @@ and Continue are required. Saved dates belong to the recorded run, not today.
 | /samples/already-complained | The helpline plan; two rejected live draft templates and no saved draft. |
 | /samples/out-of-scope | The actual out-of-scope result with the failed document read disclosed. |
 
-/demo is the original **invented visual example**, not a measured model run. The public URL
-will be recorded after the owner deploys; none is supplied yet.
+/demo is the original **invented visual example**, not a measured model run.
 
 ## The problem and its evidence
 
