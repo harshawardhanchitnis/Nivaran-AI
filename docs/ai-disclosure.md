@@ -442,6 +442,8 @@ See `docs/t12-fixes.md` and `eval/rerun-stage-one-report.md`.
 | Google Gemini API | Setup, document reading, quote checks and the owner-supplied benchmark. Original stage one: 24 attempts/19 routed responses; 40-call rerun: 3/2; final pass: 27/22. Failures remain disclosed. |
 | Groq API | Setup, reading/quote checks, owner-supplied Qwen benchmark and routing checks. Original stage one: 20 attempts/12 responses; 40-call rerun: 38/38; final pass: 48/48, with actual token metering. Failures remain disclosed. |
 | Tesseract 0.2.0 and FFmpeg | Local assembly of the silent submission video on 5 October. Codex wrote the explanatory captions and assembly scripts. Footage comes from the real public app and labelled earlier production captures; these tools did not generate app screens or model results. |
+| ElevenLabs | The owner supplied two generated narration takes on 5 October for the submission video, using Codex's narration text plus the owner's personal introduction. |
+| faster-whisper (local Whisper base.en) | Supporting transcript and word-timing checks of the two supplied narration files on 5 October. These are video-editing checks, not app evaluation results. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->
@@ -571,3 +573,12 @@ failure, incomplete deployment gate and incomplete evaluation coverage remain vi
 live case, provider call or evaluation was run for the recording, and measured results were not
 changed. Tesseract's editable local project and MP4 are kept in the ignored local video workspace;
 the owner uploads the video for submission.
+
+On 5 October, the owner supplied two ElevenLabs MP3 takes and requested a narrated final edit.
+Codex selected the longer `(1)` take for its less hurried pacing, kept the personal introduction,
+adjusted the screen timing and inserted pauses through native editable audio layers. The final
+edit retains the earlier capture labels, saved-run limitations, failure disclosure and measured
+numbers. Audio audition was unavailable to Codex; automated transcripts, waveforms, media
+decoding, signal alignment and loudness measurements support the technical checks, and the
+owner should listen before uploading. The original silent edit and both source takes are retained.
+No new app case, provider call or corpus evaluation was performed for this audio revision.
