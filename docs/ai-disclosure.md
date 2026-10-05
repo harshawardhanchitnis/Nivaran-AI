@@ -441,6 +441,7 @@ See `docs/t12-fixes.md` and `eval/rerun-stage-one-report.md`.
 | Codex (OpenAI) | Handover review, T1–T15 implementation, T12 corpus/runner and bounded evaluation, model routing with signed cooldowns, browser checks/session refresh through computer-use, PDF fixture/print checks, and T16 README/deployment documentation on 2–4 October 2026. Dated records distinguish pre-event work. |
 | Google Gemini API | Setup, document reading, quote checks and the owner-supplied benchmark. Original stage one: 24 attempts/19 routed responses; 40-call rerun: 3/2; final pass: 27/22. Failures remain disclosed. |
 | Groq API | Setup, reading/quote checks, owner-supplied Qwen benchmark and routing checks. Original stage one: 20 attempts/12 responses; 40-call rerun: 38/38; final pass: 48/48, with actual token metering. Failures remain disclosed. |
+| Tesseract 0.2.0 and FFmpeg | Local assembly of the silent submission video on 5 October. Codex wrote the explanatory captions and assembly scripts. Footage comes from the real public app and labelled earlier production captures; these tools did not generate app screens or model results. |
 
 <!-- Team: add any other tool that made a significant contribution (for example a design or
      video tool), and correct anything above that does not match what you actually used. -->
@@ -558,3 +559,15 @@ saved-run header with technical details moved into a "Run details for reviewers"
 display-only tidying of fact values (ISO dates and rupee amounts) with each evidence label shown
 once. Stored values, quotes, drafts and the linter are unchanged. `npm run check` passed with
 430 server/database tests, 112 Angular tests, both type-checks and the production build.
+
+## 5 October 2026: silent demo video
+
+At the owner's request, Codex assembled a 119-second silent video following `docs/demo-script.md`,
+with explanatory text instead of narration. It combines an actual 360 px recording of the public
+interface and read-only Saved replay with explicitly labelled screenshots and the exported pack
+from the 4 October production check. The executed fake-ID flag is an earlier captured check;
+answer and approval in Saved replay are not presented as newly performed. The helpline draft
+failure, incomplete deployment gate and incomplete evaluation coverage remain visible. No new
+live case, provider call or evaluation was run for the recording, and measured results were not
+changed. Tesseract's editable local project and MP4 are kept in the ignored local video workspace;
+the owner uploads the video for submission.
