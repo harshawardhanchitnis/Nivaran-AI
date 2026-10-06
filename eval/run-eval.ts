@@ -19,7 +19,7 @@ import type {EvaluationObservation} from './types.js';
 const countsSchema=z.object({logicalCalls:z.number().int().nonnegative(),providerAttempts:z.number().int().nonnegative(),models:z.record(z.string(),z.number().int().nonnegative()),
   answers:z.array(z.object({modelId:z.string(),firstModelId:z.string(),attempts:z.array(z.string())})).optional(),
   requests:z.array(z.object({modelId:z.string(),kind:z.enum(['tool_choice','reading','draft']),inputBytes:z.number(),maxOutputTokens:z.number(),status:z.number(),
-    inputTokens:z.number().optional(),outputTokens:z.number().optional(),tokenLimit:z.number().optional(),remainingTokens:z.number().optional(),resetTokens:z.string().optional(),imageCount:z.number().optional()})).optional()});
+    inputTokens:z.number().optional(),outputTokens:z.number().optional(),responseMs:z.number().nonnegative().optional(),tokenLimit:z.number().optional(),remainingTokens:z.number().optional(),resetTokens:z.string().optional(),imageCount:z.number().optional()})).optional()});
 const checkpointSchema=z.object({caseId:z.uuid(),title:z.string().startsWith('Evaluation '),runId:z.uuid().nullable(),uploaded:z.boolean(),paths:z.array(z.string()),
   initialFacts:z.array(z.object({field:z.string(),status:z.enum(['document','user','conflict','missing','needs_check']),value_norm:z.record(z.string(),z.unknown()).nullable()})),
   startedAt:z.string(),seconds:z.number().nonnegative(),calls:countsSchema,finished:z.boolean(),cleaned:z.boolean(),audited:z.boolean().default(false),failureCode:z.string().nullable().default(null)});

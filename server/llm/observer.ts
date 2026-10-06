@@ -12,6 +12,8 @@ export interface ModelCallObserver {
 export interface ProviderMeasurement {
   modelId:string; kind:'tool_choice'|'reading'|'draft'; inputBytes:number; maxOutputTokens:number; status:number;
   inputTokens?:number; outputTokens?:number;
+  /** Transport + full response-body time; excludes runner waits before the request. */
+  responseMs?:number;
   tokenLimit?:number; remainingTokens?:number; resetTokens?:string;
   imageCount?:number;
 }

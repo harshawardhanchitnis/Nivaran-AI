@@ -582,3 +582,28 @@ numbers. Audio audition was unavailable to Codex; automated transcripts, wavefor
 decoding, signal alignment and loudness measurements support the technical checks, and the
 owner should listen before uploading. The original silent edit and both source takes are retained.
 No new app case, provider call or corpus evaluation was performed for this audio revision.
+
+## 6 October 2026: owner-authorised submission improvements
+
+The owner reported a three-day extension and no submitted version. Codex added specific safe
+draft repair diagnostics, code-owned chronology sentences, an explicit basic-complaint recovery
+without model calls, required-guidance loading within the ladder tool, compact investigation
+context and a smaller draft output allowance. It reused the existing components and tokens for
+next-action guidance, prioritised facts, conflict-choice source quotes, saved-state document
+progress, cooldown countdown, side-by-side desktop review and saved-version/unsaved-edit notices.
+Caller-scoped merchant facts supply empty display headers. Home points judges to a recorded
+conflict and distinguishes the illustrative still and invented tour.
+The invented tour now executes the real renderer, editor and linter entirely in page memory;
+answer, approval and preparation are separate, uncertainty leaves the conflict open, and
+chosen values are Your statement. It neither uses a model nor creates a stored case.
+
+Offline SDK serialization produced a new dated payload measurement without keys or network
+calls. Groq instrumentation records duration/usage without prompts or response prose. Fake
+providers and regression tests cover chronology, recovery, repairs, source matching and the
+one-tool rule. Research/testing materials were prepared; the owner deferred real-user testing,
+so no findings, interviews, improved model scores or measured speedups are claimed. Historical
+evaluation files and footage remain unchanged. Local verification and pending release checks
+are tracked in improvements-2026-10-06.md. These features have not yet been deployed.
+Migration 0013 preserves the last actual answering model for code-only drafts and records origin
+separately. Its caller-ownership and unchanged-usage tests run on local Postgres; the owner must
+apply it to the hosted project before releasing the feature. No service-role key was introduced.

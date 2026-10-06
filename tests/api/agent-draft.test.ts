@@ -39,6 +39,7 @@ describe('draft endpoints', () => {
       fake.store,
       expect.objectContaining({ generate: fake.generate }),
       id,
+      'model',
     );
   });
   it('reports all-model cooldowns and daily quota separately', async () => {
@@ -48,6 +49,13 @@ describe('draft endpoints', () => {
     expect(await retry.json()).toEqual({ retryAfterMs: 1234 });
     fake.write.mockRejectedValue(new HttpError(429, 'quota_exhausted', 'Daily limit reached.'));
     expect((await draft(request({ planId: id }))).status).toBe(429);
+  });
+  it('accepts only an explicit supported recovery mode', async () => {
+    expect((await draft(request({ planId: id, mode: 'basic' }))).status).toBe(200);
+    expect(fake.write.mock.calls[0]?.[3]).toBe('basic');
+    fake.write.mockClear();
+    expect((await draft(request({ planId: id, mode: 'automatic' }))).status).toBe(400);
+    expect(fake.write).not.toHaveBeenCalled();
   });
   it('saves edit text and explicit statements without accepting private-detail fields', async () => {
     await edit(

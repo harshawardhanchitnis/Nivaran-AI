@@ -155,7 +155,7 @@ In the investigating phase, the model chooses the next tool. Maximum 10 model-ch
 | `request_document(kind, reason)` | Asks for a missing or better document and pauses the run. |
 | `record_user_statement(field, value)` | Stores something the user said, with status "Your statement". |
 | `search_guidance(query)` | Full-text search over the hand-checked guidance rows. |
-| `get_next_step()` | Runs the coded ladder on the current fact sheet. Returns step, reasons and dates. |
+| `get_next_step()` | Runs the coded ladder on the current fact sheet and loads its required checked guidance. Returns step, reasons and dates. |
 | `mark_out_of_scope(reason)` | Ends the run. |
 | `propose_plan(summary, guidance_ids)` | Ends the investigation and waits for approval. |
 
@@ -198,7 +198,7 @@ Journey 2 work without a scheduler.
 |---|---|---|
 | `POST /api/agent/start` | `{ caseId }` | `{ run }`. Returns the active run if one exists. |
 | `POST /api/agent/advance` | `{ runId, expectedTurn }` | `{ run, events, question?, plan?, retryAfterMs? }` |
-| `POST /api/agent/draft` | `{ planId }` | `{ draft }` |
+| `POST /api/agent/draft` | `{ planId, mode?: 'model' \| 'basic' }` | `{ draft }` |
 
 `advance` must be idempotent: it updates `agent_runs` with
 `... where id = :runId and turn = :expectedTurn and status = 'running'` and treats zero updated
@@ -226,6 +226,17 @@ One schema-constrained logical model call per document, with no tools. Output:
 Images and PDFs are sent to the model directly. Do not use browser OCR as the reader.
 
 ## 7. Drafting and the linter
+
+Owner-authorised improvement on 6 October: code owns chronology sentences as well as inserted
+date values. Model prose uses only available non-date/non-duration fact placeholders and private
+detail placeholders; code adds promise-on, due-by, sent-on and calculated-date caveats. Invalid
+prose receives specific validation codes for its single repair, without retaining raw rejected text.
+After approving a complaint plan, the user may explicitly choose a basic complaint assembled by
+code from usable facts without a model call. It uses the same claim, renderer, linter and save flow;
+an existing draft is restored, never overwritten. Scope, approval and checked-guidance gates remain.
+Approval saves the decision before the user explicitly selects a complaint wording mode.
+The labelled invented tour may exercise this same renderer/editor/linter in page memory,
+without a model call or stored case. It is separate from historical Saved runs and live evidence.
 
 The model never types an amount, a date or an ID. It writes placeholders:
 

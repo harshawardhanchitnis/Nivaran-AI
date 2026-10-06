@@ -109,6 +109,7 @@ describe('approval-gated idempotent drafting', () => {
     generate.mockResolvedValueOnce({ template: 'Refund INR 9999.', modelId: 'first' });
     await writeDraft(store, deps, 'plan');
     expect(generate).toHaveBeenCalledTimes(2);
+    expect(generate.mock.calls[1]?.[3]).toEqual(['literal_value']);
     expect(save.mock.calls[0]?.[1]).toMatchObject({
       modelId: 'fake-model',
       answeringModels: ['first', 'fake-model'],
@@ -120,6 +121,31 @@ describe('approval-gated idempotent drafting', () => {
       code: 'draft_in_progress',
     });
     expect(generate).not.toHaveBeenCalled();
+  });
+  it('uses basic recovery without a provider and records its code origin', async () => {
+    store.context = async () => ({ ...context, guidance: [], facts: [...context.facts,
+      { field: 'merchant_name', status: 'user', value_text: 'Meridian Mart', value_norm: { kind: 'text', value: 'meridian mart' }, evidence_item_id: null },
+      { field: 'refund_received', status: 'user', value_text: 'No', value_norm: { kind: 'boolean', value: false }, evidence_item_id: null },
+    ] });
+    plan.ladder_step = 2;
+    claim.mockResolvedValue({ ...plan, draft_claim_token: 'claim' });
+    await writeDraft(store, deps, 'plan', 'basic');
+    expect(generate).not.toHaveBeenCalled();
+    expect(save.mock.calls[0]?.[1]).toMatchObject({ modelId: null, generationKind:'code_basic', answeringModels: [], lint: { generationKind: 'code_basic', chronologyByCode: true } });
+    expect(save.mock.calls[0]?.[1].rendered_md).toContain('Requested remedy');
+  });
+  it('releases a basic claim and gives an actionable error for absent facts', async () => {
+    await expect(writeDraft(store, deps, 'plan', 'basic')).rejects.toMatchObject({ status: 409, code: 'basic_facts_unavailable' });
+    expect(generate).not.toHaveBeenCalled(); expect(save).not.toHaveBeenCalled(); expect(release).toHaveBeenCalledTimes(1);
+  });
+  it('logs only validation codes and model identity, never rejected document prose', async () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    generate.mockResolvedValue({ template: 'PRIVATE DOCUMENT 9999', modelId: 'fake-model' });
+    try {
+      await expect(writeDraft(store, deps, 'plan')).rejects.toMatchObject({ code: 'draft_template_invalid' });
+      expect(JSON.stringify(warning.mock.calls)).not.toContain('PRIVATE DOCUMENT');
+      expect(warning.mock.calls[0]?.[1]).toMatchObject({ issues: ['literal_value'] });
+    } finally { warning.mockRestore(); }
   });
   it('releases the claim on a refused charge or failed save without retrying the provider', async () => {
     generate.mockRejectedValue(new Error('Daily limit reached.'));

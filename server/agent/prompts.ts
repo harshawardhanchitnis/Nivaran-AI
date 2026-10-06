@@ -11,9 +11,9 @@ Ask only about neededFields: gaps or contradictions that affect the next step or
 If a file could not be read, request a clearer document instead of asking the user to reconstruct it.
 For a missing fact choose a targeted reread or a question. Never ask about an optional reference while a waiting plan is possible.
 For an open conflict, ask_user with the supplied alternatives; rereading a stated value cannot decide which source is right.
-Do not repeat the same tool/input when the facts have not changed. After a code ladder decision, search its rule then propose the plan.
+Do not repeat the same tool/input when the facts have not changed. Code loads required checked guidance with its ladder decision. Search only if guidance is still missing, otherwise propose the plan.
 Use record_user_statement only for an actual answer in the context. Never invent something the user said.
-Use get_next_step before propose_plan. Cite only guidance returned by search_guidance, checked by a human.
+Use get_next_step before propose_plan. Cite only the checked guidance in context, loaded by code or search_guidance.
 Plans await the user's approval; you cannot send, file, pay, delete, or draft here.
 Statuses mean Stated in document, Your statement, Conflicting, Missing, Needs your check. Never use confidence percentages,
 verified or proven. Do not claim legal requirements from memory. If outside online owed-refund scope, mark_out_of_scope.
@@ -24,9 +24,9 @@ export function investigationContext(snapshot: AgentSnapshot, run: AgentRunRow):
     neededFields: actionableFields(snapshot,run), needsClearerDocument: needsClearerDocument(snapshot),
     facts: snapshot.facts.map(fact => ({ field: fact.field, status: fact.status, value_text: fact.value_text, value_norm: fact.value_norm })),
     documents: snapshot.documents.map(document => ({ id: document.id, label: document.label, kind: document.doc_type, read_status: document.read_status })),
-    answers: snapshot.questions.filter(question => question.answered_at).map(question => ({ field: question.field, answer: question.answer, options: question.options })),
+    answers: snapshot.questions.filter(question => question.answered_at).slice(-2).map(question => ({ field: question.field, answer: question.answer, options: question.options })),
     nextStep: run.agent_state.next_step ?? null,
     conflicts: snapshot.facts.filter(f=>f.status==='conflict').map(f=>({field:f.field,alternatives:[...new Set(snapshot.evidence.filter(e=>e.field===f.field&&e.quote_verified===true).map(e=>e.value_text))]})),
-    guidance: (run.agent_state.checked_guidance ?? []).map(g=>({id:g.id,title:g.title,body:g.body,checked_on:g.checked_on,steps:g.applies_to_steps})),
+    guidance: (run.agent_state.checked_guidance ?? []).map(g=>({id:g.id,title:g.title,checked_on:g.checked_on,steps:g.applies_to_steps})),
   });
 }

@@ -24,6 +24,7 @@ const sentMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migr
 const outcomeMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0010_case_outcomes.sql'), 'utf8');
 const budgetMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0011_model_budget_status.sql'), 'utf8');
 const resumeMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0012_resume_document_reading.sql'), 'utf8');
+const draftOriginMigration = readFileSync(path.join(here, '..', '..', 'supabase', 'migrations', '0013_draft_origin.sql'), 'utf8');
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -80,6 +81,7 @@ beforeAll(async () => {
   await db.exec(outcomeMigration);
   await db.exec(budgetMigration);
   await db.exec(resumeMigration);
+  await db.exec(draftOriginMigration);
   await db.query('insert into auth.users (id) values ($1), ($2)', [ALICE, BOB]);
   await db.exec(`
     insert into public.guidance (id, title, body, source_name, source_url, checked_on)
@@ -499,6 +501,37 @@ describe('draft generation and versioned edits as the caller',()=> {
   await asUser(ALICE,()=>db.query('select public.release_plan_draft($1,$2)',[id,otherToken]));
   expect((await claim(ALICE,id)).rows[0]?.result).toMatchObject({draft_claim_token:token});
  });
+});
+
+describe('code-only draft origin preserves actual answering models', () => {
+  const token = '99999999-9999-4999-8999-999999999999';
+  async function fixture() {
+    // Reuse this suite's existing caller-owned case; creating more would hit the real case cap.
+    const existing = await asUser(ALICE, () => db.query<{id:string}>("select id from public.cases where title='Draft transaction fixture'"));
+    const caseId = existing.rows[0]!.id;
+    const run = await asUser(ALICE, () => db.query<{id:string}>("insert into public.agent_runs(case_id,model,status,phase) values($1,'last-actual-provider','completed','done') returning id",[caseId]));
+    const runId = run.rows[0]!.id;
+    const plan = await asUser(ALICE, () => db.query<{id:string}>("insert into public.plans(case_id,run_id,ladder_step,approved_at) values($1,$2,2,now()) returning id",[caseId,runId]));
+    const planId = plan.rows[0]!.id;
+    await asUser(ALICE, () => db.query('select public.claim_plan_draft($1,$2)',[planId,token]));
+    return {planId,runId};
+  }
+  const result = {template_md:'Basic template.',rendered_md:'Basic complaint.',lint:{flags:[]},generationKind:'code_basic',modelId:'not-an-answering-model',answeringModels:['not-an-answering-model']};
+  it('enforces ownership, records no model answer, preserves the actual run model and charges nothing', async () => {
+    const {planId,runId} = await fixture();
+    const before = (await db.query('select day,calls from public.model_usage_global order by day')).rows;
+    expect((await asUser(BOB,()=>db.query<{result:unknown}>('select public.finish_plan_draft($1,$2,$3) as result',[planId,token,result]))).rows[0]?.result).toBeNull();
+    expect((await asUser(ALICE,()=>db.query<{result:unknown}>('select public.finish_plan_draft($1,$2,$3) as result',[planId,token,result]))).rows[0]?.result).toMatchObject({kind:'helpline',lint:{generationKind:'code_basic'}});
+    expect((await db.query('select model from public.agent_runs where id=$1',[runId])).rows[0]).toEqual({model:'last-actual-provider'});
+    expect((await db.query<{payload:unknown}>('select payload from public.agent_events where run_id=$1',[runId])).rows[0]?.payload).toMatchObject({generationKind:'code_basic',modelId:null,answeringModels:[],message:expect.stringContaining('without a model call')});
+    expect((await db.query('select day,calls from public.model_usage_global order by day')).rows).toEqual(before);
+  });
+  it('keeps actual model answers and rejects unknown origins without saving', async () => {
+    const {planId,runId} = await fixture();
+    await expect(asUser(ALICE,()=>db.query('select public.finish_plan_draft($1,$2,$3)',[planId,token,{...result,generationKind:'unknown'}]))).rejects.toThrow('Invalid draft origin');
+    await asUser(ALICE,()=>db.query('select public.finish_plan_draft($1,$2,$3)',[planId,token,{...result,generationKind:'model',modelId:'actual-draft-provider',answeringModels:['actual-draft-provider']}]));
+    expect((await db.query('select model from public.agent_runs where id=$1',[runId])).rows[0]).toEqual({model:'actual-draft-provider'});
+  });
 });
 
 describe('caller records sending their complaint',()=>{

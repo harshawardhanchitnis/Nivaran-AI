@@ -1,8 +1,10 @@
-import type { DraftRow, GuidanceRow, PlanRow } from '../../shared/database.js';
+import type { DraftRow, DraftGenerationKind, GuidanceRow, PlanRow } from '../../shared/database.js';
 import { renderDraft, DraftPlaceholderError } from './render.js';
 import type { DraftRenderContext } from './render.js';
 import { lintDraft } from '../../shared/draft-lint.js';
 import { HttpError } from '../http.js';
+import { assembleComplaint, basicComplaint, templateIssue } from './template.js';
+import type { TemplateIssue } from './template.js';
 export interface DraftSnapshot extends DraftRenderContext {
   guidance: GuidanceRow[];
 }
@@ -10,7 +12,8 @@ export interface DraftSave {
   template_md: string;
   rendered_md: string;
   lint: Record<string, unknown>;
-  modelId: string;
+  modelId: string | null;
+  generationKind: DraftGenerationKind;
   answeringModels: string[];
 }
 export interface DraftStore {
@@ -27,6 +30,7 @@ export interface DraftDependencies {
     plan: PlanRow,
     context: DraftSnapshot,
     repair: boolean,
+    issues?: readonly TemplateIssue[],
   ): Promise<{ template: string; modelId: string }>;
 }
 /** Initial generation is idempotent; only approved complaint steps can claim and spend quota. */
@@ -34,6 +38,7 @@ export async function writeDraft(
   store: DraftStore,
   deps: DraftDependencies,
   planId: string,
+  mode: 'model' | 'basic' = 'model',
 ): Promise<DraftRow> {
   const plan = await store.getPlan(planId);
   if (!plan.approved_at || plan.rejected_at)
@@ -57,34 +62,48 @@ export async function writeDraft(
   let saved = false;
   try {
     const context = await store.context(claimed, deps.today());
+    let basic: string | null = null;
+    if (mode === 'basic') {
+      try { basic = basicComplaint(claimed, context); }
+      catch (error) {
+        if (!(error instanceof DraftPlaceholderError)) throw error;
+        throw new HttpError(409, 'basic_facts_unavailable', 'The basic complaint needs a usable merchant, order ID, refund amount and your confirmation that the refund has not arrived. Check your facts first.');
+      }
+    }
     const answeringModels: string[] = [];
+    let issues: TemplateIssue[] = [];
     for (let attempt = 0; attempt < 2; attempt++) {
-      const answer = await deps.generate(claimed, context, attempt === 1);
-      answeringModels.push(answer.modelId);
+      const answer = mode === 'basic'
+        ? { template: basic!, modelId: null }
+        : await deps.generate(claimed, context, attempt === 1, issues);
+      if (answer.modelId) answeringModels.push(answer.modelId);
+      let issue = mode === 'model' ? templateIssue(answer.template, context) : null;
+      const template = mode === 'basic' ? answer.template : assembleComplaint(answer.template, context);
+      if (template.length > 20000) issue = 'too_long';
       let rendered;
       try {
-        if (
-          answer.template.length > 20000 ||
-          !answer.template.trim() ||
-          /\d/.test(answer.template.replace(/{{[^{}]+}}/g, ''))
-        )
-          throw new DraftPlaceholderError();
-        rendered = renderDraft(answer.template, context);
+        if (issue) throw new DraftPlaceholderError();
+        rendered = renderDraft(template, context);
+        if (rendered.text.length > 20000) { issue = 'too_long'; throw new DraftPlaceholderError(); }
       } catch (error) {
         if (!(error instanceof DraftPlaceholderError)) throw error;
+        issues = [issue ?? 'placeholder_unavailable'];
+        if (mode === 'basic') throw new HttpError(409, 'basic_facts_unavailable', 'The basic complaint cannot use these facts yet. Check their values and source labels before preparing it.');
+        console.warn('[draft] template rejected', { attempt: attempt + 1, modelId: answer.modelId, issues });
         if (attempt === 0) continue;
         throw new HttpError(
           502,
           'draft_template_invalid',
-          'The model could not prepare a draft using your facts. Your plan is safe; try again.',
+          `The model could not prepare a draft using your facts. ${issueMessage(issues[0]!)} Your plan is saved. Try again or choose the basic complaint without AI wording.`,
         );
       }
       const flags = lintDraft(rendered.text, { ...context, ignore: rendered.spans });
       const result = await store.save(claimed, {
-        template_md: answer.template,
+        template_md: template,
         rendered_md: rendered.text,
-        lint: { flags, userStatements: [], generatedOn: context.today },
+        lint: { flags, userStatements: [], generatedOn: context.today, generationKind: mode === 'basic' ? 'code_basic' : 'model', chronologyByCode: true, repairIssues: issues },
         modelId: answer.modelId,
+        generationKind: mode === 'basic' ? 'code_basic' : 'model',
         answeringModels,
       });
       if (!result)
@@ -104,4 +123,7 @@ export async function writeDraft(
   } finally {
     if (!saved) await store.release(claimed);
   }
+}
+function issueMessage(issue: TemplateIssue): string {
+  return ({ empty:'Its response was empty.',too_long:'Its response was too long.',literal_value:'It typed numbers instead of using the allowed fact placeholders.',date_in_model_prose:'It tried to control date wording that belongs to code.',placeholder_unavailable:'It requested a value your fact sheet cannot supply.' } as const)[issue];
 }

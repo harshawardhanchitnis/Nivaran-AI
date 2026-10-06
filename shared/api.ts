@@ -68,7 +68,7 @@ export interface AgentAdvanceResponse {
   plan?: PlanRow;
   retryAfterMs?: number;
 }
-export const agentDraftRequestSchema = z.object({ planId: z.uuid() });
+export const agentDraftRequestSchema = z.object({ planId: z.uuid(), mode: z.enum(['model', 'basic']).default('model') });
 export interface AgentDraftResponse {
   draft?: DraftRow;
   retryAfterMs?: number;

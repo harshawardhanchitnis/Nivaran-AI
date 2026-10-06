@@ -11,6 +11,7 @@ export const groqFetch:typeof fetch=async(input,init)=>{
   const imageCount=(JSON.stringify(body['messages']).match(/"type":"image_url"/g)??[]).length;
   const allowance=observer.groqOutputAllowance?.(inputBytes,requested,imageCount)??requested;
   if('max_completion_tokens'in body)body['max_completion_tokens']=allowance;else body['max_tokens']=allowance;
+  const started=performance.now();
   const response=await fetch(input,{...init,body:JSON.stringify(body)});
   const measurement:ProviderMeasurement={modelId:String(body['model']),kind:body['tools']?'tool_choice':body['response_format']?'reading':'draft',inputBytes,maxOutputTokens:allowance,status:response.status};
   if(imageCount)measurement.imageCount=imageCount;
@@ -25,5 +26,6 @@ export const groqFetch:typeof fetch=async(input,init)=>{
       if(typeof result.usage?.completion_tokens==='number')measurement.outputTokens=result.usage.completion_tokens;
     } catch { /* The SDK reports any malformed body; telemetry must not invent usage. */ }
   }
+  measurement.responseMs=Math.round(performance.now()-started);
   observer.providerResponse?.(measurement);return response;
 };

@@ -37,4 +37,15 @@ describe('tool-free routed draft generation', () => {
     expect(args.prompt).not.toContain('9999');
     expect(args.prompt).not.toContain('MM-123456');
   });
+  it('gives the repair call specific safe codes and leaves date wording to code', async () => {
+    await createDraftGenerator({} as SupabaseClient)(
+      { ladder_step: 2, summary: 'Helpline assistance.', dates: context.dates } as PlanRow,
+      { ...context, guidance: [] }, true, ['literal_value'],
+    );
+    const args = fake.text.mock.calls[0]![0];
+    expect(args.prompt).toContain('literal_value');
+    expect(args.prompt).not.toContain('{{fact:complaint_sent_date}}');
+    expect(args.maxOutputTokens).toBe(1400);
+    expect(args.tools).toBeUndefined();
+  });
 });

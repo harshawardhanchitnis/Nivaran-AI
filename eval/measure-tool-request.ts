@@ -27,4 +27,4 @@ try {
 const report={mode:'offline-serialization',sample:'original conflicting-amounts fact sheet',datasetHash:observation.datasetHash,
   fullToolSet:measurements[0],activeToolSet:measurements[1],tokenCount:null,
   tokenCountNote:'Bytes are measured; they are not provider token counts. The rerun records actual prompt_tokens from each Groq response, including tool-choice requests.'};
-await writeFile('eval/tool-request-size.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+await writeFile(process.argv[2] ?? 'eval/tool-request-size.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

@@ -196,7 +196,7 @@ export interface DraftRow {
   plan_id: string;
   kind: DraftKind;
   version: number;
-  /** Model output with fact placeholders and no raw values. */
+  /** Model prose or code template with fact placeholders and no raw values. */
   template_md: string;
   /** Placeholders replaced by code. */
   rendered_md: string | null;
@@ -204,6 +204,8 @@ export interface DraftRow {
   edited_by_user: boolean;
   created_at: string;
 }
+/** Migration 0013 records origin separately and preserves the run model for code-only drafts. */
+export type DraftGenerationKind = 'model' | 'code_basic';
 
 /** Caller-owned mark_plan_sent transaction in migration 0009. */
 export interface SentPlanResult {

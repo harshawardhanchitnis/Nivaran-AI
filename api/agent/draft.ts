@@ -15,6 +15,7 @@ export const POST = handle(async (request) => {
         createDraftStore(supabase),
         { generate: createDraftGenerator(supabase), today: indiaToday },
         input.planId,
+        input.mode,
       ),
     });
   } catch (error) {

@@ -39,6 +39,13 @@ describe('one model-chosen investigation step', () => {
     expect(finishStep.mock.calls[1]?.[1]).toMatchObject({ plan: { ladder_step: 1, dates: { refund_due: '2026-09-24' } } });
     expect(charge.mock.invocationCallOrder[0]).toBeLessThan(choose.mock.invocationCallOrder[0]!);
   });
+  it('loads code-required guidance within the single ladder tool, saving a separate model choice', async () => {
+    nextStep.mockResolvedValue({ outcome: 'ladder', step: 1, reasons: [{ guidanceIds: ['checked-rule'] }], dates: { today: '2026-10-06' } });
+    await advanceInvestigation(store, deps, run.id, 0);
+    expect(run.agent_state.checked_guidance?.map(g => g.id)).toEqual(['checked-rule']);
+    expect(choose).toHaveBeenCalledTimes(1); expect(charge).toHaveBeenCalledTimes(1);
+    expect(run.agent_steps).toBe(1);
+  });
   it('forces the real source alternatives after one repeated get_next_step',async()=>{
     snapshot.facts=[{field:'refund_amount',status:'conflict',value_norm:null}] as CaseFactRow[];
     snapshot.evidence=[{field:'refund_amount',value_text:'INR 9,999.00',quote_verified:true},{field:'refund_amount',value_text:'INR 8,999.00',quote_verified:true}] as AgentSnapshot['evidence'];
