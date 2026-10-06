@@ -4,13 +4,15 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { CaseWorkspaceView } from '../../shared/ui/case-workspace-view';
 import type { FactView } from '../../shared/ui/models';
+import type { DraftRow } from '@shared/database';
+import { draftPresentation, draftStatements, baseDraftFlags } from '../../core/workspace-draft';
+import { DraftEditor } from '../../shared/ui/draft-editor';
+import { demoBasicDraft, demoDraftContext } from './demo-draft';
 import {
   SAMPLE_ACTIVITY_AFTER,
   SAMPLE_ACTIVITY_BEFORE,
   SAMPLE_CASE,
-  SAMPLE_DRAFT,
   SAMPLE_FACTS,
-  SAMPLE_FLAG,
   SAMPLE_PLAN,
   SAMPLE_QUESTION,
 } from './sample-case';
@@ -22,7 +24,7 @@ import {
  */
 @Component({
   selector: 'app-demo',
-  imports: [MatButtonModule, MatIconModule, CaseWorkspaceView],
+  imports: [MatButtonModule, MatIconModule, CaseWorkspaceView, DraftEditor],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-case-workspace-view
@@ -36,23 +38,33 @@ import {
       [plan]="answer() ? plan : null"
       [approved]="approved()"
       [draft]="draft()"
+      [draftId]="draftRow()?.id ?? null"
+      [customDraft]="true"
+      [practice]="true"
       (answered)="onAnswered($event)"
       (approve)="onApprove()"
+      (decline)="resetReview('You rejected the practice plan. Start again to explore a different choice.')"
+      (edit)="resetReview('Practice restarted so you can choose a different amount. A real case saves your requested change separately.')"
     >
       <p banner class="banner">
         <mat-icon aria-hidden="true">science</mat-icon>
         <span>
-          <strong>Sample case.</strong> Invented documents from a fictional seller. Nothing here was
-          produced by a model, and nothing is saved.
+          <strong>Interactive practice case.</strong> Invented documents from a fictional seller.
+          No model calls or account. Changes last only until you leave or restart.
+          @if (practiceMessage()) { <span role="status">{{ practiceMessage() }}</span> }
           <button type="button" class="link" (click)="reset()">Start again</button>
         </span>
       </p>
 
-      <div draft-tools class="tools">
-        <button mat-stroked-button type="button" (click)="fake.set(!fake())">
-          <mat-icon aria-hidden="true">bug_report</mat-icon>
-          {{ fake() ? 'Remove the made-up ID' : 'Try typing a made-up transaction ID' }}
-        </button>
+      @if (draftRow(); as letter) {
+        <app-draft-editor complaint-editor [draft]="letter" [context]="draftContext()" [practice]="true" (saveRequested)="savePractice($event)" (copyRequested)="copyPractice($event)" (printRequested)="printPractice()" />
+      }
+      <div draft-tools class="tools no-print">
+        @if (approved() && !draftRow()) {
+          <p>This invented practice uses the real basic-complaint renderer and edit linter, without AI wording.</p>
+          <button mat-flat-button type="button" (click)="preparePractice()">Prepare practice complaint without AI</button>
+        }
+        @if (draftRow()) { <p>Try adding FAKE123456 in the editor. The real linter will flag it; review, remove it or keep it as Your statement.</p> }
       </div>
     </app-case-workspace-view>
   `,
@@ -94,7 +106,11 @@ import {
 })
 export class Demo {
   protected readonly sample = SAMPLE_CASE;
-  protected readonly question = SAMPLE_QUESTION;
+  protected readonly question = { ...SAMPLE_QUESTION, options: SAMPLE_QUESTION.options.map(option => {
+    if (option.id === 'unsure') return { ...option, hint:'Keep the conflict open while you compare the sources.' };
+    const source = SAMPLE_FACTS.find(f => f.field === 'refund_amount')?.sources[option.id === 'chat' ? 1 : 0];
+    return { ...option, sources:source ? [{ evidence:source.evidence,documentName:source.documentName,page:source.page,quote:source.quote }] : [] };
+  }) };
   protected readonly plan = SAMPLE_PLAN;
 
   private readonly view = viewChild.required(CaseWorkspaceView);
@@ -102,12 +118,13 @@ export class Demo {
   /** The option chosen for the refund-amount question, once answered. */
   protected readonly answer = signal<string | null>(null);
   protected readonly approved = signal(false);
-  protected readonly fake = signal(false);
+  protected readonly draftRow = signal<DraftRow | null>(null);
+  protected readonly practiceMessage = signal('');
+  protected readonly draftContext = computed(() => demoDraftContext(this.facts()));
 
   protected readonly stage = computed(() => {
-    if (this.approved()) {
-      return 'Complaint ready';
-    }
+    if (this.draftRow()) return 'Practice complaint ready';
+    if (this.approved()) return 'Plan approved';
     return this.answer() ? 'Plan ready for your approval' : 'Needs your answer';
   });
 
@@ -124,12 +141,9 @@ export class Demo {
       return {
         ...fact,
         value: chosen?.value ?? fact.value,
-        status: 'document' as const,
-        sources: chosen ? [chosen] : fact.sources,
-        note:
-          answer === 'unsure'
-            ? 'You were not sure, so the complaint asks for the full amount the seller confirmed.'
-            : 'You confirmed this amount.',
+        status: 'user' as const,
+        sources: [],
+        note: 'Your choice is Your statement; it does not establish which document is correct.',
       };
     });
   });
@@ -139,22 +153,12 @@ export class Demo {
   );
 
   protected readonly draft = computed(() => {
-    if (!this.approved()) {
-      return null;
-    }
-    // Keep the letter in step with the answer: the refund amount comes from the chosen source.
-    const base =
-      this.answer() === 'chat'
-        ? SAMPLE_DRAFT.map((segment) =>
-            segment.kind === 'value' && segment.text === '₹9,999' && segment.evidence === 'E02'
-              ? { ...segment, text: '₹8,999', evidence: 'E03' }
-              : segment,
-          )
-        : SAMPLE_DRAFT;
-    return this.fake() ? [...base, ...SAMPLE_FLAG] : base;
+    const draft = this.draftRow();
+    return draft ? draftPresentation(draft, draft.rendered_md ?? '', this.draftContext(), {name:'',contact:'',address:''}, draftStatements(draft)).segments : null;
   });
 
   protected onAnswered(optionId: string): void {
+    if (optionId === 'unsure') { this.practiceMessage.set('The conflict stays open. Compare the source quotes before choosing an amount.'); return; }
     this.answer.set(optionId);
     this.view().tab.set('plan');
   }
@@ -163,11 +167,25 @@ export class Demo {
     this.approved.set(true);
     this.view().tab.set('complaint');
   }
+  protected preparePractice(): void { if (this.approved() && !this.draftRow()) this.draftRow.set(demoBasicDraft(this.draftContext())); }
+  protected savePractice(edit: {text:string;userStatements:string[]}): void {
+    const previous = this.draftRow(); if (!previous) return;
+    this.draftRow.set({...previous,id:`demo-draft-${previous.version + 1}`,version:previous.version + 1,rendered_md:edit.text,edited_by_user:true,
+      lint:{...previous.lint,userStatements:edit.userStatements,flags:baseDraftFlags(previous,edit.text,this.draftContext(),edit.userStatements)}});
+    this.practiceMessage.set('Practice edit saved in this page only. It disappears when you leave or restart.');
+  }
+  protected async copyPractice(text: string): Promise<void> {
+    try { await navigator.clipboard.writeText(text); this.practiceMessage.set('Practice text copied. It uses fictional facts.'); }
+    catch { this.practiceMessage.set('Copy was unavailable. Select and copy the text manually.'); }
+  }
+  protected printPractice(): void { window.print(); }
 
   protected reset(): void {
     this.answer.set(null);
     this.approved.set(false);
-    this.fake.set(false);
+    this.draftRow.set(null);
+    this.practiceMessage.set('');
     this.view().tab.set('facts');
   }
+  protected resetReview(message: string): void { this.reset(); this.practiceMessage.set(message); }
 }

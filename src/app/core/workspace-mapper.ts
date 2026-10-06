@@ -1,5 +1,7 @@
 import type { AgentRunRow, CaseFactRow, DocumentRow, EvidenceItemRow, QuestionRow } from '@shared/database';
 import { FACT_FIELDS, FACT_FIELD_LABELS } from '@shared/facts';
+import { normaliseFact } from '@shared/normalise';
+import { isFactField } from '@shared/facts';
 import type { ActivityView, FactView, SourceView, QuestionView } from '../shared/ui/models';
 
 export interface DocumentPreview { url?: string; pageImages?: Record<number, string>; loading?: boolean; error?: string }
@@ -56,11 +58,29 @@ export function workspaceActivity(events: readonly {
   });
 }
 
-export function workspaceQuestion(questions: readonly QuestionRow[], run: AgentRunRow | null): QuestionView | null {
+export function questionOptions(question: QuestionRow, documents: readonly DocumentRow[], items: readonly EvidenceItemRow[]): QuestionView['options'] {
+  return question.options.flatMap(option => {
+    if (!option || typeof option !== 'object' || !('id' in option) || !('label' in option) || typeof option.id !== 'string' || typeof option.label !== 'string') return [];
+    const field = question.field;
+    const norm = field && isFactField(field) ? normaliseFact(field, 'value' in option && typeof option.value === 'string' ? option.value : option.label) : null;
+    const seen = new Set<string>();
+    const sources = norm ? items.flatMap(item => {
+      if (item.field !== field || item.source !== 'document' || item.quote_verified !== true || !item.quote || !field || !isFactField(field)) return [];
+      if (JSON.stringify(normaliseFact(field, item.value_text)) !== JSON.stringify(norm)) return [];
+      const doc = documents.find(d => d.id === item.document_id);
+      const key = JSON.stringify([doc?.id, item.page, item.quote]);
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return doc ? [{ evidence: doc.label, documentName: doc.file_name, page: item.page, quote: item.quote }] : [];
+    }) : [];
+    return [{ id: option.id, label: option.label, sources }];
+  });
+}
+
+export function workspaceQuestion(questions: readonly QuestionRow[], run: AgentRunRow | null, documents: readonly DocumentRow[] = [], items: readonly EvidenceItemRow[] = []): QuestionView | null {
   const question = questions.at(-1);
   if (run?.status !== 'waiting_for_user' || !question || question.answer !== null) return null;
-  const options = question.options.flatMap(option => option && typeof option === 'object' && 'id' in option && 'label' in option && typeof option.id === 'string' && typeof option.label === 'string'
-    ? [{ id: option.id, label: option.label }] : []);
+  const options = questionOptions(question, documents, items);
   const why = question.kind === 'conflict' ? 'The sources give different values. Your choice will be saved as Your statement.'
     : question.kind === 'document_request' ? 'A missing or unclear document prevents the next step.'
     : question.kind === 'confirm' && question.field === null ? 'Your requested change will be considered before a new plan is proposed.'

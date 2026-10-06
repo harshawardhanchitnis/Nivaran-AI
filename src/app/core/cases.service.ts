@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import type { CaseRow, DocumentRow, PlanRow, ModelBudgetStatus } from '@shared/database';
+import type { CaseRow, CaseFactRow, DocumentRow, PlanRow, ModelBudgetStatus } from '@shared/database';
 import { EVIDENCE_BUCKET, evidencePath, MAX_FILES_PER_CASE } from '@shared/limits';
 import { checkFiles } from '../features/case-new/file-rules';
 import type { CaseSummaryView } from '../shared/ui/models';
@@ -90,13 +90,15 @@ export class CasesService {
     if (error || !cases) throw new Error('Could not load your cases. Please try again.');
     if (cases.length === 0) return [];
     const ids = cases.map((row) => row.id);
-    const [documents, plans] = await Promise.all([
+    const [documents, plans, merchants] = await Promise.all([
       client.from('documents').select('case_id').in('case_id', ids).returns<Pick<DocumentRow, 'case_id'>[]>(),
       client.from('plans').select('case_id, dates, created_at').in('case_id', ids)
         .is('rejected_at', null)
         .order('created_at', { ascending: false }).returns<Pick<PlanRow, 'case_id' | 'dates' | 'created_at'>[]>(),
+      client.from('case_facts').select('case_id, value_text').in('case_id', ids).eq('field', 'merchant_name')
+        .in('status', ['document', 'user']).returns<Pick<CaseFactRow, 'case_id' | 'value_text'>[]>(),
     ]);
-    if (documents.error || plans.error) throw new Error('Could not load the case details. Please try again.');
+    if (documents.error || plans.error || merchants.error) throw new Error('Could not load the case details. Please try again.');
     const counts = new Map<string, number>();
     for (const document of documents.data ?? []) counts.set(document.case_id, (counts.get(document.case_id) ?? 0) + 1);
     const dates = new Map<string, Record<string, string>>();
@@ -104,7 +106,8 @@ export class CasesService {
     const today = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
     }).format(new Date());
-    return cases.map((row) => caseSummary(row, counts.get(row.id) ?? 0, dates.get(row.id) ?? {}, today));
+    const names = new Map((merchants.data ?? []).map(f => [f.case_id, f.value_text]));
+    return cases.map((row) => caseSummary({ ...row, merchant_name: row.merchant_name ?? names.get(row.id) ?? null }, counts.get(row.id) ?? 0, dates.get(row.id) ?? {}, today));
   }
   /** Append one reply to an existing caller-owned case. Its earlier files are never removed. */
   async addReplyDocument(caseId: string, file: File, consent: boolean): Promise<DocumentRow> {

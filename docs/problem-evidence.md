@@ -51,3 +51,6 @@ The reviewed sources support the scoped guidance and its limits. They do not est
 frequency, usability or financial recovery. Synthetic model evaluation and scripted hosted checks
 test parts of the implementation; they are separately reported in the README. User-insight
 claims remain limited until the owner supplies actual research and independent phone findings.
+
+On 6 October the owner deferred independent user testing. A structured guide and note table
+are provided in user-testing-kit.md. They are collection materials, not completed research.

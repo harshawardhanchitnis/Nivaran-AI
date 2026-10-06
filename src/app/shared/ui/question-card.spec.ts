@@ -1,6 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { QuestionCard } from './question-card';
 describe('question card', () => {
+  it('shows the literal quote and page before a choice and leaves saved answers disabled', async () => {
+    const fixture = TestBed.createComponent(QuestionCard);
+    fixture.componentRef.setInput('question', {id:'q',prompt:'Which amount?',why:'Compare the sources.',options:[{id:'one',label:'9999',sources:[{evidence:'E02',documentName:'refund.pdf',page:2,quote:'Refund: INR 9,999.00'}]}]});
+    fixture.componentRef.setInput('readOnly',true);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('q').textContent).toBe('Refund: INR 9,999.00');
+    expect(fixture.nativeElement.textContent).toContain('page 2');
+    expect(fixture.nativeElement.querySelector('button').disabled).toBe(true);
+  });
   it('emits a choice in one tap and disables repeat answers while saving', async () => {
     const fixture = TestBed.createComponent(QuestionCard);
     fixture.componentRef.setInput('question', { id: 'q', prompt: 'Which amount?', why: 'Two sources differ.', options: [{ id: 'one', label: 'INR 9999' }] });

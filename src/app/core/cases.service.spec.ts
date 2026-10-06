@@ -135,4 +135,19 @@ describe('CasesService uploads', () => {
     await expect(service.addReplyDocument(caseRow.id,file('reply.png'),true)).rejects.toThrow('earlier files are safe');
     expect(remove).toHaveBeenCalledExactlyOnceWith([upload.mock.calls[0]![0]]);expect(deleteCase).not.toHaveBeenCalled();
   });
+  it('shows the caller-owned usable merchant fact when the case header is empty', async () => {
+    const queries: Array<[string, unknown]> = [];
+    from.mockImplementation((table: string) => {
+      const query = {
+        select: () => query, order: () => query, is: () => query,
+        in: (key:string,values:unknown) => { queries.push([key, values]); return query; },
+        eq: (key:string,value:unknown) => { queries.push([key,value]); return query; },
+        returns: async () => ({data: table === 'cases' ? [caseRow] : table === 'case_facts' ? [{case_id:caseRow.id,value_text:'Meridian Mart'}] : [], error:null}),
+      };
+      return query;
+    });
+    expect((await service.list())[0]?.merchant).toBe('Meridian Mart');
+    expect(queries).toContainEqual(['status',['document','user']]);
+    expect(queries).toContainEqual(['case_id',[caseRow.id]]);
+  });
 });

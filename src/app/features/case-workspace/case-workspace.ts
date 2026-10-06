@@ -12,6 +12,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import type { FactField } from '@shared/facts';
+import { isFactField } from '@shared/facts';
 import type { AgentAnswerRequest } from '@shared/api';
 import type { RecordOutcomeRequest } from '@shared/api';
 import { CasesService } from '../../core/cases.service';
@@ -45,10 +46,11 @@ import {
     @if (rows(); as data) {
       <app-case-workspace-view
         [heading]="data.case.title"
-        [merchant]="data.case.merchant_name ?? 'Your refund case'"
+        [merchant]="merchant()"
         [documentCount]="data.documents.length"
         [stage]="stage()"
         [facts]="facts()"
+        [requiredFields]="requiredFields()"
         [activity]="activity()"
         [busy]="busy()"
         [question]="question()"
@@ -78,7 +80,7 @@ import {
               Try again
             </button>
           } @else if (waiting()) {
-            <p>Waiting for the model. Your progress is saved; Nivaran will continue shortly.</p>
+            <p>Model cooldown: retrying in {{ cooldownSeconds() }} seconds. Your progress is saved.</p>
           } @else if (busy()) {
             <p>
               {{
@@ -134,6 +136,13 @@ import {
               <a routerLink="/cases/new">Start a case with your documents.</a>
             </p>
           }
+          @if (busy() && data.documents.length) {
+            <ul class="document-progress" aria-label="Document reading progress">
+              @for (document of data.documents; track document.id) {
+                <li><strong>{{ document.label }}</strong> {{ document.file_name }} · {{ readLabel(document.read_status) }}</li>
+              }
+            </ul>
+          }
           @if (plan()?.step === 0) {
             <button mat-stroked-button type="button" (click)="calendar()">
               Add refund date to calendar
@@ -165,6 +174,10 @@ import {
             <button mat-flat-button type="button" [disabled]="draftBusy()" (click)="prepareDraft()">
               {{ draftBusy() ? 'Preparing complaint…' : 'Prepare complaint' }}
             </button>
+            <button mat-stroked-button type="button" [disabled]="draftBusy()" (click)="prepareDraft('basic')">
+              Use basic complaint without AI wording
+            </button>
+            <p class="muted">The basic version uses your approved facts and costs no model call. Review it before sending.</p>
           }
           @if (data.draft) {
             <a [routerLink]="['/cases', caseId(), 'pack']">Open printable pack</a>
@@ -199,6 +212,8 @@ import {
     .notice p {
       margin-bottom: 8px;
     }
+    .document-progress { padding-left: 20px; font-size: .9rem; }
+    .document-progress li { overflow-wrap: anywhere; margin: 4px 0; }
   `,
 })
 export class CaseWorkspace {
@@ -240,14 +255,24 @@ export class CaseWorkspace {
   protected readonly draftMessage = signal<string | null>(null);
   protected readonly today = signal(indiaCalendarDate());
   protected readonly waiting = signal(false);
+  private readonly clockNow = signal(Date.now());
+  private readonly cooldownUntil = signal(0);
+  protected readonly cooldownSeconds = computed(() => Math.max(0, Math.ceil((this.cooldownUntil() - this.clockNow()) / 1000)));
+  protected readLabel(status: string): string { return ({ pending: 'Queued', reading: 'Reading', read: 'Read', failed: 'Needs a clearer file', unreadable: 'Needs a clearer file' } as Record<string,string>)[status] ?? status; }
   protected readonly error = signal<string | null>(null);
   protected readonly facts = computed(() => {
     const data = this.rows();
     return data ? workspaceFacts(data.documents, data.evidence, data.facts, this.previews()) : [];
   });
+  protected readonly merchant = computed(() => this.rows()?.case.merchant_name ?? this.facts().find(f => f.field === 'merchant_name' && ['document','user'].includes(f.status))?.value ?? 'Your refund case');
+  protected readonly requiredFields = computed(() => {
+    const fields = this.rows()?.run?.agent_state?.next_step?.['requiredFields'];
+    const questionField = this.rows()?.questions.at(-1)?.field;
+    return [...new Set([...(Array.isArray(fields) ? fields.filter((f): f is FactField => typeof f === 'string' && isFactField(f)) : []), ...(questionField && isFactField(questionField) && this.question() ? [questionField] : [])])];
+  });
   protected readonly activity = computed(() => workspaceActivity(this.rows()?.events ?? []));
   protected readonly question = computed(() =>
-    workspaceQuestion(this.rows()?.questions ?? [], this.rows()?.run ?? null),
+    workspaceQuestion(this.rows()?.questions ?? [], this.rows()?.run ?? null, this.rows()?.documents ?? [], this.rows()?.evidence ?? []),
   );
   protected readonly plan = computed(() => {
     const data = this.rows();
@@ -304,6 +329,7 @@ export class CaseWorkspace {
   );
 
   constructor() {
+    const ticker = setInterval(() => { if (this.waiting()) this.clockNow.set(Date.now()); }, 1000);
     effect(() => {
       const id = this.caseId();
       untracked(() => {
@@ -311,6 +337,7 @@ export class CaseWorkspace {
       });
     });
     inject(DestroyRef).onDestroy(() => {
+      clearInterval(ticker);
       this.controller?.abort();
       this.clearPreviews();
     });
@@ -375,7 +402,8 @@ export class CaseWorkspace {
       current: async () => this.rows()?.run ?? null,
       refresh,
       wait: (ms) => waitForReading(ms, controller.signal),
-      delay: (value) => this.waiting.set(value),
+      cooldown: (ms) => { this.clockNow.set(Date.now()); this.cooldownUntil.set(Date.now() + ms); },
+      delay: (value) => { if (!controller.signal.aborted) this.waiting.set(value); },
       signal: controller.signal,
       resumeWaiting:
         !!latest?.answered_at && latest.id !== data.run?.agent_state?.answered_question_id,
@@ -434,7 +462,7 @@ export class CaseWorkspace {
       const latest = await this.service.load(data.case.id);
       if (generation === this.generation) {
         this.rows.set(latest);
-        if (action === 'approve' && this.canPrepareDraft()) await this.prepareDraft();
+        if (action === 'approve' && this.canPrepareDraft()) this.draftMessage.set('Plan approved. Choose AI wording or a basic complaint without a model call on the Complaint tab.');
       }
     } catch (error) {
       if (generation === this.generation)
@@ -446,14 +474,14 @@ export class CaseWorkspace {
     }
   }
 
-  protected async prepareDraft(): Promise<void> {
+  protected async prepareDraft(mode: 'model' | 'basic' = 'model'): Promise<void> {
     const data = this.rows();
     const generation = this.generation;
     if (!data?.plan || !this.canPrepareDraft() || this.draftBusy()) return;
     this.draftBusy.set(true);
     this.draftMessage.set(null);
     try {
-      const result = await this.service.prepareDraft(data.plan.id);
+      const result = await this.service.prepareDraft(data.plan.id, mode);
       if (generation !== this.generation) return;
       if (result.draft) {
         const draft = result.draft;

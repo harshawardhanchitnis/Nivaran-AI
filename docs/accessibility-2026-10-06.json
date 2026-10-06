@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-06",
+  "environment": "local development build; saved fictional records and invented practice; no model calls",
+  "savedConflictPhone": {
+    "incomplete": 0,
+    "passes": 26,
+    "scrollWidth": 345,
+    "violations": [],
+    "width": 360
+  },
+  "practicePhone": {
+    "incomplete": 0,
+    "passes": 28,
+    "scrollWidth": 345,
+    "violations": [],
+    "width": 360
+  },
+  "practiceDesktop": {
+    "incomplete": 1,
+    "layout": "534px 534px",
+    "passes": 28,
+    "scrollWidth": 1425,
+    "violations": [],
+    "width": 1440
+  },
+  "homePhone": {
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "target": [
+          [
+            "mark"
+          ]
+        ]
+      }
+    ],
+    "passes": 21,
+    "scrollWidth": 345,
+    "violations": [],
+    "width": 360
+  },
+  "sourcePhone": {
+    "focus": "Close source",
+    "incomplete": [
+      {
+        "id": "aria-hidden-focus",
+        "target": [
+          [
+            ".cdk-visually-hidden.cdk-focus-trap-anchor:nth-child(2)"
+          ],
+          [
+            ".cdk-visually-hidden.cdk-focus-trap-anchor:nth-child(4)"
+          ]
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "target": [
+          [
+            "a[aria-label=\"Nivaran AI, home\"] > span[_ngcontent-ng-c1705632163=\"\"]"
+          ],
+          [
+            "#case-tab-complaint"
+          ],
+          [
+            "article:nth-child(3) > blockquote > mark"
+          ],
+          [
+            "article:nth-child(4) > blockquote > mark"
+          ],
+          [
+            "article:nth-child(5) > blockquote > mark"
+          ]
+        ]
+      }
+    ],
+    "passes": 27,
+    "scrollWidth": 345,
+    "violations": [],
+    "width": 360
+  },
+  "keyboard": "Source sheet kept Shift+Tab focus inside and Escape restored Order ID focus.",
+  "practiceDesktopRecheck": {
+    "width": 1440,
+    "height": 900,
+    "violations": [],
+    "incomplete": 0,
+    "note": "Latest desktop recheck after exercising actual editor and linter; earlier scan retained above."
+  }
+}

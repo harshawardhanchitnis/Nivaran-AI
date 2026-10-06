@@ -144,8 +144,8 @@ export class CaseWorkspaceService {
   answer(questionId: string, answer: AgentAnswerRequest['answer']): Promise<AgentAdvanceResponse> {
     return this.api.post('agent/answer', { questionId, answer });
   }
-  prepareDraft(planId: string): Promise<AgentDraftResponse> {
-    return this.api.post('agent/draft', { planId });
+  prepareDraft(planId: string, mode: 'model' | 'basic' = 'model'): Promise<AgentDraftResponse> {
+    return this.api.post('agent/draft', { planId, ...(mode === 'basic' ? { mode } : {}) });
   }
   markSent(planId: string, sentOn: string): Promise<SentPlanResult> {
     return this.api.post('agent/sent', { planId, sentOn });

@@ -21,6 +21,10 @@ import type { QuestionView } from './models';
             @if (option.hint) {
               <span class="hint">{{ option.hint }}</span>
             }
+            @for (source of option.sources ?? []; track $index) {
+              <span class="hint">{{ source.evidence }} · {{ source.documentName }}{{ source.page ? ' · page ' + source.page : '' }}</span>
+              <q class="excerpt">{{ source.quote }}</q>
+            }
           </button>
         }
       </div>
@@ -38,8 +42,8 @@ import type { QuestionView } from './models';
     .card {
       padding: 18px;
       border-radius: var(--radius);
-      background: linear-gradient(180deg, #fff8ea 0%, #fffdf8 100%);
-      border: 1px solid #f0d9a8;
+      background: var(--st-needs_check-bg);
+      border: 1px solid var(--line-strong);
       box-shadow: var(--shadow-1);
     }
 
@@ -99,6 +103,7 @@ import type { QuestionView } from './models';
       color: var(--ink-2);
       font-size: 0.85rem;
     }
+    .excerpt { font-size: .9rem; font-weight: 400; color: var(--ink); overflow-wrap: anywhere; }
     form { display: grid; gap: 10px; margin-top: 12px; }
     textarea { width: 100%; padding: 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); color: var(--ink); background: var(--surface); font: inherit; resize: vertical; }
     .option:disabled { cursor: default; opacity: 0.7; }

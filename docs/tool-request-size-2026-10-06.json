@@ -1,0 +1,28 @@
+{
+  "mode": "offline-serialization",
+  "sample": "original conflicting-amounts fact sheet",
+  "datasetHash": "c1f0a919e529fface0a266075a4249043a466d4434ba31529eeb1b5e2e8b3468",
+  "fullToolSet": {
+    "tools": [
+      "reread_document",
+      "ask_user",
+      "request_document",
+      "record_user_statement",
+      "search_guidance",
+      "get_next_step",
+      "mark_out_of_scope",
+      "propose_plan"
+    ],
+    "schemaBytes": 3036,
+    "inputPayloadBytes": 7420
+  },
+  "activeToolSet": {
+    "tools": [
+      "ask_user"
+    ],
+    "schemaBytes": 630,
+    "inputPayloadBytes": 5014
+  },
+  "tokenCount": null,
+  "tokenCountNote": "Bytes are measured; they are not provider token counts. The rerun records actual prompt_tokens from each Groq response, including tool-choice requests."
+}

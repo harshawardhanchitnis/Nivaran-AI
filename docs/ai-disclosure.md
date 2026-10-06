@@ -607,3 +607,9 @@ are tracked in improvements-2026-10-06.md. These features have not yet been depl
 Migration 0013 preserves the last actual answering model for code-only drafts and records origin
 separately. Its caller-ownership and unchanged-usage tests run on local Postgres; the owner must
 apply it to the hosted project before releasing the feature. No service-role key was introduced.
+The full local check passed 453 server/database and 126 Angular tests, both type checks and
+production build. Targeted 360 px and 1440 px axe A/AA scans found no violations; incomplete
+gradient/focus-anchor checks remain documented rather than claimed as passes. Keyboard source
+focus recovery and an actual local practice fake-ID flag/remove/save were observed. Secret
+scans of tracked/index/history/build files found none. The build is still local, pending migration
+application and publication. Recorded model measurements remain unchanged.

@@ -126,7 +126,7 @@ export const SAMPLE_QUESTION: QuestionView = {
   options: [
     { id: 'email', label: '₹9,999', hint: 'E02 · cancellation email' },
     { id: 'chat', label: '₹8,999', hint: 'E03 · support chat' },
-    { id: 'unsure', label: 'I am not sure', hint: 'Nivaran will ask for the full amount paid and say why' },
+    { id: 'unsure', label: 'I am not sure', hint: 'Keep the conflict open while you compare the sources.' },
   ],
 };
 
@@ -158,9 +158,10 @@ export const SAMPLE_PLAN: PlanView = {
       sourceName: 'Your cancellation email, E02',
     },
     {
-      text: 'An online seller’s grievance officer must acknowledge a complaint within 48 hours and resolve it within one month.',
+      text: 'Rule 4(5) requires acknowledgement within 48 hours and redress within one month from receipt of the complaint. Dates based on sending are working dates and need adjustment if receipt was later.',
       sourceName: 'Consumer Protection (E-Commerce) Rules, 2020, rule 4(5)',
-      checkedOn: null,
+      sourceUrl: 'https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf#page=8',
+      checkedOn: '2026-10-02',
     },
     {
       text: 'You have no refund reference number. Asking for it lets your bank trace the money if the seller says it was sent.',
@@ -171,8 +172,8 @@ export const SAMPLE_PLAN: PlanView = {
     { id: 't2', label: 'Order cancelled, refund promised', date: '31 Aug 2026', tone: 'past' },
     { id: 't3', label: 'Refund was due', date: '9 Sep 2026', tone: 'overdue', note: '23 days overdue' },
     { id: 't4', label: 'Today', date: '2 Oct 2026', tone: 'today', note: 'Send the complaint' },
-    { id: 't5', label: 'Acknowledgement due', date: '48 hours after you send', tone: 'upcoming' },
-    { id: 't6', label: 'Resolution due', date: 'One month after you send', tone: 'upcoming', note: 'If not, the next step is the National Consumer Helpline.' },
+    { id: 't5', label: 'Acknowledgement due', date: '48 hours after receipt', tone: 'upcoming', note: 'A sent-date calculation needs adjustment if receipt was later.' },
+    { id: 't6', label: 'Resolution due', date: 'One month after receipt', tone: 'upcoming', note: 'The National Consumer Helpline is a recommended next step if unresolved.' },
   ],
 };
 

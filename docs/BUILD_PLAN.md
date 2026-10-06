@@ -280,3 +280,13 @@ provider attempts: eight finished, one interrupted at the budget, three unstarte
 7/8 and exact pauses 5/8; no three-run consistency is available. See docs/t12-final-pass.md.
 The owner explicitly directed proceeding through T13–T17 and deployment, with no further evaluation.
 T12 acceptance remains incomplete; later guards will not be credited with unmeasured accuracy.
+
+## Owner-authorised extension, 6 October 2026
+
+The owner reports three more days and no submitted version; the exact new deadline time is
+not supplied. Continue scoped improvements without further live evaluation. Priorities:
+draft validation diagnostics and explicit code recovery; code-owned chronology; fewer redundant
+guidance calls; clearer case/question/progress/review UI; independent phone-testing materials;
+judge-facing honesty. Track implementation and local checks in improvements-2026-10-06.md.
+Acceptance still requires the bounded public deployment gates and owner calendar/print checks.
+Two-person testing is deferred by the owner, not passed. Historical T12 results stay unchanged.

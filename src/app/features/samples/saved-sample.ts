@@ -7,7 +7,7 @@ import type { SavedSample } from '@shared/samples';
 import { sampleDocumentPath } from '@shared/samples';
 import { SamplesService } from '../../core/samples.service';
 import { CasesService } from '../../core/cases.service';
-import { workspaceActivity, workspaceFacts, workspaceStage } from '../../core/workspace-mapper';
+import { workspaceActivity, workspaceFacts, workspaceStage, questionOptions } from '../../core/workspace-mapper';
 import type { DocumentPreview } from '../../core/workspace-mapper';
 import { workspacePlan } from '../../core/workspace-plan';
 import { draftPresentation, draftStatements } from '../../core/workspace-draft';
@@ -93,7 +93,8 @@ export class SavedSampleView {
   });
   protected readonly question = computed<QuestionView | null>(() => {
     const recorded = this.sample()?.questions.at(-1); if (!recorded) return null;
-    const options = recorded.options.flatMap(option => typeof option === 'object' && option && 'id' in option && 'label' in option && typeof option.id === 'string' && typeof option.label === 'string' ? [{id:option.id,label:option.label}] : []);
+    const saved = this.sample()!;
+    const options = questionOptions(recorded, saved.documents, saved.evidence);
     const answer = recorded.answer; const optionId = answer && typeof answer === 'object' && 'optionId' in answer ? answer.optionId : null;
     const label = options.find(option => option.id === optionId)?.label ?? (typeof answer === 'string' ? answer : answer ? JSON.stringify(answer) : null);
     return {id:recorded.id,prompt:recorded.prompt,options,why:label ? `Recorded answer: ${label}. This view cannot change it.` : 'This question remained unanswered in the recorded run.'};

@@ -229,7 +229,7 @@ describe('real case screen', () => {
       const { page, fixture } = await setup();
       const label =
         action === 'approve'
-          ? 'Approve and'
+          ? 'Approve this plan'
           : action === 'reject'
             ? 'Reject this'
             : 'Request a change';
@@ -239,8 +239,7 @@ describe('real case screen', () => {
       await fixture.whenStable();
       expect(reviewPlan).toHaveBeenCalledExactlyOnceWith('plan', action);
       expect(advance).not.toHaveBeenCalled();
-      if (action === 'approve') expect(prepareDraft).toHaveBeenCalledExactlyOnceWith('plan');
-      else expect(prepareDraft).not.toHaveBeenCalled();
+      expect(prepareDraft).not.toHaveBeenCalled();
       if (action === 'approve') expect(page.textContent).toContain('You approved this plan.');
       if (action === 'change') {
         expect(page.textContent).toContain('Needs your answer');
@@ -275,6 +274,17 @@ describe('real case screen', () => {
     const { page } = await setup();
     expect(page.textContent).toContain('Information only.');
     expect(page.querySelectorAll('app-plan-panel button')).toHaveLength(0);
+  });
+  it('lets an approved user choose basic recovery before spending a drafting call', async () => {
+    load.mockResolvedValue({ ...saved, plan:{...proposal,approved_at:'2026-10-02'},guidance:[rule] });
+    const { fixture, page } = await setup();
+    expect(prepareDraft).not.toHaveBeenCalled();
+    page.querySelector<HTMLButtonElement>('#case-tab-complaint')!.click();
+    await fixture.whenStable();
+    Array.from(page.querySelectorAll<HTMLButtonElement>('button')).find(b => b.textContent?.includes('Use basic complaint'))!.click();
+    await fixture.whenStable();
+    expect(prepareDraft).toHaveBeenCalledExactlyOnceWith('plan','basic');
+    expect(advance).not.toHaveBeenCalled();
   });
   it('accepts waiting dates for an already sent step-one complaint without preparing another letter',async()=>{
     const waiting={...saved,plan:{...proposal,sent_on:'2026-10-01'},guidance:[rule]};

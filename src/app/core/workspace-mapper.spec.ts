@@ -1,5 +1,5 @@
-import type { CaseFactRow, DocumentRow, EvidenceItemRow } from '@shared/database';
-import { workspaceFacts, workspaceActivity, workspaceStage } from './workspace-mapper';
+import type { CaseFactRow, DocumentRow, EvidenceItemRow, QuestionRow } from '@shared/database';
+import { workspaceFacts, workspaceActivity, workspaceStage, questionOptions } from './workspace-mapper';
 
 const doc = { id: 'doc', label: 'E01', file_name: 'invoice.pdf', mime_type: 'application/pdf', doc_type: 'invoice' } as DocumentRow;
 const item = (id: string, page: number, value = 'Rs. 9999'): EvidenceItemRow => ({
@@ -44,6 +44,16 @@ describe('workspace facts', () => {
 });
 
 describe('workspace progress', () => {
+  it('matches conflict choices to exact checked source quotes using normalised amounts', () => {
+    const question = { field: 'amount_paid', options: [{id:'a',label:'9999',value:'9999'},{id:'b',label:'8999',value:'8999'}] } as QuestionRow;
+    const readings = [{ ...item('one', 1), quote_verified:true }, { ...item('duplicate', 1), quote_verified:true }, { ...item('two',2,'8999'), quote_verified:true }, { ...item('bad',3,'9999'), quote_verified:false }];
+    const options = questionOptions(question, [doc], readings);
+    expect(options[0]?.sources).toEqual([{ evidence:'E01',documentName:'invoice.pdf',page:1,quote:'Paid Rs. 9999' }]);
+    expect(options[1]?.sources?.[0]?.page).toBe(2);
+  });
+  it('does not invent a source for a typed or non-matching answer', () => {
+    expect(questionOptions({field:'amount_paid',options:[{id:'x',label:'100'}]} as QuestionRow,[doc],[{...item('one',1),quote_verified:true}])[0]?.sources).toEqual([]);
+  });
   it('uses only safe event messages, ordered by sequence', () => {
     const events = [{ id: 'later', seq: 2, type: 'error', payload: { message: 'Try again.', diagnostic: { message: 'private debug' } }, created_at: '2026-10-02T10:02:00Z' },
       { id: 'first', seq: 1, type: 'tool_result', payload: { tool: 'read_document', message: 'Read E01.' }, created_at: '2026-10-02T10:01:00Z' }];

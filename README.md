@@ -7,13 +7,21 @@ complaint pack you review and send yourself. Built for WCC Launchpad 30, Track 1
 order, an accepted return or a written refund confirmation qualifies. Bank/UPI disputes and
 disputes over whether a refund is owed are outside scope.
 
-**Current status, 4 October 2026:** the local journey, saved samples and deletion are implemented.
-The latest full check passed **430 server/database tests, 97 Angular tests, both server type
-checks and the production build**. The [public app](https://nivaran-ai-green.vercel.app) passes
+**Improvement build, 6 October 2026:** the local journey, saved samples and deletion are implemented.
+Code-owned draft chronology, explicit basic-complaint recovery without a model call, specific
+repair feedback, fewer guidance steps and clearer case/review UI are now implemented locally.
+The labelled invented guided tour executes the real renderer/editor/linter in page memory.
+These updates still need publication and a public release check; historical measured scores
+are unchanged. See [the improvement report](docs/improvements-2026-10-06.md) and
+[the reviewer brief](docs/judge-brief.md).
+Local verification passed **453 server/database tests, 126 Angular tests, both server type
+checks and the production build**. No model was called by those checks.
+
+The earlier [public app](https://nivaran-ai-green.vercel.app) passed
 all six infrastructure checks in Mumbai and both model diagnostics. All five Saved runs work
 at phone width. The bounded deployed journey produced a grievance draft, passed editing/copy,
 sent/outcome persistence and deletion, but helpline drafting failed validation. Diagnostics are
-now disabled. Full acceptance remains incomplete. See [the deployment report](docs/deployed-journey.md).
+disabled after that check. Full acceptance remains incomplete. See [the deployment report](docs/deployed-journey.md).
 
 ## Try it
 
@@ -252,6 +260,8 @@ fictional corpus and measured audits; docs/ design, checks, disclosure and demo 
   hosted helpline checks used an explicitly labelled scripted provider. Live refusal reading
   remains unverified. The separate deployed journey also rejected both helpline templates;
   no helpline draft was saved. Its grievance prose needed a manual promise-date wording correction.
+  The 6 October build addresses repair diagnostics and date wording and offers explicit basic
+  recovery; those local changes are not a newly measured live helpline model success.
 - The linter checks amounts/dates/IDs, not unsupported prose or every spelled-out number.
   Image quote checking is model-based; no OCR or independent truth verification is claimed.
 - Free-tier quotas and model availability can stop a live journey; Saved runs remain viewable.

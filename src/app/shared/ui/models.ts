@@ -79,6 +79,8 @@ export interface QuestionOptionView {
   label: string;
   /** Where this option comes from, for example "E02, cancellation email". */
   hint?: string;
+  /** Source excerpts for this choice, shown as data before the user answers. */
+  sources?: readonly { evidence: string; documentName: string; page: number | null; quote: string }[];
 }
 
 export interface QuestionView {

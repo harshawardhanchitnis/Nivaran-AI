@@ -1,5 +1,13 @@
 # T17: two-minute demo script
 
+6 October improvement build: approval saves the plan first. For new footage, separately
+choose “Prepare complaint” for model wording, or “Use basic complaint without AI wording”
+for the code recovery. Label the latter clearly; it is not evidence that live helpline model
+drafting passed. Code now owns chronology wording, and conflict choices display source quotes.
+These local changes require a new deployment before recording. Existing footage and measured
+closing numbers remain historical. The owner reports a three-day extension and no submission;
+the old deadline below describes the original plan, not the revised deadline.
+
 Use the deployed URL after its acceptance check. All merchants/documents below are fictional.
 Record the single bounded deployment journey while it is being checked; do not start another
 case or rerun the evaluation just to get footage. Model waits exceed two minutes: edit out the

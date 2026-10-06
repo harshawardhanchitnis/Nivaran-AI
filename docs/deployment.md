@@ -87,6 +87,12 @@ the deployed journey as passed from a scripted local fixture or a Saved run.
 
 ## Gate evidence
 
+6 October improvement release: apply supabase/migrations/0013_draft_origin.sql before publishing
+the new basic-recovery path. No new environment variables or cap increase are needed. Run the
+local check and use improvements-2026-10-06.md for dated local verification; the table below is
+the historical production check, not acceptance of this later build. No new corpus evaluation
+is authorised. Confirm the owner's exact revised deadline time before submission.
+
 | Handover requirement | Current result | Evidence / remaining action |
 |---|---|---|
 | Full check green; clean working tree | Local pass after date regression fix | 430 server/database + 97 Angular tests, both type checks, production build; inspect git status again before push. |
@@ -100,8 +106,9 @@ the deployed journey as passed from a scripted local fixture or a Saved run.
 | README, disclosure, problem evidence complete and truthful | Owner research missing | Missing interview/survey results are explicitly recorded; never invent them. |
 
 Owner checks still outstanding: deferred calendar-app preview, two independent phone users,
-actual research findings, recording the demo video and submission. Aim to submit by 13:00 IST
-on 5 October, before the 14:00 deadline. Do not change the deployment after submission.
+actual research findings, a refreshed demo of the improvement release and submission. The owner
+reported a three-day extension on 6 October; confirm the exact revised submission time. Do not
+change the deployment after submission.
 
 Official hosting references: [Node function runtime](https://vercel.com/docs/functions/runtimes/node-js),
 [function limitations](https://vercel.com/docs/functions/limitations),

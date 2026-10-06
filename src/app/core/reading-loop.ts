@@ -9,6 +9,7 @@ interface ReadingDependencies {
   refresh(): Promise<void>;
   wait(milliseconds: number): Promise<void>;
   delay(waiting: boolean): void;
+  cooldown?(milliseconds: number): void;
   signal: AbortSignal;
   resumeWaiting?: boolean;
 }
@@ -28,6 +29,7 @@ export async function continueReading(initial: AgentRunRow | null, deps: Reading
       conflicts = 0;
       await deps.refresh();
       if (response.retryAfterMs) {
+        deps.cooldown?.(response.retryAfterMs);
         deps.delay(true);
         try { await deps.wait(response.retryAfterMs); } finally { deps.delay(false); }
       }

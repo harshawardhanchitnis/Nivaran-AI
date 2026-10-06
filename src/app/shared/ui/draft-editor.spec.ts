@@ -80,4 +80,18 @@ describe('draft editor using the existing letter component', () => {
     await fixture.whenStable();
     expect(editor.value).toBe('Refund . Keep this prose.');
   });
+  it('identifies code recovery, unsaved edits and a refreshed saved version', async () => {
+    const { fixture, page } = await setup();
+    fixture.componentRef.setInput('draft', { ...draft, lint: { ...draft.lint, generationKind:'code_basic' } });
+    await fixture.whenStable();
+    expect(page.textContent).toContain('No AI wording was generated');
+    expect(page.textContent).toContain('Showing saved version 1');
+    const editor = page.querySelector<HTMLTextAreaElement>('#complaint-text')!;
+    editor.value += '\nPlease reply.'; editor.dispatchEvent(new Event('input', { bubbles:true }));
+    await fixture.whenStable();
+    expect(page.textContent).toContain('unsaved edits');
+    fixture.componentRef.setInput('draft', { ...draft, id:'saved-edit',version:2, rendered_md:editor.value });
+    await fixture.whenStable();
+    expect(page.textContent).toContain('Showing saved version 2');
+  });
 });

@@ -12,6 +12,12 @@
       <a mat-flat-button routerLink="/cases/new"><mat-icon aria-hidden="true">add</mat-icon>Start a case</a>
       <a mat-stroked-button routerLink="/saved-runs"><mat-icon aria-hidden="true">play_circle</mat-icon>See saved runs</a>
     </div>
+    <div class="judge-start surface">
+      <p class="eyebrow">Start here for a recorded example</p>
+      <p><strong>Two documents, two refund amounts.</strong> See the conflict, compare both sources and read the recorded answer and complaint.</p>
+      <a mat-button routerLink="/samples/conflicting-amounts">Open the saved conflict case</a>
+      <p class="small muted">Fictional documents · real saved run · no model calls. The guided tour uses invented data.</p>
+    </div>
     <ul class="trust" aria-label="Promises">
       @for (item of trust; track item.text) {
         <li><mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>{{ item.text }}</li>
@@ -22,7 +28,7 @@
   <!-- A still of the fact sheet, built from the real components. Decorative. -->
   <div class="preview" aria-hidden="true">
     <div class="sheet surface">
-      <p class="eyebrow">Fact sheet</p>
+      <p class="eyebrow">Illustrative fact sheet</p>
       <div class="line">
         <div><span class="k">Amount paid</span><span class="v">₹9,999</span></div>
         <span class="tags"><app-status-chip status="document" /><app-evidence-tag label="E01" /></span>

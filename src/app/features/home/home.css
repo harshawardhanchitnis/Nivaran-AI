@@ -297,3 +297,5 @@ details p {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+:host .judge-start { padding: 14px 16px; margin-top: 20px; border-left: 3px solid var(--brand); }
+:host .judge-start p { margin: 4px 0; }

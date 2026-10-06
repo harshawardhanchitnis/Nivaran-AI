@@ -19,7 +19,13 @@ import { ComplaintDraft } from './complaint-draft';
   selector: 'app-draft-editor',
   imports: [ComplaintDraft, ReactiveFormsModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <app-complaint-draft [segments]="presentation().segments" />
+  template: `
+    @if (draft().lint['generationKind'] === 'code_basic') {
+      <p class="surface controls" role="note">Basic complaint assembled by code from your approved facts. No AI wording was generated.</p>
+    }
+    <p class="save-state no-print" role="status">{{ unsaved() ? 'You have unsaved edits.' : 'Showing saved version ' + draft().version + '.' }} {{ flags().length }} value flags to review.</p>
+    <div class="review-layout">
+    <app-complaint-draft [segments]="presentation().segments" />
     <section class="controls surface no-print" aria-labelledby="draft-edit-title">
       <h2 id="draft-edit-title">Review and edit</h2>
       <p>
@@ -29,8 +35,7 @@ import { ComplaintDraft } from './complaint-draft';
       <label for="complaint-text">Complaint text</label>
       <textarea id="complaint-text" rows="12" [formControl]="editor" maxlength="20000"></textarea>
       <p class="muted">
-        Edited complaint text is saved to your case. Use the private fields below for your contact
-        details.
+        {{ practice() ? 'Practice edits stay only in this page and disappear when you leave or restart.' : 'Edited complaint text is saved to your case.' }} Use the private fields below for your contact details.
       </p>
       <div aria-live="polite">
         @for (flag of flags(); track flag.start) {
@@ -77,7 +82,7 @@ import { ComplaintDraft } from './complaint-draft';
           Print / save PDF
         </button>
       </div>
-    </section>`,
+    </section></div>`,
   styles: `
     :host {
       display: block;
@@ -88,6 +93,10 @@ import { ComplaintDraft } from './complaint-draft';
       display: grid;
       gap: 10px;
     }
+    .review-layout { display: grid; gap: 20px; align-items: start; }
+    .save-state { color: var(--ink-2); padding: 12px 0; }
+    @media (min-width: 1100px) { .review-layout { grid-template-columns: 1fr 1fr; } .controls { margin-top: 0; } }
+    @media print { .review-layout { display: block; } }
     label {
       font-weight: 600;
     }
@@ -130,6 +139,7 @@ import { ComplaintDraft } from './complaint-draft';
   `,
 })
 export class DraftEditor {
+  readonly practice = input(false);
   readonly draft = input.required<DraftRow>();
   readonly context = input.required<DraftRenderContext>();
   readonly busy = input(false);
@@ -150,6 +160,8 @@ export class DraftEditor {
     initialValue: { name: '', contact: '', address: '' },
   });
   private readonly statements = signal<string[]>([]);
+  protected readonly unsaved = computed(() => this.editedText() !== (this.draft().rendered_md ?? '') ||
+    JSON.stringify(this.statements()) !== JSON.stringify(draftStatements(this.draft())));
   protected readonly presentation = computed(() => {
     const details = this.privateValues();
     return draftPresentation(

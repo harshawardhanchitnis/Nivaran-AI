@@ -29,10 +29,11 @@ describe('resumable browser reading loop', () => {
   it('waits for a provider delay and reuses the unchanged turn', async () => {
     const advance = vi.fn().mockResolvedValueOnce({ run: run(4), events: [], retryAfterMs: 4000 })
       .mockResolvedValueOnce({ run: run(5, 'done'), events: [] });
-    const wait = vi.fn(async () => {}); const delay = vi.fn();
-    await continueReading(run(4), { start: vi.fn(), advance, current: vi.fn(), refresh: vi.fn(), wait, delay, signal: new AbortController().signal });
+    const wait = vi.fn(async () => {}); const delay = vi.fn(); const cooldown = vi.fn();
+    await continueReading(run(4), { start: vi.fn(), advance, current: vi.fn(), refresh: vi.fn(), wait, delay, cooldown, signal: new AbortController().signal });
     expect(advance.mock.calls.map(c => c[0].turn)).toEqual([4, 4]);
     expect(wait).toHaveBeenCalledWith(4000); expect(delay).toHaveBeenCalledWith(true);
+    expect(cooldown).toHaveBeenCalledExactlyOnceWith(4000);
     expect(delay).toHaveBeenLastCalledWith(false);
   });
 

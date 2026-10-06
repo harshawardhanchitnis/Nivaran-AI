@@ -13,6 +13,7 @@ import type { ActivityView, DraftSegment, FactView, PlanView, QuestionView } fro
 import { PlanPanel } from './plan-panel';
 import { QuestionCard } from './question-card';
 import { SourcePanel } from './source-panel';
+import { factGroups, workspaceNextAction } from './workspace-guidance';
 
 type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
 
@@ -39,6 +40,11 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
     </header>
 
     <ng-content select="[banner]" />
+
+    <section class="next-action surface no-print" aria-label="Next action">
+      <div><p class="eyebrow">{{ readOnly() ? 'Recorded journey' : 'Next action' }}</p><h2>{{ nextAction().title }}</h2><p>{{ nextAction().detail }}</p></div>
+      <button mat-stroked-button type="button" (click)="goNext()">{{ nextAction().button }}</button>
+    </section>
 
     <div class="tabs no-print" role="tablist" aria-label="Case sections">
       @for (item of tabs; track item.id) {
@@ -69,7 +75,20 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
             @if (question(); as open) {
               <app-question-card [question]="open" [readOnly]="readOnly()" [busy]="answerBusy()" (answered)="answered.emit($event)" (textAnswered)="textAnswered.emit($event)" />
             }
-            <app-fact-list [facts]="facts()" [selected]="selectedField()" (factSelected)="openSource($event)" />
+            @if (groups().attention.length) {
+              <h2 class="group-title">Check these first</h2>
+              <app-fact-list [facts]="groups().attention" [selected]="selectedField()" (factSelected)="openSource($event)" />
+            }
+            @if (groups().core.length) {
+              <h2 class="group-title">Your refund facts</h2>
+              <app-fact-list [facts]="groups().core" [selected]="selectedField()" (factSelected)="openSource($event)" />
+            }
+            @if (groups().other.length) {
+              <details class="other-facts"><summary>Other missing details ({{ groups().other.length }})</summary>
+                <p class="muted">Missing does not mean every detail is needed for this next step.</p>
+                <app-fact-list [facts]="groups().other" [selected]="selectedField()" (factSelected)="openSource($event)" />
+              </details>
+            }
           </div>
 
           <aside class="source" [class.open]="selectedFact() !== null">
@@ -110,7 +129,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
         </div>
       }
       @case ('complaint') {
-        <div class="narrow-panel" role="tabpanel" id="case-panel-complaint" aria-labelledby="case-tab-complaint">
+        <div role="tabpanel" id="case-panel-complaint" aria-labelledby="case-tab-complaint">
           @if (draft(); as segments) {
             @if (customDraft()) { <ng-content select="[complaint-editor]" /> }
             @else { <app-complaint-draft [segments]="segments" /> }
@@ -118,7 +137,7 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
             <div class="empty surface">
               <mat-icon aria-hidden="true">edit_note</mat-icon>
               <h2>Nothing drafted yet</h2>
-              <p class="muted">{{ plan()?.step === 0 ? 'Wait until the promised date. There is nothing to send yet.' : plan()?.step === 3 ? 'This step provides information only. Nivaran prepares no complaint.' : 'The complaint is prepared only after you approve the plan.' }}</p>
+              <p class="muted">{{ plan()?.step === 0 ? 'Wait until the promised date. There is nothing to send yet.' : plan()?.step === 3 ? 'This step provides information only. Nivaran prepares no complaint.' : approved() ? 'Your plan is approved. Choose how to prepare the complaint below.' : 'The complaint is prepared only after you approve the plan.' }}</p>
               <button mat-stroked-button type="button" (click)="selectTab('plan')">Go to Plan</button>
             </div>
           }
@@ -135,6 +154,12 @@ type Tab = 'facts' | 'activity' | 'plan' | 'complaint';
     .case-head {
       margin-bottom: 16px;
     }
+    .next-action { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; border-left: 4px solid var(--brand); }
+    .next-action h2 { font-size: 1.25rem; margin: 0; }
+    .next-action p { margin: 4px 0 0; color: var(--ink-2); }
+    .group-title { font-size: 1.15rem; margin: 12px 0 6px; }
+    .other-facts { margin-top: 16px; }
+    .other-facts summary { cursor: pointer; font-weight: 600; color: var(--ink-2); padding: 10px 0; }
 
     .meta {
       display: flex;
@@ -329,9 +354,11 @@ export class CaseWorkspaceView {
   /** Short status in plain words: "Needs your answer", "Plan ready". */
   readonly stage = input.required<string>();
   readonly facts = input.required<readonly FactView[]>();
+  readonly requiredFields = input<readonly FactField[]>([]);
   readonly activity = input.required<readonly ActivityView[]>();
   readonly busy = input(false);
   readonly readOnly = input(false);
+  readonly practice = input(false);
   readonly question = input<QuestionView | null>(null);
   readonly answerBusy = input(false);
   readonly plan = input<PlanView | null>(null);
@@ -361,6 +388,16 @@ export class CaseWorkspaceView {
     { id: 'complaint', label: 'Complaint' },
   ];
   readonly tab = signal<Tab>('facts');
+  protected readonly groups = computed(() => factGroups(this.facts(), this.requiredFields()));
+  protected readonly nextAction = computed(() => workspaceNextAction({ readOnly: this.readOnly(), practice:this.practice(), busy: this.busy(), question: this.question(), plan: this.plan(), approved: this.approved(), draft: !!this.draft(), stage: this.stage() }));
+  protected goNext(): void {
+    const tab = this.nextAction().tab;
+    this.selectTab(tab);
+    afterNextRender(() => {
+      const target = this.element.nativeElement.querySelector<HTMLElement>(tab === 'facts' && this.question() ? 'app-question-card h2' : `#case-tab-${tab}`);
+      if (target) { if (target.tagName === 'H2') target.setAttribute('tabindex', '-1'); target.focus(); target.scrollIntoView({ block: 'center' }); }
+    }, { injector: this.injector });
+  }
   constructor() {
     let previousDraft: string | null = null;
     effect(() => {
