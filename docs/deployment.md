@@ -87,8 +87,10 @@ the deployed journey as passed from a scripted local fixture or a Saved run.
 
 ## Gate evidence
 
-6 October improvement release: apply supabase/migrations/0013_draft_origin.sql before publishing
-the new basic-recovery path. No new environment variables or cap increase are needed. Run the
+6 October improvement release: the owner confirmed supabase/migrations/0013_draft_origin.sql is
+applied. Main was pushed through 3986fd8, but the subsequent public /demo check still showed the
+older practice screen. Confirm successful deployment of the latest main revision before release.
+No new environment variables or cap increase are needed. Run the
 local check and use improvements-2026-10-06.md for dated local verification; the table below is
 the historical production check, not acceptance of this later build. No new corpus evaluation
 is authorised. Confirm the owner's exact revised deadline time before submission.

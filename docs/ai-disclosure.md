@@ -613,3 +613,9 @@ gradient/focus-anchor checks remain documented rather than claimed as passes. Ke
 focus recovery and an actual local practice fake-ID flag/remove/save were observed. Secret
 scans of tracked/index/history/build files found none. The build is still local, pending migration
 application and publication. Recorded model measurements remain unchanged.
+
+Later on 6 October, Codex pushed the four prepared commits through 3986fd8 after a clean secret
+scan, and the owner confirmed migration 0013 applied. A read-only public /demo check still showed
+the older sample banner and uncertainty choice; deployment of the new practice flow was not yet
+confirmed. No model call or further evaluation was made. The earlier local check above remains
+the validation for this documentation-only handoff update.

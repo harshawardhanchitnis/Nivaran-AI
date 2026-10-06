@@ -74,9 +74,15 @@ is in accessibility-2026-10-06.json. These targeted checks are not a complete WC
 or independent user study. Screenshots in screenshots/improved-* show local fictional views.
 
 Repeat the release checks if further code changes are made, and inspect the public build after publication.
-Apply 0013_draft_origin.sql before publishing the improvement build. It replaces only the
+The owner confirmed on 6 October that 0013_draft_origin.sql has been applied. It replaces only the
 caller-scoped draft-save function, preserving its ownership, claim and changed-fact checks;
 it adds no table and changes no cap or usage counter. No credential or cap increase is needed. Public model
 draft recovery and refusal reading remain unverified until an explicitly approved bounded smoke
 check; do not rerun the evaluation. Native calendar/print confirmation and independent phone
 testing remain owner checks. The testing guide is user-testing-kit.md; no findings are invented.
+
+All four prepared project commits were pushed to main through 3986fd8 on 6 October. A subsequent
+read-only public /demo check still displayed the older Sample case banner and the old uncertainty
+choice; the new interactive practice build was not yet visible at that check. Confirm Vercel has
+successfully deployed the latest main commit before accepting the improvement release. No model
+calls were made by this check.
